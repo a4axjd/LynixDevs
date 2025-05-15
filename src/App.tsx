@@ -21,14 +21,24 @@ import Blog from "./pages/Blog";
 import Contact from "./pages/Contact";
 import Testimonials from "./pages/Testimonials";
 
-// Protected pages (to be implemented)
+// Protected pages
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 
+// Admin pages
+import UsersAdmin from "./pages/admin/UsersAdmin";
+// import ProjectsAdmin from "./pages/admin/ProjectsAdmin";
+// import BlogAdmin from "./pages/admin/BlogAdmin";
+// import EmailTemplatesAdmin from "./pages/admin/EmailTemplatesAdmin";
+// import NewsletterAdmin from "./pages/admin/NewsletterAdmin";
+// import ContactAdmin from "./pages/admin/ContactAdmin";
+// import AdminSettings from "./pages/admin/AdminSettings";
+
 // Layout components
 import MainLayout from "./layouts/MainLayout";
+import AdminLayout from "./layouts/AdminLayout";
 
 const queryClient = new QueryClient();
 
@@ -66,8 +76,15 @@ const App = () => (
 
             {/* Admin protected routes */}
             <Route element={<RouteGuard requiredRole="admin" />}>
-              <Route element={<MainLayout />}>
+              <Route element={<AdminLayout />}>
                 <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/users" element={<UsersAdmin />} />
+                {/* <Route path="/admin/projects" element={<ProjectsAdmin />} />
+                <Route path="/admin/blog" element={<BlogAdmin />} />
+                <Route path="/admin/email-templates" element={<EmailTemplatesAdmin />} />
+                <Route path="/admin/newsletter" element={<NewsletterAdmin />} />
+                <Route path="/admin/contact" element={<ContactAdmin />} />
+                <Route path="/admin/settings" element={<AdminSettings />} /> */}
               </Route>
             </Route>
 
