@@ -1,109 +1,217 @@
 
-import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { Link, NavLink } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import UserMenu from "./UserMenu";
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const location = useLocation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "About", path: "/about" },
-    { name: "Services", path: "/services" },
-    { name: "Portfolio", path: "/portfolio" },
-    { name: "Blog", path: "/blog" },
-    { name: "Testimonials", path: "/testimonials" },
-    { name: "Contact", path: "/contact" }
-  ];
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
-  useEffect(() => {
-    setIsOpen(false);
-  }, [location]);
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
 
   return (
-    <nav
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        isScrolled || isOpen ? "bg-lynix-dark py-3" : "bg-transparent py-5"
-      }`}
-    >
-      <div className="container-custom">
-        <div className="flex items-center justify-between">
-          <Link 
-            to="/" 
-            className="text-white font-bold text-2xl flex items-center"
-          >
-            <span className="text-lynix-purple">Lynix</span>
-            <span>Devs</span>
-          </Link>
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur">
+      <div className="container flex h-16 items-center justify-between">
+        <Link to="/" className="flex items-center gap-2 font-bold text-xl text-primary">
+          LynixDevs
+        </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                className={`text-sm font-medium transition-colors hover:text-lynix-purple ${
-                  location.pathname === link.path ? "text-lynix-purple" : "text-white"
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-            <Button className="bg-lynix-purple hover:bg-lynix-secondary-purple text-white">
-              Get Started
-            </Button>
-          </div>
+        {/* Mobile Menu Button */}
+        <button
+          className="block md:hidden"
+          onClick={toggleMenu}
+          aria-label={isMenuOpen ? "Close Menu" : "Open Menu"}
+        >
+          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
 
-          {/* Mobile Navigation Toggle */}
-          <button
-            className="lg:hidden text-white p-2"
-            onClick={() => setIsOpen(!isOpen)}
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-6">
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              cn("text-sm font-medium transition-colors hover:text-primary", {
+                "text-primary": isActive,
+                "text-muted-foreground": !isActive,
+              })
+            }
           >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
+            Home
+          </NavLink>
+          <NavLink
+            to="/about"
+            className={({ isActive }) =>
+              cn("text-sm font-medium transition-colors hover:text-primary", {
+                "text-primary": isActive,
+                "text-muted-foreground": !isActive,
+              })
+            }
+          >
+            About
+          </NavLink>
+          <NavLink
+            to="/services"
+            className={({ isActive }) =>
+              cn("text-sm font-medium transition-colors hover:text-primary", {
+                "text-primary": isActive,
+                "text-muted-foreground": !isActive,
+              })
+            }
+          >
+            Services
+          </NavLink>
+          <NavLink
+            to="/portfolio"
+            className={({ isActive }) =>
+              cn("text-sm font-medium transition-colors hover:text-primary", {
+                "text-primary": isActive,
+                "text-muted-foreground": !isActive,
+              })
+            }
+          >
+            Portfolio
+          </NavLink>
+          <NavLink
+            to="/blog"
+            className={({ isActive }) =>
+              cn("text-sm font-medium transition-colors hover:text-primary", {
+                "text-primary": isActive,
+                "text-muted-foreground": !isActive,
+              })
+            }
+          >
+            Blog
+          </NavLink>
+          <NavLink
+            to="/testimonials"
+            className={({ isActive }) =>
+              cn("text-sm font-medium transition-colors hover:text-primary", {
+                "text-primary": isActive,
+                "text-muted-foreground": !isActive,
+              })
+            }
+          >
+            Testimonials
+          </NavLink>
+          <NavLink
+            to="/contact"
+            className={({ isActive }) =>
+              cn("text-sm font-medium transition-colors hover:text-primary", {
+                "text-primary": isActive,
+                "text-muted-foreground": !isActive,
+              })
+            }
+          >
+            Contact
+          </NavLink>
+        </nav>
 
         {/* Mobile Navigation */}
-        {isOpen && (
-          <div className="lg:hidden pt-5 pb-6 animate-fade-in">
-            <div className="flex flex-col space-y-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.path}
-                  className={`text-base font-medium transition-colors hover:text-lynix-purple ${
-                    location.pathname === link.path ? "text-lynix-purple" : "text-white"
-                  }`}
-                >
-                  {link.name}
-                </Link>
-              ))}
-              <Button className="bg-lynix-purple hover:bg-lynix-secondary-purple text-white w-full mt-2">
-                Get Started
-              </Button>
-            </div>
-          </div>
-        )}
+        <div
+          className={`fixed top-16 left-0 z-40 w-full transform bg-background px-6 py-8 shadow-lg transition-transform duration-300 md:hidden ${
+            isMenuOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <nav className="flex flex-col space-y-6">
+            <NavLink
+              to="/"
+              className={({ isActive }) =>
+                cn("text-base font-medium transition-colors hover:text-primary", {
+                  "text-primary": isActive,
+                  "text-muted-foreground": !isActive,
+                })
+              }
+              onClick={closeMenu}
+            >
+              Home
+            </NavLink>
+            <NavLink
+              to="/about"
+              className={({ isActive }) =>
+                cn("text-base font-medium transition-colors hover:text-primary", {
+                  "text-primary": isActive,
+                  "text-muted-foreground": !isActive,
+                })
+              }
+              onClick={closeMenu}
+            >
+              About
+            </NavLink>
+            <NavLink
+              to="/services"
+              className={({ isActive }) =>
+                cn("text-base font-medium transition-colors hover:text-primary", {
+                  "text-primary": isActive,
+                  "text-muted-foreground": !isActive,
+                })
+              }
+              onClick={closeMenu}
+            >
+              Services
+            </NavLink>
+            <NavLink
+              to="/portfolio"
+              className={({ isActive }) =>
+                cn("text-base font-medium transition-colors hover:text-primary", {
+                  "text-primary": isActive,
+                  "text-muted-foreground": !isActive,
+                })
+              }
+              onClick={closeMenu}
+            >
+              Portfolio
+            </NavLink>
+            <NavLink
+              to="/blog"
+              className={({ isActive }) =>
+                cn("text-base font-medium transition-colors hover:text-primary", {
+                  "text-primary": isActive,
+                  "text-muted-foreground": !isActive,
+                })
+              }
+              onClick={closeMenu}
+            >
+              Blog
+            </NavLink>
+            <NavLink
+              to="/testimonials"
+              className={({ isActive }) =>
+                cn("text-base font-medium transition-colors hover:text-primary", {
+                  "text-primary": isActive,
+                  "text-muted-foreground": !isActive,
+                })
+              }
+              onClick={closeMenu}
+            >
+              Testimonials
+            </NavLink>
+            <NavLink
+              to="/contact"
+              className={({ isActive }) =>
+                cn("text-base font-medium transition-colors hover:text-primary", {
+                  "text-primary": isActive,
+                  "text-muted-foreground": !isActive,
+                })
+              }
+              onClick={closeMenu}
+            >
+              Contact
+            </NavLink>
+          </nav>
+        </div>
+
+        <div className="hidden md:flex items-center gap-4">
+          <UserMenu />
+        </div>
       </div>
-    </nav>
+    </header>
   );
 };
 
