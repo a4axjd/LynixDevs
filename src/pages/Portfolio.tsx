@@ -2,68 +2,98 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
+
+// Define project type based on Supabase schema
+interface Project {
+  id: string;
+  title: string;
+  description: string | null;
+  client: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string | null;
+}
 
 const Portfolio = () => {
   const [filter, setFilter] = useState("all");
+  const { toast } = useToast();
 
   const categories = [
     { id: "all", name: "All Projects" },
-    { id: "web", name: "Web Development" },
-    { id: "mobile", name: "Mobile Apps" },
-    { id: "design", name: "UI/UX Design" },
-    { id: "ecommerce", name: "E-Commerce" },
+    { id: "active", name: "Active Projects" },
+    { id: "completed", name: "Completed" },
+    { id: "on-hold", name: "On Hold" },
   ];
 
-  // Sample portfolio items
-  const portfolioItems = [
-    {
-      id: 1,
-      title: "E-Commerce Platform",
-      category: "ecommerce",
-      image: "gradient-1",
-      color: "from-blue-500 to-purple-500",
-    },
-    {
-      id: 2,
-      title: "Mobile Banking App",
-      category: "mobile",
-      image: "gradient-2",
-      color: "from-green-500 to-teal-500",
-    },
-    {
-      id: 3,
-      title: "Real Estate Website",
-      category: "web",
-      image: "gradient-3",
-      color: "from-red-500 to-orange-500",
-    },
-    {
-      id: 4,
-      title: "Travel Agency UI Design",
-      category: "design",
-      image: "gradient-4",
-      color: "from-yellow-500 to-amber-500",
-    },
-    {
-      id: 5,
-      title: "Fitness Tracking App",
-      category: "mobile",
-      image: "gradient-5",
-      color: "from-pink-500 to-rose-500",
-    },
-    {
-      id: 6,
-      title: "Restaurant Ordering System",
-      category: "web",
-      image: "gradient-6",
-      color: "from-indigo-500 to-violet-500",
-    },
-  ];
+  // Fetch projects from Supabase
+  const { data: projects, isLoading, error } = useQuery({
+    queryKey: ["publicProjects"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-  const filteredItems = filter === "all" 
-    ? portfolioItems 
-    : portfolioItems.filter(item => item.category === filter);
+      if (error) {
+        throw new Error(`Error fetching projects: ${error.message}`);
+      }
+
+      return data as Project[];
+    },
+  });
+
+  if (error) {
+    toast({
+      title: "Error loading projects",
+      description: (error as Error).message,
+      variant: "destructive",
+    });
+  }
+
+  // Filter projects by selected category/status
+  const filteredProjects = projects
+    ? filter === "all"
+      ? projects
+      : projects.filter(project => project.status === filter)
+    : [];
+
+  // Helper function to get project color based on status
+  const getProjectColor = (status: string) => {
+    switch (status) {
+      case "active":
+        return "from-blue-500 to-purple-500";
+      case "completed":
+        return "from-green-500 to-teal-500";
+      case "on-hold":
+        return "from-yellow-500 to-amber-500";
+      case "cancelled":
+        return "from-red-500 to-orange-500";
+      default:
+        return "from-indigo-500 to-violet-500";
+    }
+  };
+
+  // Helper function to get badge variant
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case "active":
+        return "default";
+      case "completed":
+        return "success";
+      case "on-hold":
+        return "warning";
+      case "cancelled":
+        return "destructive";
+      default:
+        return "secondary";
+    }
+  };
 
   return (
     <div className="pt-20">
@@ -101,38 +131,58 @@ const Portfolio = () => {
           </div>
 
           {/* Portfolio Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredItems.map((item) => (
-              <div 
-                key={item.id} 
-                className="group rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <div className={`relative h-64 bg-gradient-to-br ${item.color} overflow-hidden`}>
-                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button asChild className="bg-white text-lynix-purple hover:bg-gray-100">
-                      <Link to={`/portfolio/${item.id}`}>
-                        View Project
-                      </Link>
-                    </Button>
+          {isLoading ? (
+            <div className="flex justify-center my-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : filteredProjects.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredProjects.map((project) => (
+                <div 
+                  key={project.id} 
+                  className="group rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <div className={`relative h-64 bg-gradient-to-br ${getProjectColor(project.status)} overflow-hidden`}>
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button asChild className="bg-white text-lynix-purple hover:bg-gray-100">
+                        <Link to={`/portfolio/${project.id}`}>
+                          View Project
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="p-6 bg-white">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-xl font-bold group-hover:text-lynix-purple transition-colors">
+                        {project.title}
+                      </h3>
+                      <Badge variant={getStatusVariant(project.status)}>
+                        {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                      </Badge>
+                    </div>
+                    <p className="text-gray-600 mb-4">
+                      {project.client ? `Client: ${project.client}` : "Internal Project"}
+                    </p>
+                    {project.description && (
+                      <p className="text-gray-500 mb-4 line-clamp-2">
+                        {project.description}
+                      </p>
+                    )}
+                    <Link 
+                      to={`/portfolio/${project.id}`}
+                      className="inline-flex items-center text-lynix-purple font-medium hover:underline"
+                    >
+                      Case Study <ArrowRight size={16} className="ml-2" />
+                    </Link>
                   </div>
                 </div>
-                <div className="p-6 bg-white">
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-lynix-purple transition-colors">
-                    {item.title}
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    {categories.find(cat => cat.id === item.category)?.name}
-                  </p>
-                  <Link 
-                    to={`/portfolio/${item.id}`}
-                    className="inline-flex items-center text-lynix-purple font-medium hover:underline"
-                  >
-                    Case Study <ArrowRight size={16} className="ml-2" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">No projects found matching your filter criteria.</p>
+            </div>
+          )}
         </div>
       </section>
 
