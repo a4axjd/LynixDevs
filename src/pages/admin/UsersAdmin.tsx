@@ -48,23 +48,36 @@ interface User {
   };
   profile?: Profile;
   roles?: UserRole[];
-  isAdmin?: boolean; // Add this property to the interface
+  isAdmin?: boolean;
 }
 
 const UsersAdmin = () => {
   const { toast } = useToast();
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
 
   const { data: users, isLoading, error, refetch } = useQuery({
     queryKey: ['adminUsers'],
     queryFn: async () => {
-      // Fetch users from Supabase Auth
-      const { data: users, error: usersError } = await supabase.functions.invoke('admin-get-users');
-      
-      if (usersError) {
-        throw new Error(usersError.message);
-      }
+      try {
+        // Fetch users from Supabase Auth
+        const { data: users, error: usersError } = await supabase.functions.invoke('admin-get-users');
+        
+        if (usersError) {
+          throw new Error(usersError.message);
+        }
 
-      return users as User[];
+        if (!users) {
+          throw new Error("No users data returned");
+        }
+
+        return users as User[];
+      } catch (err: any) {
+        console.error("Error fetching users:", err);
+        if (err.message?.includes("Edge")) {
+          setErrorDetails(`Edge function error - please verify that the SUPABASE_SERVICE_ROLE_KEY is correctly set in the Supabase dashboard.`);
+        }
+        throw err;
+      }
     },
   });
 
@@ -80,28 +93,12 @@ const UsersAdmin = () => {
       });
       
       refetch();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: (error as Error).message,
+        description: error.message,
         variant: "destructive",
       });
-    }
-  };
-
-  const checkIsAdmin = async (userId: string) => {
-    try {
-      const { data, error } = await supabase.rpc('has_role', { 
-        _user_id: userId,
-        _role: 'admin'
-      });
-      
-      if (error) throw error;
-      
-      return data;
-    } catch (error) {
-      console.error("Error checking admin status:", error);
-      return false;
     }
   };
 
@@ -128,6 +125,17 @@ const UsersAdmin = () => {
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : error ? (
+          <div className="flex flex-col justify-center items-center h-64 text-center px-4">
+            <div className="text-destructive font-medium mb-2">Failed to load users</div>
+            <p className="text-muted-foreground mb-4">{(error as Error).message}</p>
+            {errorDetails && (
+              <div className="bg-muted p-4 rounded-md text-sm mb-4 max-w-md">
+                <p>{errorDetails}</p>
+              </div>
+            )}
+            <Button onClick={() => refetch()}>Try Again</Button>
           </div>
         ) : (
           <Table>
