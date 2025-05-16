@@ -76,16 +76,17 @@ const App = () => (
 
             {/* Admin protected routes */}
             <Route element={<RouteGuard requiredRole="admin" />}>
-              <Route element={<AdminLayout />}>
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/users" element={<UsersAdmin />} />
-                {/* <Route path="/admin/projects" element={<ProjectsAdmin />} />
-                <Route path="/admin/blog" element={<BlogAdmin />} />
-                <Route path="/admin/email-templates" element={<EmailTemplatesAdmin />} />
-                <Route path="/admin/newsletter" element={<NewsletterAdmin />} />
-                <Route path="/admin/contact" element={<ContactAdmin />} />
-                <Route path="/admin/settings" element={<AdminSettings />} /> */}
-              </Route>
+              <Route path="/admin" element={
+                <AdminLayout>
+                  <AdminDashboard />
+                </AdminLayout>
+              } />
+              <Route path="/admin/users" element={
+                <AdminLayout>
+                  <UsersAdmin />
+                </AdminLayout>
+              } />
+              {/* Additional admin routes would be updated similarly */}
             </Route>
 
             {/* Not found */}

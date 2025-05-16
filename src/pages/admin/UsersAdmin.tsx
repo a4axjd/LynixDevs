@@ -48,6 +48,7 @@ interface User {
   };
   profile?: Profile;
   roles?: UserRole[];
+  isAdmin?: boolean; // Add this property to the interface
 }
 
 const UsersAdmin = () => {
@@ -63,7 +64,7 @@ const UsersAdmin = () => {
         throw new Error(usersError.message);
       }
 
-      return users;
+      return users as User[];
     },
   });
 
@@ -141,7 +142,7 @@ const UsersAdmin = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users?.map((user: User) => (
+              {users?.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">

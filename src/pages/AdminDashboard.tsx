@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,12 +24,13 @@ const AdminDashboard = () => {
   const { data: counts, isLoading, error } = useQuery({
     queryKey: ['adminCounts'],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_admin_counts');
+      const { data, error } = await supabase.rpc("get_admin_counts");
       
       if (error) {
         throw new Error(error.message);
       }
       
+      // Add type assertion to resolve the type mismatch
       return data as AdminCounts;
     },
   });
