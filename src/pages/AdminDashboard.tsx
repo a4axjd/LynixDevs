@@ -30,8 +30,8 @@ const AdminDashboard = () => {
         throw new Error(error.message);
       }
       
-      // Add type assertion to resolve the type mismatch
-      return data as AdminCounts;
+      // First cast to unknown and then to AdminCounts to avoid the type error
+      return data as unknown as AdminCounts;
     },
   });
 
