@@ -2,12 +2,14 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
+import { ReactNode } from "react";
 
 interface AdminPageHeaderProps {
   title: string;
   description?: string;
   actionLabel?: string;
   actionHref?: string;
+  actionButton?: ReactNode;
 }
 
 const AdminPageHeader = ({
@@ -15,6 +17,7 @@ const AdminPageHeader = ({
   description,
   actionLabel,
   actionHref,
+  actionButton,
 }: AdminPageHeaderProps) => {
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b pb-6">
@@ -30,11 +33,13 @@ const AdminPageHeader = ({
         </div>
         {description && <p className="text-muted-foreground">{description}</p>}
       </div>
-      {actionLabel && actionHref && (
+      {actionButton ? (
+        actionButton
+      ) : actionLabel && actionHref ? (
         <Button asChild>
           <Link to={actionHref}>{actionLabel}</Link>
         </Button>
-      )}
+      ) : null}
     </div>
   );
 };

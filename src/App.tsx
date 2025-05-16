@@ -29,8 +29,8 @@ import Settings from "./pages/Settings";
 
 // Admin pages
 import UsersAdmin from "./pages/admin/UsersAdmin";
-// import ProjectsAdmin from "./pages/admin/ProjectsAdmin";
-// import BlogAdmin from "./pages/admin/BlogAdmin";
+import ProjectsAdmin from "./pages/admin/ProjectsAdmin";
+import BlogAdmin from "./pages/admin/BlogAdmin";
 // import EmailTemplatesAdmin from "./pages/admin/EmailTemplatesAdmin";
 // import NewsletterAdmin from "./pages/admin/NewsletterAdmin";
 // import ContactAdmin from "./pages/admin/ContactAdmin";
@@ -84,6 +84,16 @@ const App = () => (
               <Route path="/admin/users" element={
                 <AdminLayout>
                   <UsersAdmin />
+                </AdminLayout>
+              } />
+              <Route path="/admin/projects" element={
+                <AdminLayout>
+                  <ProjectsAdmin />
+                </AdminLayout>
+              } />
+              <Route path="/admin/blog" element={
+                <AdminLayout>
+                  <BlogAdmin />
                 </AdminLayout>
               } />
               {/* Additional admin routes would be updated similarly */}
