@@ -18,17 +18,26 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Starting admin-get-users function");
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
     const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
     if (!supabaseUrl || !supabaseAnonKey) {
+      console.error("Missing Supabase URL or anon key");
       throw new Error("Missing Supabase URL or anon key");
     }
 
     if (!supabaseServiceRoleKey) {
       console.error("SUPABASE_SERVICE_ROLE_KEY is not set");
       throw new Error("Missing service role key - check your edge function secrets configuration");
+    }
+
+    // Get the JWT token from the Authorization header
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      console.error("No Authorization header provided");
+      throw new Error("No Authorization header provided");
     }
 
     console.log("Creating authenticated Supabase client");
@@ -38,12 +47,13 @@ serve(async (req) => {
       supabaseAnonKey,
       {
         global: {
-          headers: { Authorization: req.headers.get("Authorization")! },
+          headers: { Authorization: authHeader },
         },
       }
     );
 
     // Check authentication
+    console.log("Checking user authentication");
     const {
       data: { user },
       error: authError
@@ -62,6 +72,7 @@ serve(async (req) => {
     console.log("Authenticated user:", user.id);
 
     // Check if the user is an admin
+    console.log("Checking if user is admin");
     const { data: isAdmin, error: roleError } = await supabaseClient.rpc(
       "has_role",
       {
@@ -92,44 +103,49 @@ serve(async (req) => {
 
     // Use admin API to get users
     console.log("Fetching users from Auth API");
-    const authResponse = await fetch(
-      `${supabaseUrl}/auth/v1/admin/users`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${supabaseServiceRoleKey}`,
-          apikey: supabaseServiceRoleKey,
-        },
+    try {
+      const authResponse = await fetch(
+        `${supabaseUrl}/auth/v1/admin/users`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${supabaseServiceRoleKey}`,
+            apikey: supabaseServiceRoleKey,
+          },
+        }
+      );
+
+      if (!authResponse.ok) {
+        const errorText = await authResponse.text();
+        console.error("Failed to fetch users:", authResponse.status, errorText);
+        throw new Error(`Failed to fetch users: ${authResponse.statusText} (${errorText})`);
       }
-    );
 
-    if (!authResponse.ok) {
-      const errorText = await authResponse.text();
-      console.error("Failed to fetch users:", authResponse.status, errorText);
-      throw new Error(`Failed to fetch users: ${authResponse.statusText} (${errorText})`);
-    }
+      const users = await authResponse.json();
+      console.log("Successfully fetched users, count:", users.length);
 
-    const users = await authResponse.json();
-    console.log("Successfully fetched users, count:", users.length);
+      // Check admin status for each user
+      for (const user of users) {
+        const { data, error } = await serviceRoleClient.rpc("has_role", {
+          _user_id: user.id,
+          _role: "admin",
+        });
+        
+        if (error) {
+          console.warn(`Error checking admin status for user ${user.id}:`, error.message);
+        }
+        
+        user.isAdmin = !!data;
+      }
 
-    // Check admin status for each user
-    for (const user of users) {
-      const { data, error } = await serviceRoleClient.rpc("has_role", {
-        _user_id: user.id,
-        _role: "admin",
+      return new Response(JSON.stringify(users), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
       });
-      
-      if (error) {
-        console.warn(`Error checking admin status for user ${user.id}:`, error.message);
-      }
-      
-      user.isAdmin = !!data;
+    } catch (fetchError) {
+      console.error("Error fetching users:", fetchError.message);
+      throw new Error(`Error fetching users: ${fetchError.message}`);
     }
-
-    return new Response(JSON.stringify(users), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
   } catch (error) {
     console.error("Error in function:", error.message);
     return new Response(JSON.stringify({ error: error.message }), {
