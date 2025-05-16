@@ -25,6 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 interface Profile {
   id: string;
@@ -54,15 +55,26 @@ interface User {
 const UsersAdmin = () => {
   const { toast } = useToast();
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
+  const [serviceRoleKeyError, setServiceRoleKeyError] = useState<boolean>(false);
 
   const { data: users, isLoading, error, refetch } = useQuery({
     queryKey: ['adminUsers'],
     queryFn: async () => {
       try {
+        console.log("Fetching users from edge function");
         // Fetch users from Supabase Auth
         const { data: users, error: usersError } = await supabase.functions.invoke('admin-get-users');
         
         if (usersError) {
+          console.error("Edge function error:", usersError);
+          
+          // Check for service role key issues in the error message
+          if (usersError.message?.includes("service role key") || 
+              usersError.message?.includes("SUPABASE_SERVICE_ROLE_KEY")) {
+            setServiceRoleKeyError(true);
+            setErrorDetails(`The SUPABASE_SERVICE_ROLE_KEY is not properly configured. Please check the Supabase edge function secrets.`);
+          }
+          
           throw new Error(usersError.message);
         }
 
@@ -70,15 +82,24 @@ const UsersAdmin = () => {
           throw new Error("No users data returned");
         }
 
+        setServiceRoleKeyError(false);
+        setErrorDetails(null);
         return users as User[];
       } catch (err: any) {
         console.error("Error fetching users:", err);
-        if (err.message?.includes("Edge")) {
-          setErrorDetails(`Edge function error - please verify that the SUPABASE_SERVICE_ROLE_KEY is correctly set in the Supabase dashboard.`);
+        
+        // Check for service role key issues in the error message
+        if (err.message?.includes("Edge") || err.message?.includes("service role key")) {
+          setServiceRoleKeyError(true);
+          setErrorDetails(`Edge function error - please verify that the SUPABASE_SERVICE_ROLE_KEY is correctly set in the Supabase dashboard under Settings > API > Project API keys.`);
+        } else if (err.message?.includes("Auth")) {
+          setErrorDetails(`Authentication error - please make sure you're logged in as an admin user.`);
         }
+        
         throw err;
       }
     },
+    retry: 1,
   });
 
   const makeAdmin = async (userId: string) => {
@@ -120,6 +141,23 @@ const UsersAdmin = () => {
         actionLabel="Invite User"
         actionHref="/admin/users/invite"
       />
+      
+      {serviceRoleKeyError && (
+        <Alert variant="destructive" className="my-4">
+          <AlertTitle>Configuration Error</AlertTitle>
+          <AlertDescription>
+            <p className="mb-2">The SUPABASE_SERVICE_ROLE_KEY is not configured correctly.</p>
+            <p className="mb-2">To fix this issue:</p>
+            <ol className="list-decimal pl-5 space-y-1">
+              <li>Go to the Supabase dashboard</li>
+              <li>Navigate to Settings &gt; API</li>
+              <li>Copy the "service_role key" (not the anon key)</li>
+              <li>Go to Settings &gt; Edge Functions</li>
+              <li>Add or update the SUPABASE_SERVICE_ROLE_KEY secret with the copied value</li>
+            </ol>
+          </AlertDescription>
+        </Alert>
+      )}
       
       <div className="rounded-md border mt-8">
         {isLoading ? (

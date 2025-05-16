@@ -18,10 +18,24 @@ serve(async (req) => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error("Missing Supabase URL or anon key");
+    }
+
+    if (!supabaseServiceRoleKey) {
+      console.error("SUPABASE_SERVICE_ROLE_KEY is not set");
+      throw new Error("Missing service role key - check your edge function secrets configuration");
+    }
+
+    console.log("Creating authenticated Supabase client");
     // Create a Supabase client with the Auth context of the logged-in user
     const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      supabaseUrl,
+      supabaseAnonKey,
       {
         global: {
           headers: { Authorization: req.headers.get("Authorization")! },
@@ -35,9 +49,14 @@ serve(async (req) => {
       error: authError
     } = await supabaseClient.auth.getUser();
 
-    if (authError || !user) {
-      console.error("Authentication error:", authError?.message || "User not authenticated");
-      throw new Error("Not authenticated");
+    if (authError) {
+      console.error("Authentication error:", authError.message);
+      throw new Error("Authentication failed: " + authError.message);
+    }
+
+    if (!user) {
+      console.error("User not authenticated");
+      throw new Error("Authentication required");
     }
 
     console.log("Authenticated user:", user.id);
@@ -53,38 +72,33 @@ serve(async (req) => {
 
     if (roleError) {
       console.error("Role check error:", roleError.message);
-      throw new Error(roleError.message);
+      throw new Error("Error checking admin role: " + roleError.message);
     }
 
     if (!isAdmin) {
       console.error("User is not an admin:", user.id);
-      throw new Error("Not authorized");
+      throw new Error("Admin privileges required");
     }
 
     console.log("Admin check passed for user:", user.id);
 
     // Create a service role client to fetch user data
     // Service role bypasses RLS policies
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    
-    if (!serviceRoleKey) {
-      console.error("Service role key is missing");
-      throw new Error("Server configuration error: Missing service role key");
-    }
-
+    console.log("Creating service role client");
     const serviceRoleClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      serviceRoleKey
+      supabaseUrl,
+      supabaseServiceRoleKey
     );
 
     // Use admin API to get users
+    console.log("Fetching users from Auth API");
     const authResponse = await fetch(
-      `${Deno.env.get("SUPABASE_URL")}/auth/v1/admin/users`,
+      `${supabaseUrl}/auth/v1/admin/users`,
       {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${serviceRoleKey}`,
-          apikey: serviceRoleKey,
+          Authorization: `Bearer ${supabaseServiceRoleKey}`,
+          apikey: supabaseServiceRoleKey,
         },
       }
     );
