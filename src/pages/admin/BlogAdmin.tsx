@@ -19,9 +19,8 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
-import { Loader2, Edit, Trash2, Plus } from "lucide-react";
+import { Loader2, Edit, Trash2, Plus, Image as ImageIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
@@ -37,6 +36,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import ImageUploadField from "@/components/admin/ImageUploadField";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -48,6 +48,7 @@ interface BlogPost {
   excerpt: string | null;
   content: string;
   slug: string;
+  image_url: string | null;
   published: boolean | null;
   published_at: string | null;
   created_at: string;
@@ -63,6 +64,7 @@ const blogFormSchema = z.object({
   excerpt: z.string().optional(),
   content: z.string().min(1, "Content is required"),
   published: z.boolean().default(false),
+  image_url: z.string().nullable(),
 });
 
 type BlogFormValues = z.infer<typeof blogFormSchema>;
@@ -70,7 +72,6 @@ type BlogFormValues = z.infer<typeof blogFormSchema>;
 const BlogAdmin = () => {
   const { toast } = useToast();
   const [selectedBlog, setSelectedBlog] = useState<BlogPost | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   const form = useForm<BlogFormValues>({
@@ -81,6 +82,7 @@ const BlogAdmin = () => {
       excerpt: "",
       content: "",
       published: false,
+      image_url: null,
     },
   });
 
@@ -119,6 +121,7 @@ const BlogAdmin = () => {
       excerpt: "",
       content: "",
       published: false,
+      image_url: null,
     });
     setSelectedBlog(null);
     setIsFormOpen(true);
@@ -132,6 +135,7 @@ const BlogAdmin = () => {
       excerpt: blog.excerpt || "",
       content: blog.content,
       published: blog.published || false,
+      image_url: blog.image_url,
     });
     setSelectedBlog(blog);
     setIsFormOpen(true);
@@ -155,6 +159,7 @@ const BlogAdmin = () => {
             excerpt: values.excerpt || null,
             content: values.content,
             published: values.published,
+            image_url: values.image_url,
             published_at: values.published ? selectedBlog.published_at || new Date().toISOString() : null,
             updated_at: new Date().toISOString(),
           })
@@ -177,6 +182,7 @@ const BlogAdmin = () => {
             excerpt: values.excerpt || null,
             content: values.content,
             published: values.published,
+            image_url: values.image_url,
             published_at: values.published ? new Date().toISOString() : null,
           })
           .select();
@@ -251,6 +257,7 @@ const BlogAdmin = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[80px]">Image</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Slug</TableHead>
                 <TableHead>Status</TableHead>
@@ -262,6 +269,21 @@ const BlogAdmin = () => {
               {blogPosts && blogPosts.length > 0 ? (
                 blogPosts.map((blog) => (
                   <TableRow key={blog.id}>
+                    <TableCell>
+                      {blog.image_url ? (
+                        <div className="relative w-16 h-16 rounded-md overflow-hidden">
+                          <img 
+                            src={blog.image_url} 
+                            alt={blog.title}
+                            className="object-cover w-full h-full" 
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-16 bg-muted flex items-center justify-center rounded-md">
+                          <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell className="font-medium">{blog.title}</TableCell>
                     <TableCell>{blog.slug}</TableCell>
                     <TableCell>
@@ -299,7 +321,7 @@ const BlogAdmin = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center">
+                  <TableCell colSpan={6} className="text-center">
                     No blog posts found
                   </TableCell>
                 </TableRow>
@@ -353,6 +375,27 @@ const BlogAdmin = () => {
                       <FormDescription>
                         URL-friendly version of the title. Use lowercase letters,
                         numbers, and hyphens only.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="image_url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Featured Image</FormLabel>
+                      <FormControl>
+                        <ImageUploadField
+                          bucketName="blog_images"
+                          value={field.value}
+                          onChange={field.onChange}
+                          label="Blog Featured Image"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Upload a featured image for your blog post
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

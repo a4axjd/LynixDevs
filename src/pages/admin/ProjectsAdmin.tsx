@@ -19,9 +19,8 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
-import { Loader2, Edit, Trash2, Plus } from "lucide-react";
+import { Loader2, Edit, Trash2, Plus, Image as ImageIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
@@ -36,6 +35,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import ImageUploadField from "@/components/admin/ImageUploadField";
 import {
   Select,
   SelectContent,
@@ -53,6 +53,7 @@ interface Project {
   title: string;
   description: string | null;
   client: string | null;
+  image_url: string | null;
   status: string;
   created_at: string;
   updated_at: string;
@@ -65,6 +66,7 @@ const projectFormSchema = z.object({
   description: z.string().optional(),
   client: z.string().optional(),
   status: z.string().min(1, "Status is required"),
+  image_url: z.string().nullable(),
 });
 
 type ProjectFormValues = z.infer<typeof projectFormSchema>;
@@ -84,6 +86,7 @@ const ProjectsAdmin = () => {
       description: "",
       client: "",
       status: "active",
+      image_url: null,
     },
   });
 
@@ -121,6 +124,7 @@ const ProjectsAdmin = () => {
       description: "",
       client: "",
       status: "active",
+      image_url: null,
     });
     setSelectedProject(null);
     setIsFormOpen(true);
@@ -133,6 +137,7 @@ const ProjectsAdmin = () => {
       description: project.description || "",
       client: project.client || "",
       status: project.status,
+      image_url: project.image_url,
     });
     setSelectedProject(project);
     setIsFormOpen(true);
@@ -155,6 +160,7 @@ const ProjectsAdmin = () => {
             description: values.description || null,
             client: values.client || null,
             status: values.status,
+            image_url: values.image_url,
             updated_at: new Date().toISOString(),
           })
           .eq("id", selectedProject.id)
@@ -175,6 +181,7 @@ const ProjectsAdmin = () => {
             description: values.description || null,
             client: values.client || null,
             status: values.status,
+            image_url: values.image_url,
           })
           .select();
 
@@ -261,6 +268,7 @@ const ProjectsAdmin = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[80px]">Image</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Client</TableHead>
                 <TableHead>Status</TableHead>
@@ -272,6 +280,21 @@ const ProjectsAdmin = () => {
               {projects && projects.length > 0 ? (
                 projects.map((project) => (
                   <TableRow key={project.id}>
+                    <TableCell>
+                      {project.image_url ? (
+                        <div className="relative w-16 h-16 rounded-md overflow-hidden">
+                          <img 
+                            src={project.image_url} 
+                            alt={project.title}
+                            className="object-cover w-full h-full" 
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-16 bg-muted flex items-center justify-center rounded-md">
+                          <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell className="font-medium">{project.title}</TableCell>
                     <TableCell>{project.client || "-"}</TableCell>
                     <TableCell>
@@ -307,7 +330,7 @@ const ProjectsAdmin = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center">
+                  <TableCell colSpan={6} className="text-center">
                     No projects found
                   </TableCell>
                 </TableRow>
@@ -360,6 +383,27 @@ const ProjectsAdmin = () => {
                       </FormControl>
                       <FormDescription>
                         The name of the client (optional)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="image_url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project Image</FormLabel>
+                      <FormControl>
+                        <ImageUploadField
+                          bucketName="project_images"
+                          value={field.value}
+                          onChange={field.onChange}
+                          label="Project Image"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Upload a featured image for your project
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

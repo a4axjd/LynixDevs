@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,101 +32,72 @@ interface Profile {
   full_name: string | null;
   avatar_url: string | null;
   username: string | null;
-}
-
-interface UserRole {
-  role: string;
+  created_at: string;
 }
 
 interface User {
   id: string;
-  email: string;
+  email?: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  username: string | null;
   created_at: string;
-  last_sign_in_at: string | null;
-  user_metadata: {
-    full_name?: string;
-    avatar_url?: string;
-  };
-  profile?: Profile;
-  roles?: UserRole[];
+  last_sign_in_at?: string | null;
   isAdmin?: boolean;
 }
 
 const UsersAdmin = () => {
   const { toast } = useToast();
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
-  const [serviceRoleKeyError, setServiceRoleKeyError] = useState<boolean>(false);
-  const [authHeaderError, setAuthHeaderError] = useState<boolean>(false);
 
   const { data: users, isLoading, error, refetch } = useQuery({
     queryKey: ['adminUsers'],
     queryFn: async () => {
       try {
-        console.log("Fetching users from edge function");
+        console.log("Fetching profiles from database");
         
-        // Make sure we have a session before calling the function
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        // Fetch profiles from the database
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('*');
         
-        if (sessionError) {
-          console.error("Session error:", sessionError);
-          setAuthHeaderError(true);
-          throw new Error(`Authentication error: ${sessionError.message}`);
+        if (profilesError) {
+          console.error("Profiles error:", profilesError);
+          throw new Error(`Error fetching profiles: ${profilesError.message}`);
         }
         
-        if (!session) {
-          console.error("No active session found");
-          setAuthHeaderError(true);
-          throw new Error("No active session found. Please login again.");
-        }
-        
-        // Fetch users from Supabase Auth via edge function
-        const { data: users, error: usersError } = await supabase.functions.invoke('admin-get-users', {
-          body: { timestamp: new Date().toISOString() },  // Adding timestamp to avoid caching issues
-        });
-        
-        if (usersError) {
-          console.error("Edge function error:", usersError);
-          
-          // Check for service role key issues in the error message
-          if (usersError.message?.includes("service role key") || 
-              usersError.message?.includes("SUPABASE_SERVICE_ROLE_KEY")) {
-            setServiceRoleKeyError(true);
-            setErrorDetails(`The SUPABASE_SERVICE_ROLE_KEY is not properly configured or is invalid. Please check the Supabase edge function secrets.`);
-          } else if (usersError.message?.includes("Authorization") || 
-                    usersError.message?.includes("Authentication")) {
-            setAuthHeaderError(true);
-            setErrorDetails(`Authentication error: ${usersError.message}. Try logging out and logging back in.`);
-          } else {
-            setErrorDetails(usersError.message);
-          }
-          
-          throw new Error(usersError.message);
+        if (!profiles) {
+          throw new Error("No profiles data returned");
         }
 
-        if (!users) {
-          throw new Error("No users data returned");
-        }
-
-        setServiceRoleKeyError(false);
-        setAuthHeaderError(false);
-        setErrorDetails(null);
-        return users as User[];
+        // For each profile, check if they are an admin
+        const usersWithRoles = await Promise.all(profiles.map(async (profile) => {
+          const { data: isAdmin, error: roleError } = await supabase.rpc(
+            "has_role",
+            {
+              _user_id: profile.id,
+              _role: "admin",
+            }
+          );
+          
+          // Get user email if needed (additional query)
+          // This is simplified and might not work depending on your Supabase setup
+          // Email typically isn't directly accessible from public schemas
+          
+          return {
+            id: profile.id,
+            full_name: profile.full_name,
+            avatar_url: profile.avatar_url,
+            username: profile.username,
+            created_at: profile.created_at,
+            isAdmin: !!isAdmin,
+          };
+        }));
+        
+        return usersWithRoles as User[];
       } catch (err: any) {
         console.error("Error fetching users:", err);
-        
-        if (!errorDetails) {
-          // Only set error details if they haven't been set already
-          if (err.message?.includes("service role key")) {
-            setServiceRoleKeyError(true);
-            setErrorDetails(`Edge function error - please verify that the SUPABASE_SERVICE_ROLE_KEY is correctly set in the Supabase dashboard under Settings > API > Project API keys.`);
-          } else if (err.message?.includes("Auth") || err.message?.includes("session")) {
-            setAuthHeaderError(true);
-            setErrorDetails(`Authentication error - please try logging out and logging back in.`);
-          } else {
-            setErrorDetails(`Error: ${err.message}`);
-          }
-        }
-        
+        setErrorDetails(`Error: ${err.message}`);
         throw err;
       }
     },
@@ -172,35 +144,12 @@ const UsersAdmin = () => {
         actionHref="/admin/users/invite"
       />
       
-      {serviceRoleKeyError && (
+      {errorDetails && (
         <Alert variant="destructive" className="my-4">
-          <AlertTitle>Configuration Error</AlertTitle>
+          <AlertTitle>Error loading users</AlertTitle>
           <AlertDescription>
-            <p className="mb-2">The SUPABASE_SERVICE_ROLE_KEY is not configured correctly or is invalid.</p>
-            <p className="mb-2">To fix this issue:</p>
-            <ol className="list-decimal pl-5 space-y-1">
-              <li>Go to the Supabase dashboard</li>
-              <li>Navigate to Settings &gt; API</li>
-              <li>Copy the "service_role key" (not the anon key)</li>
-              <li>Go to Settings &gt; Edge Functions</li>
-              <li>Add or update the SUPABASE_SERVICE_ROLE_KEY secret with the copied value</li>
-              <li>Remember service_role keys start with "eyJh..."</li>
-            </ol>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {authHeaderError && (
-        <Alert variant="destructive" className="my-4">
-          <AlertTitle>Authentication Error</AlertTitle>
-          <AlertDescription>
-            <p className="mb-2">There was an issue with your authentication session.</p>
-            <p className="mb-2">To fix this issue:</p>
-            <ol className="list-decimal pl-5 space-y-1">
-              <li>Try refreshing the page</li>
-              <li>If that doesn't work, try logging out and logging back in</li>
-              <li>If the issue persists, clear your browser cache and cookies</li>
-            </ol>
+            <p className="mb-2">{errorDetails}</p>
+            <p className="mb-2">We're fetching users from the profiles table instead of directly from auth.</p>
           </AlertDescription>
         </Alert>
       )}
@@ -226,10 +175,9 @@ const UsersAdmin = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>User</TableHead>
-                <TableHead>Email</TableHead>
+                <TableHead>Username</TableHead>
                 <TableHead>Role</TableHead>
-                <TableHead>Joined</TableHead>
-                <TableHead>Last Login</TableHead>
+                <TableHead>Created</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -239,9 +187,9 @@ const UsersAdmin = () => {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        <AvatarImage src={user.user_metadata?.avatar_url || user.profile?.avatar_url || ''} />
+                        <AvatarImage src={user.avatar_url || ''} />
                         <AvatarFallback>
-                          {(user.user_metadata?.full_name || user.profile?.full_name || user.email || "User")
+                          {(user.full_name || "User")
                             .split(" ")
                             .map(name => name[0])
                             .join("")
@@ -251,15 +199,12 @@ const UsersAdmin = () => {
                       </Avatar>
                       <div>
                         <p className="font-medium">
-                          {user.user_metadata?.full_name || user.profile?.full_name || "Unnamed User"}
+                          {user.full_name || "Unnamed User"}
                         </p>
-                        {user.profile?.username && (
-                          <p className="text-xs text-muted-foreground">@{user.profile.username}</p>
-                        )}
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.username || "-"}</TableCell>
                   <TableCell>
                     {user.isAdmin ? (
                       <Badge variant="outline" className="bg-primary/10 text-primary">
@@ -272,9 +217,6 @@ const UsersAdmin = () => {
                   </TableCell>
                   <TableCell>
                     {user.created_at && format(new Date(user.created_at), 'MMM d, yyyy')}
-                  </TableCell>
-                  <TableCell>
-                    {user.last_sign_in_at ? format(new Date(user.last_sign_in_at), 'MMM d, yyyy') : "Never"}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
