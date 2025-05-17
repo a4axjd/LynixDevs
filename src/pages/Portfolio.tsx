@@ -18,6 +18,7 @@ interface Project {
   created_at: string;
   updated_at: string;
   user_id: string | null;
+  image_url: string | null;
 }
 
 const Portfolio = () => {
@@ -142,7 +143,18 @@ const Portfolio = () => {
                   key={project.id} 
                   className="group rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
                 >
-                  <div className={`relative h-64 bg-gradient-to-br ${getProjectColor(project.status)} overflow-hidden`}>
+                  <div 
+                    className="relative h-64 overflow-hidden"
+                    style={{
+                      backgroundImage: project.image_url ? `url(${project.image_url})` : 'none',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundColor: project.image_url ? 'transparent' : undefined
+                    }}
+                  >
+                    {!project.image_url && (
+                      <div className={`absolute inset-0 bg-gradient-to-br ${getProjectColor(project.status)}`}></div>
+                    )}
                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button asChild className="bg-white text-lynix-purple hover:bg-gray-100">
                         <Link to={`/portfolio/${project.id}`}>

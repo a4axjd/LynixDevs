@@ -21,6 +21,7 @@ interface BlogPost {
   created_at: string;
   updated_at: string;
   author_id: string | null;
+  image_url: string | null;
 }
 
 const Blog = () => {
@@ -190,7 +191,19 @@ const Blog = () => {
                         <Link to={`/blog/${featuredPost.slug}`}>Read Article</Link>
                       </Button>
                     </div>
-                    <div className="lg:col-span-2 bg-gradient-to-br from-lynix-purple to-lynix-secondary-purple min-h-[300px]"></div>
+                    <div 
+                      className="lg:col-span-2 min-h-[300px]" 
+                      style={{ 
+                        backgroundImage: featuredPost.image_url ? `url(${featuredPost.image_url})` : 'none',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundColor: featuredPost.image_url ? 'transparent' : 'var(--lynix-purple)'
+                      }}
+                    >
+                      {!featuredPost.image_url && (
+                        <div className="w-full h-full bg-gradient-to-br from-lynix-purple to-lynix-secondary-purple"></div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
@@ -200,10 +213,20 @@ const Blog = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {regularPosts.map((post) => (
                     <div key={post.id} className="bg-white rounded-xl overflow-hidden shadow-lg border border-gray-100 transition-all hover:shadow-xl">
-                      <div className="h-48 bg-lynix-purple/10 flex items-center justify-center">
-                        <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                          <span className="text-2xl font-bold text-lynix-purple">{post.title.charAt(0)}</span>
-                        </div>
+                      <div 
+                        className="h-48 flex items-center justify-center"
+                        style={{ 
+                          backgroundImage: post.image_url ? `url(${post.image_url})` : 'none',
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          backgroundColor: post.image_url ? 'transparent' : 'var(--lynix-purple)'
+                        }}
+                      >
+                        {!post.image_url && (
+                          <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                            <span className="text-2xl font-bold text-white">{post.title.charAt(0)}</span>
+                          </div>
+                        )}
                       </div>
                       <div className="p-6">
                         <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
