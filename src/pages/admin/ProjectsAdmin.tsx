@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,6 +51,7 @@ interface Project {
   id: string;
   title: string;
   description: string | null;
+  content: string | null;
   client: string | null;
   image_url: string | null;
   status: string;
@@ -64,6 +64,7 @@ interface Project {
 const projectFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
+  content: z.string().optional(),
   client: z.string().optional(),
   status: z.string().min(1, "Status is required"),
   image_url: z.string().nullable(),
@@ -84,11 +85,24 @@ const ProjectsAdmin = () => {
     defaultValues: {
       title: "",
       description: "",
+      content: "",
       client: "",
       status: "active",
       image_url: null,
     },
   });
+
+  // Watch content for auto-generation of description
+  const watchContent = form.watch("content");
+
+  // Auto-generate description from content
+  useEffect(() => {
+    if (watchContent && (!form.getValues("description") || form.getValues("description") === "")) {
+      const plainText = watchContent.replace(/#+\s/g, "").replace(/\*\*/g, "");
+      const description = plainText.substring(0, 150) + (plainText.length > 150 ? "..." : "");
+      form.setValue("description", description);
+    }
+  }, [watchContent, form]);
 
   // Fetch projects
   const { data: projects, isLoading, error, refetch } = useQuery({
@@ -122,6 +136,7 @@ const ProjectsAdmin = () => {
     form.reset({
       title: "",
       description: "",
+      content: "",
       client: "",
       status: "active",
       image_url: null,
@@ -135,6 +150,7 @@ const ProjectsAdmin = () => {
     form.reset({
       title: project.title,
       description: project.description || "",
+      content: project.content || "",
       client: project.client || "",
       status: project.status,
       image_url: project.image_url,
@@ -158,6 +174,7 @@ const ProjectsAdmin = () => {
           .update({
             title: values.title,
             description: values.description || null,
+            content: values.content || null,
             client: values.client || null,
             status: values.status,
             image_url: values.image_url,
@@ -179,6 +196,7 @@ const ProjectsAdmin = () => {
           .insert({
             title: values.title,
             description: values.description || null,
+            content: values.content || null,
             client: values.client || null,
             status: values.status,
             image_url: values.image_url,
@@ -250,7 +268,6 @@ const ProjectsAdmin = () => {
         description="Manage your client projects"
         actionLabel="Create Project"
         actionHref="#"
-        // We use a button instead of a link because we want to open the form sheet
         actionButton={
           <Button onClick={handleCreateProject}>
             <Plus className="mr-2 h-4 w-4" />
@@ -342,7 +359,7 @@ const ProjectsAdmin = () => {
 
       {/* Project form in a sheet */}
       <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <SheetContent className="sm:max-w-md overflow-y-auto">
+        <SheetContent className="sm:max-w-2xl overflow-y-auto">
           <SheetHeader>
             <SheetTitle>
               {selectedProject ? "Edit Project" : "Create Project"}
@@ -411,16 +428,39 @@ const ProjectsAdmin = () => {
                 />
                 <FormField
                   control={form.control}
-                  name="description"
+                  name="content"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>Content</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Project description"
+                          placeholder="Project content in markdown format"
+                          className="min-h-[200px]"
                           {...field}
                         />
                       </FormControl>
+                      <FormDescription>
+                        Write detailed project content using markdown
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Short Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Brief project description"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        A short summary that appears in project listings (auto-generated from content if left blank)
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

@@ -86,6 +86,42 @@ const BlogAdmin = () => {
     },
   });
 
+  // Generate slug from title
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "") // Remove special chars
+      .replace(/\s+/g, "-") // Replace spaces with hyphens
+      .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
+      .trim();
+  };
+
+  // Generate excerpt from content
+  const generateExcerpt = (content: string) => {
+    const plainText = content.replace(/#+\s/g, "").replace(/\*\*/g, "");
+    return plainText.substring(0, 150) + (plainText.length > 150 ? "..." : "");
+  };
+
+  // Watch title and content for auto-generation
+  const watchTitle = form.watch("title");
+  const watchContent = form.watch("content");
+
+  // Auto-generate slug from title
+  useEffect(() => {
+    if (watchTitle && !selectedBlog) {
+      const slug = generateSlug(watchTitle);
+      form.setValue("slug", slug);
+    }
+  }, [watchTitle, form, selectedBlog]);
+
+  // Auto-generate excerpt from content
+  useEffect(() => {
+    if (watchContent && (!form.getValues("excerpt") || form.getValues("excerpt") === "")) {
+      const excerpt = generateExcerpt(watchContent);
+      form.setValue("excerpt", excerpt);
+    }
+  }, [watchContent, form]);
+
   // Fetch blog posts
   const { data: blogPosts, isLoading, error, refetch } = useQuery({
     queryKey: ["blogPosts"],
