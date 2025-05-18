@@ -24,24 +24,34 @@ serve(async (req) => {
   try {
     const payload: EmailPayload = await req.json();
     const { to, subject, html, replyTo, name } = payload;
+    
+    // Log the request for debugging
+    console.log("Email request received:", { to, subject, replyTo, name });
 
     // Configure SMTP client
     const client = new SmtpClient();
     
-    await client.connect({
-      hostname: Deno.env.get("SMTP_HOST") || "",
-      port: Number(Deno.env.get("SMTP_PORT")) || 587,
-      tls: true,
-      username: Deno.env.get("SMTP_USER") || "",
-      password: Deno.env.get("SMTP_PASSWORD") || "",
-    });
+    try {
+      await client.connect({
+        hostname: Deno.env.get("SMTP_HOST") || "",
+        port: Number(Deno.env.get("SMTP_PORT")) || 587,
+        tls: true,
+        username: Deno.env.get("SMTP_USER") || "",
+        password: Deno.env.get("SMTP_PASSWORD") || "",
+      });
+      
+      console.log("SMTP connection established successfully");
+    } catch (connError) {
+      console.error("SMTP connection error:", connError);
+      throw new Error(`Failed to connect to SMTP server: ${connError.message}`);
+    }
 
     // Set up email data
     const fromEmail = Deno.env.get("SMTP_FROM_EMAIL") || "noreply@example.com";
     const fromName = "LynixDevs";
     
     // Send email
-    const sendConfig: any = {
+    const sendConfig = {
       from: `${fromName} <${fromEmail}>`,
       to: to,
       subject: subject,
@@ -54,10 +64,16 @@ serve(async (req) => {
       sendConfig.replyTo = `${name} <${replyTo}>`;
     }
 
-    await client.send(sendConfig);
-    await client.close();
-    
-    console.log("Email sent successfully to:", to);
+    try {
+      console.log("Attempting to send email with config:", sendConfig);
+      await client.send(sendConfig);
+      console.log("Email sent successfully to:", to);
+    } catch (sendError) {
+      console.error("Email sending error:", sendError);
+      throw new Error(`Failed to send email: ${sendError.message}`);
+    } finally {
+      await client.close();
+    }
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

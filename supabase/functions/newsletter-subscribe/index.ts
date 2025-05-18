@@ -24,6 +24,8 @@ serve(async (req) => {
 
     // Parse request body
     const { email }: SubscribePayload = await req.json();
+    
+    console.log("Newsletter subscription request received for:", email);
 
     if (!email || !email.includes("@")) {
       return new Response(
@@ -48,33 +50,41 @@ serve(async (req) => {
     }
 
     if (existingSubscriber) {
+      console.log("Email already subscribed:", email);
       // Already subscribed - send confirmation anyway
-      // Call the send-email function
-      const emailResponse = await fetch(
-        `${supabaseUrl}/functions/v1/send-email`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${supabaseKey}`,
-          },
-          body: JSON.stringify({
-            to: email,
-            subject: "Newsletter Subscription Confirmed",
-            html: `
-              <h1>You're Already Subscribed!</h1>
-              <p>Thanks for your continued interest in LynixDevs! You're already subscribed to our newsletter.</p>
-              <p>We'll keep you updated with our latest news, insights and offers.</p>
-              <p>Best regards,<br>The LynixDevs Team</p>
-            `,
-          }),
-        }
-      );
+      try {
+        // Call the send-email function
+        const emailResponse = await fetch(
+          `${supabaseUrl}/functions/v1/send-email`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${supabaseKey}`,
+            },
+            body: JSON.stringify({
+              to: email,
+              subject: "Newsletter Subscription Confirmed",
+              html: `
+                <h1>You're Already Subscribed!</h1>
+                <p>Thanks for your continued interest in LynixDevs! You're already subscribed to our newsletter.</p>
+                <p>We'll keep you updated with our latest news, insights and offers.</p>
+                <p>Best regards,<br>The LynixDevs Team</p>
+              `,
+            }),
+          }
+        );
 
-      if (!emailResponse.ok) {
-        const errorData = await emailResponse.text();
-        console.error("Error sending confirmation email:", errorData);
-        throw new Error("Failed to send confirmation email");
+        if (!emailResponse.ok) {
+          const errorData = await emailResponse.text();
+          console.error("Error sending confirmation email:", errorData);
+          // Continue execution even if email fails
+        } else {
+          console.log("Already subscribed email sent successfully");
+        }
+      } catch (emailError) {
+        console.error("Error sending already subscribed email:", emailError);
+        // Continue execution even if email fails
       }
 
       return new Response(
@@ -96,32 +106,41 @@ serve(async (req) => {
       throw new Error(`Database error: ${insertError.message}`);
     }
 
-    // Send welcome email
-    const emailResponse = await fetch(
-      `${supabaseUrl}/functions/v1/send-email`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${supabaseKey}`,
-        },
-        body: JSON.stringify({
-          to: email,
-          subject: "Welcome to LynixDevs Newsletter",
-          html: `
-            <h1>Thanks for Subscribing!</h1>
-            <p>Welcome to the LynixDevs newsletter! You've successfully subscribed to our updates.</p>
-            <p>We're excited to share our latest news, insights and offers with you.</p>
-            <p>Best regards,<br>The LynixDevs Team</p>
-          `,
-        }),
-      }
-    );
+    console.log("New subscriber added to database:", email);
 
-    if (!emailResponse.ok) {
-      const errorData = await emailResponse.text();
-      console.error("Error sending welcome email:", errorData);
-      throw new Error("Failed to send welcome email");
+    // Send welcome email
+    try {
+      const emailResponse = await fetch(
+        `${supabaseUrl}/functions/v1/send-email`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${supabaseKey}`,
+          },
+          body: JSON.stringify({
+            to: email,
+            subject: "Welcome to LynixDevs Newsletter",
+            html: `
+              <h1>Thanks for Subscribing!</h1>
+              <p>Welcome to the LynixDevs newsletter! You've successfully subscribed to our updates.</p>
+              <p>We're excited to share our latest news, insights and offers with you.</p>
+              <p>Best regards,<br>The LynixDevs Team</p>
+            `,
+          }),
+        }
+      );
+
+      if (!emailResponse.ok) {
+        const errorData = await emailResponse.text();
+        console.error("Error sending welcome email:", errorData);
+        // Continue execution even if welcome email fails
+      } else {
+        console.log("Welcome email sent successfully");
+      }
+    } catch (emailError) {
+      console.error("Error sending welcome email:", emailError);
+      // Continue execution even if welcome email fails
     }
 
     return new Response(

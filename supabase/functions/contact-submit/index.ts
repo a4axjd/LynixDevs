@@ -10,7 +10,9 @@ const corsHeaders = {
 interface ContactPayload {
   name: string;
   email: string;
+  subject?: string;
   message: string;
+  phone?: string;
 }
 
 serve(async (req) => {
@@ -25,7 +27,10 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Parse request body
-    const { name, email, message }: ContactPayload = await req.json();
+    const contactData: ContactPayload = await req.json();
+    const { name, email, subject = "Contact Form Submission", message, phone = "" } = contactData;
+
+    console.log("Received contact submission:", { name, email, subject, phone });
 
     if (!name || !email || !message) {
       return new Response(
@@ -40,71 +45,91 @@ serve(async (req) => {
     // Insert contact submission into database
     const { error: insertError } = await supabase
       .from("contact_submissions")
-      .insert({ name, email, message });
+      .insert({ name, email, message, subject, phone });
 
     if (insertError) {
+      console.error("Database error:", insertError);
       throw new Error(`Database error: ${insertError.message}`);
     }
 
-    // Send confirmation email
-    const emailResponse = await fetch(
-      `${supabaseUrl}/functions/v1/send-email`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${supabaseKey}`,
-        },
-        body: JSON.stringify({
-          to: email,
-          subject: "We've Received Your Message",
-          html: `
-            <h1>Thank You for Contacting LynixDevs!</h1>
-            <p>Hello ${name},</p>
-            <p>We've received your message and appreciate you taking the time to reach out to us. Our team will review your inquiry and get back to you as soon as possible.</p>
-            <p>For your reference, here's a copy of your message:</p>
-            <blockquote>${message}</blockquote>
-            <p>Best regards,<br>The LynixDevs Team</p>
-          `,
-          replyTo: "info@lynixdevs.com",
-          name: "LynixDevs Support"
-        }),
-      }
-    );
+    console.log("Contact submission saved to database");
 
-    if (!emailResponse.ok) {
-      const errorData = await emailResponse.text();
-      console.error("Error sending email:", errorData);
-      throw new Error("Failed to send confirmation email");
+    // Send confirmation email
+    try {
+      const emailResponse = await fetch(
+        `${supabaseUrl}/functions/v1/send-email`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${supabaseKey}`,
+          },
+          body: JSON.stringify({
+            to: email,
+            subject: "We've Received Your Message",
+            html: `
+              <h1>Thank You for Contacting LynixDevs!</h1>
+              <p>Hello ${name},</p>
+              <p>We've received your message and appreciate you taking the time to reach out to us. Our team will review your inquiry and get back to you as soon as possible.</p>
+              <p>For your reference, here's a copy of your message:</p>
+              <blockquote>${message}</blockquote>
+              <p>Best regards,<br>The LynixDevs Team</p>
+            `,
+            replyTo: "info@lynixdevs.com",
+            name: "LynixDevs Support"
+          }),
+        }
+      );
+
+      if (!emailResponse.ok) {
+        const errorData = await emailResponse.text();
+        console.error("Error sending confirmation email:", errorData);
+        // Continue execution even if confirmation email fails
+      } else {
+        console.log("Confirmation email sent successfully");
+      }
+    } catch (emailError) {
+      console.error("Error sending confirmation email:", emailError);
+      // Continue execution even if confirmation email fails
     }
 
     // Send notification to admin
-    const adminEmailResponse = await fetch(
-      `${supabaseUrl}/functions/v1/send-email`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${supabaseKey}`,
-        },
-        body: JSON.stringify({
-          to: "info@lynixdevs.com", // Admin email
-          subject: "New Contact Form Submission",
-          html: `
-            <h1>New Contact Form Submission</h1>
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Message:</strong></p>
-            <p>${message}</p>
-          `,
-          replyTo: email,
-          name: name
-        }),
-      }
-    );
+    try {
+      const adminEmailResponse = await fetch(
+        `${supabaseUrl}/functions/v1/send-email`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${supabaseKey}`,
+          },
+          body: JSON.stringify({
+            to: "info@lynixdevs.com", // Admin email
+            subject: "New Contact Form Submission",
+            html: `
+              <h1>New Contact Form Submission</h1>
+              <p><strong>Name:</strong> ${name}</p>
+              <p><strong>Email:</strong> ${email}</p>
+              ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
+              <p><strong>Subject:</strong> ${subject}</p>
+              <p><strong>Message:</strong></p>
+              <p>${message}</p>
+            `,
+            replyTo: email,
+            name: name
+          }),
+        }
+      );
 
-    if (!adminEmailResponse.ok) {
-      console.error("Error sending admin notification:", await adminEmailResponse.text());
+      if (!adminEmailResponse.ok) {
+        const errorData = await adminEmailResponse.text();
+        console.error("Error sending admin notification:", errorData);
+        // Continue execution even if admin email fails
+      } else {
+        console.log("Admin notification email sent successfully");
+      }
+    } catch (adminEmailError) {
+      console.error("Error sending admin notification:", adminEmailError);
       // Continue execution even if admin email fails
     }
 
