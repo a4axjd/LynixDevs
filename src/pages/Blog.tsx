@@ -28,6 +28,7 @@ const Blog = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
   const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch published blog posts
   const { data: blogPosts, isLoading, error } = useQuery({
@@ -60,42 +61,39 @@ const Blog = () => {
   // Handle newsletter subscription
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) {
+    if (!email || !email.includes("@")) {
       toast({
         title: "Email required",
-        description: "Please enter your email address to subscribe.",
+        description: "Please enter a valid email address to subscribe.",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      const { error } = await supabase
-        .from("subscribers")
-        .insert({ email });
+      setIsSubmitting(true);
+
+      const { data, error } = await supabase.functions.invoke("newsletter-subscribe", {
+        body: { email },
+      });
 
       if (error) {
-        if (error.code === "23505") { // Unique violation
-          toast({
-            title: "Already subscribed",
-            description: "This email is already subscribed to our newsletter.",
-          });
-        } else {
-          throw error;
-        }
-      } else {
-        toast({
-          title: "Subscription successful",
-          description: "Thank you for subscribing to our newsletter!",
-        });
-        setEmail("");
+        throw error;
       }
+
+      toast({
+        title: "Subscription successful",
+        description: "Thank you for subscribing to our newsletter!",
+      });
+      setEmail("");
     } catch (error) {
       toast({
         title: "Subscription failed",
         description: `Error: ${(error as Error).message}`,
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -299,8 +297,19 @@ const Blog = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 className="bg-white/10 border-transparent text-white placeholder:text-gray-400 focus:border-lynix-purple"
               />
-              <Button type="submit" className="bg-lynix-purple hover:bg-lynix-secondary-purple text-white">
-                Subscribe
+              <Button 
+                type="submit"
+                disabled={isSubmitting} 
+                className="bg-lynix-purple hover:bg-lynix-secondary-purple text-white"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Subscribing...
+                  </>
+                ) : (
+                  "Subscribe"
+                )}
               </Button>
             </form>
           </div>

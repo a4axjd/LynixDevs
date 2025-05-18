@@ -3,9 +3,75 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mail, Phone, MapPin, Clock } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData(prevState => ({ ...prevState, [id]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    // Validate form data
+    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      const { data, error } = await supabase.functions.invoke("contact-submit", {
+        body: formData,
+      });
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
+      });
+      
+      toast({
+        title: "Message sent successfully!",
+        description: "Thank you for contacting us. We'll get back to you soon.",
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to send message",
+        description: error.message || "An error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="pt-20">
       {/* Hero Section */}
@@ -106,26 +172,30 @@ const Contact = () => {
             <div>
               <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
                 <h2 className="heading-3 mb-6">Send Us a Message</h2>
-                <form>
+                <form onSubmit={handleSubmit}>
                   <div className="grid grid-cols-1 gap-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                          Your Name
+                          Your Name *
                         </label>
                         <Input
                           id="name"
+                          value={formData.name}
+                          onChange={handleInputChange}
                           placeholder="John Doe"
                           className="border-gray-300 focus:border-lynix-purple focus:ring-lynix-purple"
                         />
                       </div>
                       <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                          Email Address
+                          Email Address *
                         </label>
                         <Input
                           id="email"
                           type="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
                           placeholder="john@example.com"
                           className="border-gray-300 focus:border-lynix-purple focus:ring-lynix-purple"
                         />
@@ -138,6 +208,8 @@ const Contact = () => {
                       </label>
                       <Input
                         id="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
                         placeholder="(123) 456-7890"
                         className="border-gray-300 focus:border-lynix-purple focus:ring-lynix-purple"
                       />
@@ -145,10 +217,12 @@ const Contact = () => {
 
                     <div>
                       <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                        Subject
+                        Subject *
                       </label>
                       <Input
                         id="subject"
+                        value={formData.subject}
+                        onChange={handleInputChange}
                         placeholder="How can we help you?"
                         className="border-gray-300 focus:border-lynix-purple focus:ring-lynix-purple"
                       />
@@ -156,18 +230,31 @@ const Contact = () => {
 
                     <div>
                       <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                        Message
+                        Message *
                       </label>
                       <Textarea
                         id="message"
+                        value={formData.message}
+                        onChange={handleInputChange}
                         placeholder="Tell us about your project..."
                         className="min-h-[150px] border-gray-300 focus:border-lynix-purple focus:ring-lynix-purple"
                       />
                     </div>
 
                     <div>
-                      <Button type="submit" className="w-full bg-lynix-purple hover:bg-lynix-secondary-purple">
-                        Send Message
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-lynix-purple hover:bg-lynix-secondary-purple"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Sending...
+                          </>
+                        ) : (
+                          "Send Message"
+                        )}
                       </Button>
                     </div>
                   </div>
