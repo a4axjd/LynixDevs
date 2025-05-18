@@ -36,11 +36,16 @@ serve(async (req) => {
     }
 
     // Check if email already exists
-    const { data: existingSubscriber } = await supabase
+    const { data: existingSubscriber, error: selectError } = await supabase
       .from("subscribers")
       .select("*")
       .eq("email", email)
-      .single();
+      .maybeSingle();
+      
+    if (selectError) {
+      console.error("Error checking for existing subscriber:", selectError);
+      throw new Error(`Database error: ${selectError.message}`);
+    }
 
     if (existingSubscriber) {
       // Already subscribed - send confirmation anyway
@@ -67,6 +72,8 @@ serve(async (req) => {
       );
 
       if (!emailResponse.ok) {
+        const errorData = await emailResponse.text();
+        console.error("Error sending confirmation email:", errorData);
         throw new Error("Failed to send confirmation email");
       }
 
@@ -85,6 +92,7 @@ serve(async (req) => {
       .insert({ email });
 
     if (insertError) {
+      console.error("Error inserting new subscriber:", insertError);
       throw new Error(`Database error: ${insertError.message}`);
     }
 
@@ -111,6 +119,8 @@ serve(async (req) => {
     );
 
     if (!emailResponse.ok) {
+      const errorData = await emailResponse.text();
+      console.error("Error sending welcome email:", errorData);
       throw new Error("Failed to send welcome email");
     }
 
@@ -131,7 +141,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message,
+        error: error.message || "An error occurred while processing your subscription",
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
