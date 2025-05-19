@@ -33,9 +33,9 @@ import Settings from "./pages/Settings";
 import UsersAdmin from "./pages/admin/UsersAdmin";
 import ProjectsAdmin from "./pages/admin/ProjectsAdmin";
 import BlogAdmin from "./pages/admin/BlogAdmin";
-// import EmailTemplatesAdmin from "./pages/admin/EmailTemplatesAdmin";
-// import NewsletterAdmin from "./pages/admin/NewsletterAdmin";
-// import ContactAdmin from "./pages/admin/ContactAdmin";
+import EmailTemplatesAdmin from "./pages/admin/EmailTemplatesAdmin";
+import NewsletterAdmin from "./pages/admin/NewsletterAdmin";
+import ContactAdmin from "./pages/admin/ContactAdmin";
 // import AdminSettings from "./pages/admin/AdminSettings";
 
 // Layout components
@@ -100,7 +100,21 @@ const App = () => (
                   <BlogAdmin />
                 </AdminLayout>
               } />
-              {/* Additional admin routes would be updated similarly */}
+              <Route path="/admin/email-templates" element={
+                <AdminLayout>
+                  <EmailTemplatesAdmin />
+                </AdminLayout>
+              } />
+              <Route path="/admin/newsletter" element={
+                <AdminLayout>
+                  <NewsletterAdmin />
+                </AdminLayout>
+              } />
+              <Route path="/admin/contact" element={
+                <AdminLayout>
+                  <ContactAdmin />
+                </AdminLayout>
+              } />
             </Route>
 
             {/* Not found */}

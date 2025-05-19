@@ -7,16 +7,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface ContactPayload {
-  name: string;
-  email: string;
-  subject?: string;
-  message: string;
-  phone?: string;
-}
-
 serve(async (req) => {
-  // Handle CORS preflight
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -33,16 +25,17 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Parse request body
-    const contactData: ContactPayload = await req.json();
-    console.log("Received contact submission:", contactData);
+    const { name, email, subject, message } = await req.json();
+    console.log("Received contact submission:", { name, email, subject, message });
 
-    // Validate payload
-    const { name, email, subject = "Contact Form Submission", message, phone = "" } = contactData;
-    
-    if (!name || !email || !message) {
+    // Validate form data
+    if (!name || !email || !subject || !message) {
       console.error("Missing required fields");
       return new Response(
-        JSON.stringify({ success: false, error: "Missing required fields" }),
+        JSON.stringify({ 
+          success: false, 
+          error: "Please fill in all required fields." 
+        }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 400,
@@ -50,42 +43,47 @@ serve(async (req) => {
       );
     }
 
-    // Insert into database
+    // Insert contact submission into database
     console.log("Inserting contact submission into database...");
-    const { error: insertError } = await supabase
+    const { data, error } = await supabase
       .from("contact_submissions")
-      .insert({
-        name,
-        email,
-        message,
-        subject,
-        phone,
-      });
+      .insert([
+        { 
+          name,
+          email,
+          subject,
+          message,
+        }
+      ]);
 
-    if (insertError) {
-      console.error("Database error:", insertError);
-      throw new Error(`Database error: ${insertError.message}`);
+    if (error) {
+      console.error("Database error:", error);
+      throw new Error(`Database error: ${error.message}`);
     }
     
-    console.log("Contact submission saved successfully");
-
-    // Send confirmation email to user
+    // Try to send confirmation email to the user
     try {
-      // Prepare confirmation email
-      const confirmationHtml = `
+      console.log("Sending confirmation email...");
+      
+      // Prepare email content
+      const emailHtml = `
         <h1>Thank you for contacting us, ${name}!</h1>
-        <p>We have received your message regarding "${subject}" and will get back to you soon.</p>
+        <p>We have received your message regarding "${subject}" and will get back to you as soon as possible.</p>
         <p>Here's a copy of your message:</p>
-        <blockquote>${message}</blockquote>
+        <blockquote style="border-left: 2px solid #ccc; padding-left: 10px; margin-left: 10px;">
+          ${message.replace(/\n/g, "<br>")}
+        </blockquote>
         <p>Best regards,<br>The LynixDevs Team</p>
       `;
-
-      // Call the send-email function
+      
+      // Send email using the send-email function
       const emailResponse = await supabase.functions.invoke("send-email", {
         body: {
           to: email,
-          subject: "We've received your message - LynixDevs",
-          html: confirmationHtml,
+          subject: "We've received your message",
+          html: emailHtml,
+          replyTo: "info@lynixdevs.com",
+          name: name
         },
       });
 
@@ -95,39 +93,47 @@ serve(async (req) => {
       } else {
         console.log("Confirmation email sent successfully");
       }
+    } catch (emailError) {
+      console.error("Error in email sending process:", emailError);
+      // Continue execution - we've saved the contact form to database
+    }
 
-      // Notify admin about new contact submission
-      const adminHtml = `
+    // Also try to send notification email to admin
+    try {
+      console.log("Sending notification email to admin...");
+      
+      // Prepare admin notification email content
+      const adminEmailHtml = `
         <h1>New Contact Form Submission</h1>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+        <p><strong>From:</strong> ${name} (${email})</p>
         <p><strong>Subject:</strong> ${subject}</p>
         <p><strong>Message:</strong></p>
-        <blockquote>${message}</blockquote>
+        <blockquote style="border-left: 2px solid #ccc; padding-left: 10px; margin-left: 10px;">
+          ${message.replace(/\n/g, "<br>")}
+        </blockquote>
+        <p>You can reply directly to this email to respond to the customer.</p>
       `;
-
+      
+      // Send email to admin
       const adminEmailResponse = await supabase.functions.invoke("send-email", {
         body: {
-          to: "admin@lynixdevs.com", // Change to your admin email
+          to: "info@lynixdevs.com", // Admin email address
           subject: `New Contact: ${subject}`,
-          html: adminHtml,
+          html: adminEmailHtml,
           replyTo: email,
-          name: name,
+          name: name
         },
       });
 
       if (adminEmailResponse.error) {
         console.error("Error sending admin notification email:", adminEmailResponse.error);
-        // Continue execution - don't fail the request just because email failed
       } else {
         console.log("Admin notification email sent successfully");
       }
-    } catch (emailError) {
-      console.error("Error in email sending process:", emailError);
-      // Continue execution - we've saved the contact submission to database
+    } catch (adminEmailError) {
+      console.error("Error in admin email sending process:", adminEmailError);
     }
-    
+
     return new Response(
       JSON.stringify({ 
         success: true, 
@@ -144,7 +150,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message || "An error occurred while processing your request",
+        error: error.message || "An error occurred while processing your submission",
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
