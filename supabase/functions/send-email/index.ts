@@ -16,41 +16,39 @@ interface EmailPayload {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const payload: EmailPayload = await req.json();
-    const { to, subject, html, replyTo, name } = payload;
+    const payload = await req.json();
+    console.log("Email request received:", payload);
     
-    // Log the request for debugging
-    console.log("Email request received:", { to, subject, replyTo, name });
+    // Validate payload
+    if (!payload.to || !payload.subject || !payload.html) {
+      throw new Error("Missing required email fields");
+    }
 
-    // Get SMTP configuration from environment variables
+    const { to, subject, html, replyTo, name } = payload as EmailPayload;
+    
+    // Get SMTP configuration
     const smtpHost = Deno.env.get("SMTP_HOST");
     const smtpPort = Number(Deno.env.get("SMTP_PORT"));
     const smtpUser = Deno.env.get("SMTP_USER");
     const smtpPassword = Deno.env.get("SMTP_PASSWORD");
     const fromEmail = Deno.env.get("SMTP_FROM_EMAIL");
-
-    // Validate SMTP configuration
+    
     if (!smtpHost || !smtpPort || !smtpUser || !smtpPassword || !fromEmail) {
-      console.error("Missing SMTP configuration:", { 
-        host: !!smtpHost, 
-        port: !!smtpPort, 
-        user: !!smtpUser, 
-        password: !!smtpPassword,
-        fromEmail: !!fromEmail
-      });
-      throw new Error("SMTP configuration is incomplete");
+      console.error("Missing SMTP configuration");
+      throw new Error("Server configuration error: Missing SMTP settings");
     }
 
-    // Initialize SMTP client
+    // Create a new SMTP client
     const client = new SmtpClient();
     
     try {
+      console.log("Connecting to SMTP server...");
       await client.connect({
         hostname: smtpHost,
         port: smtpPort,
@@ -58,58 +56,53 @@ serve(async (req) => {
         password: smtpPassword,
         tls: true,
       });
+      console.log("Connected to SMTP server");
       
-      console.log("SMTP connection established successfully");
-    } catch (connError) {
-      console.error("SMTP connection error:", connError);
-      throw new Error(`Failed to connect to SMTP server: ${connError.message}`);
-    }
-
-    // Set up email data
-    const fromName = "LynixDevs";
-    
-    // Prepare email data
-    const sendConfig: any = {
-      from: `${fromName} <${fromEmail}>`,
-      to: to,
-      subject: subject,
-      content: html,
-      html: html,
-    };
-
-    // Add reply-to header if provided
-    if (replyTo && name) {
-      sendConfig.replyTo = `${name} <${replyTo}>`;
-    }
-
-    try {
-      console.log("Attempting to send email with config:", sendConfig);
+      const fromName = "LynixDevs";
+      
+      // Set up email data
+      const sendConfig: any = {
+        from: `${fromName} <${fromEmail}>`,
+        to: to,
+        subject: subject,
+        content: html,
+        html: html,
+      };
+      
+      // Add reply-to header if provided
+      if (replyTo && name) {
+        sendConfig.replyTo = `${name} <${replyTo}>`;
+      }
+      
+      console.log("Sending email...");
       await client.send(sendConfig);
-      console.log("Email sent successfully to:", to);
-    } catch (sendError) {
-      console.error("Email sending error:", sendError);
-      throw new Error(`Failed to send email: ${sendError.message}`);
-    } finally {
+      console.log("Email sent");
+      
+      await client.close();
+      console.log("SMTP connection closed");
+      
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    } catch (error) {
+      console.error("Error in email sending process:", error);
+      // Ensure client is closed even if an error occurs
       try {
         await client.close();
-        console.log("SMTP connection closed");
+        console.log("SMTP connection closed after error");
       } catch (closeError) {
         console.error("Error closing SMTP connection:", closeError);
       }
+      throw error;
     }
-
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
-
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error("Failed to send email:", error);
     
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message,
+        error: error.message || "Unknown error occurred",
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

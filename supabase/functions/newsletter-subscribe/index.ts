@@ -18,11 +18,10 @@ serve(async (req) => {
   }
 
   try {
-    // Get Supabase configuration from environment
+    // Get Supabase configuration
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY");
     
-    // Validate Supabase configuration
     if (!supabaseUrl || !supabaseKey) {
       throw new Error("Missing Supabase configuration");
     }
@@ -44,7 +43,8 @@ serve(async (req) => {
       );
     }
 
-    // Check if email already exists
+    // Check if already subscribed
+    console.log("Checking if email is already subscribed...");
     const { data: existingSubscriber, error: selectError } = await supabase
       .from("subscribers")
       .select("*")
@@ -58,42 +58,7 @@ serve(async (req) => {
 
     if (existingSubscriber) {
       console.log("Email already subscribed:", email);
-      // Already subscribed - send confirmation anyway
-      try {
-        // Call the send-email function
-        const emailResponse = await fetch(
-          `${supabaseUrl}/functions/v1/send-email`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${supabaseKey}`,
-            },
-            body: JSON.stringify({
-              to: email,
-              subject: "Newsletter Subscription Confirmed",
-              html: `
-                <h1>You're Already Subscribed!</h1>
-                <p>Thanks for your continued interest in LynixDevs! You're already subscribed to our newsletter.</p>
-                <p>We'll keep you updated with our latest news, insights and offers.</p>
-                <p>Best regards,<br>The LynixDevs Team</p>
-              `,
-            }),
-          }
-        );
-
-        if (!emailResponse.ok) {
-          const errorData = await emailResponse.text();
-          console.error("Error sending confirmation email:", errorData);
-          // Continue execution even if email fails
-        } else {
-          console.log("Already subscribed email sent successfully");
-        }
-      } catch (emailError) {
-        console.error("Error sending already subscribed email:", emailError);
-        // Continue execution even if email fails
-      }
-
+      
       return new Response(
         JSON.stringify({ success: true, message: "Already subscribed" }),
         {
@@ -104,6 +69,7 @@ serve(async (req) => {
     }
 
     // Insert new subscriber
+    console.log("Adding new subscriber to database...");
     const { error: insertError } = await supabase
       .from("subscribers")
       .insert({ email });
@@ -113,47 +79,15 @@ serve(async (req) => {
       throw new Error(`Database error: ${insertError.message}`);
     }
 
-    console.log("New subscriber added to database:", email);
-
-    // Send welcome email
-    try {
-      const emailResponse = await fetch(
-        `${supabaseUrl}/functions/v1/send-email`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${supabaseKey}`,
-          },
-          body: JSON.stringify({
-            to: email,
-            subject: "Welcome to LynixDevs Newsletter",
-            html: `
-              <h1>Thanks for Subscribing!</h1>
-              <p>Welcome to the LynixDevs newsletter! You've successfully subscribed to our updates.</p>
-              <p>We're excited to share our latest news, insights and offers with you.</p>
-              <p>Best regards,<br>The LynixDevs Team</p>
-            `,
-          }),
-        }
-      );
-
-      const responseText = await emailResponse.text();
-      if (!emailResponse.ok) {
-        console.error("Error sending welcome email. Status:", emailResponse.status, "Response:", responseText);
-        // Continue execution even if welcome email fails
-      } else {
-        console.log("Welcome email sent successfully");
-      }
-    } catch (emailError) {
-      console.error("Error sending welcome email:", emailError);
-      // Continue execution even if welcome email fails
-    }
-
+    console.log("New subscriber added successfully");
+    
+    // Don't send welcome email for now to isolate potential issues
+    console.log("Bypassing email sending to diagnose issues");
+    
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "Successfully subscribed and welcome email sent" 
+        message: "Successfully subscribed" 
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
