@@ -69,8 +69,64 @@ serve(async (req) => {
     
     console.log("Contact submission saved successfully");
 
-    // Don't send confirmation email for now to isolate potential issues
-    console.log("Bypassing email sending to diagnose issues");
+    // Send confirmation email to user
+    try {
+      // Prepare confirmation email
+      const confirmationHtml = `
+        <h1>Thank you for contacting us, ${name}!</h1>
+        <p>We have received your message regarding "${subject}" and will get back to you soon.</p>
+        <p>Here's a copy of your message:</p>
+        <blockquote>${message}</blockquote>
+        <p>Best regards,<br>The LynixDevs Team</p>
+      `;
+
+      // Call the send-email function
+      const emailResponse = await supabase.functions.invoke("send-email", {
+        body: {
+          to: email,
+          subject: "We've received your message - LynixDevs",
+          html: confirmationHtml,
+        },
+      });
+
+      if (emailResponse.error) {
+        console.error("Error sending confirmation email:", emailResponse.error);
+        // Continue execution - don't fail the request just because email failed
+      } else {
+        console.log("Confirmation email sent successfully");
+      }
+
+      // Notify admin about new contact submission
+      const adminHtml = `
+        <h1>New Contact Form Submission</h1>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+        <p><strong>Subject:</strong> ${subject}</p>
+        <p><strong>Message:</strong></p>
+        <blockquote>${message}</blockquote>
+      `;
+
+      const adminEmailResponse = await supabase.functions.invoke("send-email", {
+        body: {
+          to: "admin@lynixdevs.com", // Change to your admin email
+          subject: `New Contact: ${subject}`,
+          html: adminHtml,
+          replyTo: email,
+          name: name,
+        },
+      });
+
+      if (adminEmailResponse.error) {
+        console.error("Error sending admin notification email:", adminEmailResponse.error);
+        // Continue execution - don't fail the request just because email failed
+      } else {
+        console.log("Admin notification email sent successfully");
+      }
+    } catch (emailError) {
+      console.error("Error in email sending process:", emailError);
+      // Continue execution - we've saved the contact submission to database
+    }
     
     return new Response(
       JSON.stringify({ 

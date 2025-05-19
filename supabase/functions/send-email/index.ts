@@ -1,6 +1,5 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -32,70 +31,63 @@ serve(async (req) => {
 
     const { to, subject, html, replyTo, name } = payload as EmailPayload;
     
-    // Get SMTP configuration
-    const smtpHost = Deno.env.get("SMTP_HOST");
-    const smtpPort = Number(Deno.env.get("SMTP_PORT"));
-    const smtpUser = Deno.env.get("SMTP_USER");
-    const smtpPassword = Deno.env.get("SMTP_PASSWORD");
-    const fromEmail = Deno.env.get("SMTP_FROM_EMAIL");
+    // Get Brevo API configuration
+    const brevoApiKey = Deno.env.get("BREVO_API_KEY");
     
-    if (!smtpHost || !smtpPort || !smtpUser || !smtpPassword || !fromEmail) {
-      console.error("Missing SMTP configuration");
-      throw new Error("Server configuration error: Missing SMTP settings");
+    if (!brevoApiKey) {
+      console.error("Missing Brevo API key");
+      throw new Error("Server configuration error: Missing Brevo API key");
     }
 
-    // Create a new SMTP client
-    const client = new SmtpClient();
+    // Prepare the email data for Brevo API
+    const brevoPayload = {
+      sender: {
+        name: "LynixDevs",
+        email: "noreply@lynixdevs.com",
+      },
+      to: [
+        {
+          email: to,
+          name: name || to,
+        },
+      ],
+      subject: subject,
+      htmlContent: html,
+    };
     
-    try {
-      console.log("Connecting to SMTP server...");
-      await client.connect({
-        hostname: smtpHost,
-        port: smtpPort,
-        username: smtpUser,
-        password: smtpPassword,
-        tls: true,
-      });
-      console.log("Connected to SMTP server");
-      
-      const fromName = "LynixDevs";
-      
-      // Set up email data
-      const sendConfig: any = {
-        from: `${fromName} <${fromEmail}>`,
-        to: to,
-        subject: subject,
-        content: html,
-        html: html,
+    // Add reply-to header if provided
+    if (replyTo) {
+      brevoPayload.replyTo = {
+        email: replyTo,
+        name: name || replyTo,
       };
-      
-      // Add reply-to header if provided
-      if (replyTo && name) {
-        sendConfig.replyTo = `${name} <${replyTo}>`;
-      }
-      
-      console.log("Sending email...");
-      await client.send(sendConfig);
-      console.log("Email sent");
-      
-      await client.close();
-      console.log("SMTP connection closed");
-      
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
-    } catch (error) {
-      console.error("Error in email sending process:", error);
-      // Ensure client is closed even if an error occurs
-      try {
-        await client.close();
-        console.log("SMTP connection closed after error");
-      } catch (closeError) {
-        console.error("Error closing SMTP connection:", closeError);
-      }
-      throw error;
     }
+    
+    console.log("Sending email via Brevo API...");
+    
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "api-key": brevoApiKey,
+      },
+      body: JSON.stringify(brevoPayload),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error("Brevo API error:", response.status, errorData);
+      throw new Error(`Failed to send email: ${response.status} ${errorData}`);
+    }
+    
+    const result = await response.json();
+    console.log("Email sent successfully via Brevo API:", result);
+    
+    return new Response(JSON.stringify({ success: true, messageId: result.messageId }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
   } catch (error) {
     console.error("Failed to send email:", error);
     
