@@ -28,16 +28,35 @@ serve(async (req) => {
     // Log the request for debugging
     console.log("Email request received:", { to, subject, replyTo, name });
 
-    // Configure SMTP client
+    // Get SMTP configuration from environment variables
+    const smtpHost = Deno.env.get("SMTP_HOST");
+    const smtpPort = Number(Deno.env.get("SMTP_PORT"));
+    const smtpUser = Deno.env.get("SMTP_USER");
+    const smtpPassword = Deno.env.get("SMTP_PASSWORD");
+    const fromEmail = Deno.env.get("SMTP_FROM_EMAIL");
+
+    // Validate SMTP configuration
+    if (!smtpHost || !smtpPort || !smtpUser || !smtpPassword || !fromEmail) {
+      console.error("Missing SMTP configuration:", { 
+        host: !!smtpHost, 
+        port: !!smtpPort, 
+        user: !!smtpUser, 
+        password: !!smtpPassword,
+        fromEmail: !!fromEmail
+      });
+      throw new Error("SMTP configuration is incomplete");
+    }
+
+    // Initialize SMTP client
     const client = new SmtpClient();
     
     try {
       await client.connect({
-        hostname: Deno.env.get("SMTP_HOST") || "",
-        port: Number(Deno.env.get("SMTP_PORT")) || 587,
+        hostname: smtpHost,
+        port: smtpPort,
+        username: smtpUser,
+        password: smtpPassword,
         tls: true,
-        username: Deno.env.get("SMTP_USER") || "",
-        password: Deno.env.get("SMTP_PASSWORD") || "",
       });
       
       console.log("SMTP connection established successfully");
@@ -47,11 +66,10 @@ serve(async (req) => {
     }
 
     // Set up email data
-    const fromEmail = Deno.env.get("SMTP_FROM_EMAIL") || "noreply@example.com";
     const fromName = "LynixDevs";
     
-    // Send email
-    const sendConfig = {
+    // Prepare email data
+    const sendConfig: any = {
       from: `${fromName} <${fromEmail}>`,
       to: to,
       subject: subject,
@@ -72,7 +90,12 @@ serve(async (req) => {
       console.error("Email sending error:", sendError);
       throw new Error(`Failed to send email: ${sendError.message}`);
     } finally {
-      await client.close();
+      try {
+        await client.close();
+        console.log("SMTP connection closed");
+      } catch (closeError) {
+        console.error("Error closing SMTP connection:", closeError);
+      }
     }
 
     return new Response(JSON.stringify({ success: true }), {

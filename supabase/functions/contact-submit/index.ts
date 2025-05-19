@@ -22,8 +22,15 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+    // Get Supabase configuration from environment
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY");
+    
+    // Validate Supabase configuration
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error("Missing Supabase configuration");
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Parse request body
@@ -81,9 +88,9 @@ serve(async (req) => {
         }
       );
 
+      const responseText = await emailResponse.text();
       if (!emailResponse.ok) {
-        const errorData = await emailResponse.text();
-        console.error("Error sending confirmation email:", errorData);
+        console.error("Error sending confirmation email. Status:", emailResponse.status, "Response:", responseText);
         // Continue execution even if confirmation email fails
       } else {
         console.log("Confirmation email sent successfully");
@@ -121,9 +128,9 @@ serve(async (req) => {
         }
       );
 
+      const adminResponseText = await adminEmailResponse.text();
       if (!adminEmailResponse.ok) {
-        const errorData = await adminEmailResponse.text();
-        console.error("Error sending admin notification:", errorData);
+        console.error("Error sending admin notification. Status:", adminEmailResponse.status, "Response:", adminResponseText);
         // Continue execution even if admin email fails
       } else {
         console.log("Admin notification email sent successfully");

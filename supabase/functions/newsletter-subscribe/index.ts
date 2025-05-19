@@ -18,8 +18,15 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+    // Get Supabase configuration from environment
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY");
+    
+    // Validate Supabase configuration
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error("Missing Supabase configuration");
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Parse request body
@@ -131,9 +138,9 @@ serve(async (req) => {
         }
       );
 
+      const responseText = await emailResponse.text();
       if (!emailResponse.ok) {
-        const errorData = await emailResponse.text();
-        console.error("Error sending welcome email:", errorData);
+        console.error("Error sending welcome email. Status:", emailResponse.status, "Response:", responseText);
         // Continue execution even if welcome email fails
       } else {
         console.log("Welcome email sent successfully");
