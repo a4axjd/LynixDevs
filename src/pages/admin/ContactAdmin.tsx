@@ -29,10 +29,11 @@ interface ContactSubmission {
   id: string;
   name: string;
   email: string;
-  subject: string;
+  subject?: string; // Changed to optional to match database structure
   message: string;
   created_at: string;
   read: boolean;
+  updated_at: string;
 }
 
 const ContactAdmin = () => {
@@ -123,7 +124,7 @@ const ContactAdmin = () => {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Subject</TableHead>
+                    <TableHead>{submissions[0]?.subject ? 'Subject' : 'Date'}</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -134,7 +135,7 @@ const ContactAdmin = () => {
                     <TableRow key={submission.id} className={!submission.read ? "bg-muted/30" : ""}>
                       <TableCell className="font-medium">{submission.name}</TableCell>
                       <TableCell>{submission.email}</TableCell>
-                      <TableCell>{submission.subject}</TableCell>
+                      <TableCell>{submission.subject || '-'}</TableCell>
                       <TableCell>{format(new Date(submission.created_at), "PPP")}</TableCell>
                       <TableCell>
                         <Badge variant={submission.read ? "outline" : "default"}>
@@ -169,10 +170,12 @@ const ContactAdmin = () => {
                                     <p className="text-sm text-muted-foreground">{selectedSubmission?.email}</p>
                                   </div>
                                 </div>
-                                <div>
-                                  <h4 className="text-sm font-medium">Subject</h4>
-                                  <p className="text-sm text-muted-foreground">{selectedSubmission?.subject}</p>
-                                </div>
+                                {selectedSubmission?.subject && (
+                                  <div>
+                                    <h4 className="text-sm font-medium">Subject</h4>
+                                    <p className="text-sm text-muted-foreground">{selectedSubmission?.subject}</p>
+                                  </div>
+                                )}
                                 <div>
                                   <h4 className="text-sm font-medium">Message</h4>
                                   <div className="rounded-md bg-muted p-4 mt-2">

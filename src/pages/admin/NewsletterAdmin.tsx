@@ -44,10 +44,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 interface Subscriber {
   id: string;
   email: string;
-  first_name: string;
-  last_name: string;
-  subscribed_at: string;
-  status: string;
+  first_name: string | null;
+  last_name: string | null;
+  created_at: string; // Changed to match actual database structure
+  updated_at: string;
   subscribed: boolean;
 }
 
@@ -277,7 +277,7 @@ const NewsletterAdmin = () => {
           sub.email, 
           sub.first_name || "", 
           sub.last_name || "", 
-          new Date(sub.subscribed_at || sub.created_at).toISOString()
+          new Date(sub.created_at).toISOString()
         ].join(",")
       )
     ].join("\n");
@@ -370,7 +370,7 @@ const NewsletterAdmin = () => {
                               .join(" ") || "-"}
                           </TableCell>
                           <TableCell>
-                            {format(new Date(subscriber.subscribed_at || subscriber.created_at), "PPP")}
+                            {format(new Date(subscriber.created_at), "PPP")}
                           </TableCell>
                           <TableCell>
                             <Badge variant={subscriber.subscribed ? "default" : "outline"}>
