@@ -22,8 +22,17 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { Eye, Loader2, Mail, CheckCircle } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Eye, Loader2, Mail, CheckCircle, Reply } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 interface ContactSubmission {
   id: string;
@@ -36,10 +45,23 @@ interface ContactSubmission {
   updated_at: string;
 }
 
+interface EmailTemplate {
+  id: string;
+  name: string;
+  subject: string;
+  content: string;
+}
+
 const ContactAdmin = () => {
   const { toast } = useToast();
   const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
+  const [showReplyDialog, setShowReplyDialog] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
+  const [replyMessage, setReplyMessage] = useState<string>("");
+  const [replySubject, setReplySubject] = useState<string>("");
+  const [isReplying, setIsReplying] = useState(false);
   
+  // Fetch contact submissions
   const { data: submissions, isLoading, error, refetch } = useQuery({
     queryKey: ["contactSubmissions"],
     queryFn: async () => {
@@ -50,6 +72,20 @@ const ContactAdmin = () => {
       
       if (error) throw new Error(error.message);
       return data as ContactSubmission[];
+    },
+  });
+
+  // Fetch email templates
+  const { data: emailTemplates, isLoading: isLoadingTemplates } = useQuery({
+    queryKey: ["emailTemplates"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("email_templates")
+        .select("id, name, subject, content")
+        .order("name", { ascending: true });
+      
+      if (error) throw new Error(error.message);
+      return data as EmailTemplate[];
     },
   });
 
@@ -77,16 +113,92 @@ const ContactAdmin = () => {
     }
   };
 
-  const handleSendReply = async (email: string) => {
+  const handleOpenReplyDialog = (submission: ContactSubmission) => {
+    setSelectedSubmission(submission);
+    setReplySubject(submission.subject ? `Re: ${submission.subject}` : "Re: Your contact submission");
+    setShowReplyDialog(true);
+  };
+
+  const handleTemplateChange = (templateId: string) => {
+    setSelectedTemplateId(templateId);
+    
+    if (!templateId) {
+      setReplyMessage("");
+      return;
+    }
+    
+    const template = emailTemplates?.find((t) => t.id === templateId);
+    if (template) {
+      let content = template.content;
+      
+      // Replace placeholder variables if they exist in the template
+      if (selectedSubmission) {
+        content = content
+          .replace(/\{name\}/g, selectedSubmission.name)
+          .replace(/\{email\}/g, selectedSubmission.email)
+          .replace(/\{message\}/g, selectedSubmission.message);
+      }
+      
+      setReplyMessage(content);
+      setReplySubject(template.subject);
+    }
+  };
+
+  const handleSendReply = async () => {
+    if (!selectedSubmission || !replyMessage || !replySubject) {
+      toast({
+        title: "Required fields missing",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      // Redirect to a new email composition with the recipient's email
-      window.location.href = `mailto:${email}`;
+      setIsReplying(true);
+      
+      // Send email via edge function
+      const response = await fetch("/api/functions/v1/send-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to: selectedSubmission.email,
+          subject: replySubject,
+          html: replyMessage,
+          replyTo: "info@lynixdevs.com",
+          name: selectedSubmission.name
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to send email");
+      }
+
+      // Update submission as read if not already
+      if (!selectedSubmission.read) {
+        await handleMarkAsRead(selectedSubmission.id);
+      }
+      
+      toast({
+        title: "Reply sent",
+        description: `Your reply has been sent to ${selectedSubmission.name}.`,
+      });
+      
+      setShowReplyDialog(false);
+      setReplyMessage("");
+      setReplySubject("");
+      setSelectedTemplateId("");
     } catch (error) {
       toast({
-        title: "Error",
+        title: "Error sending reply",
         description: error.message || "An error occurred",
         variant: "destructive",
       });
+    } finally {
+      setIsReplying(false);
     }
   };
 
@@ -185,7 +297,15 @@ const ContactAdmin = () => {
                                 <div className="flex gap-2 mt-4">
                                   <Button 
                                     variant="default" 
-                                    onClick={() => handleSendReply(selectedSubmission?.email || "")}
+                                    onClick={() => handleOpenReplyDialog(selectedSubmission!)}
+                                  >
+                                    <Reply className="h-4 w-4 mr-2" />
+                                    Reply with Template
+                                  </Button>
+                                  
+                                  <Button 
+                                    variant="outline" 
+                                    onClick={() => window.location.href = `mailto:${selectedSubmission?.email}`}
                                   >
                                     <Mail className="h-4 w-4 mr-2" />
                                     Reply via Email
@@ -208,9 +328,9 @@ const ContactAdmin = () => {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => handleSendReply(submission.email)}
+                            onClick={() => handleOpenReplyDialog(submission)}
                           >
-                            <Mail className="h-4 w-4 mr-1" />
+                            <Reply className="h-4 w-4 mr-1" />
                             Reply
                           </Button>
                           
@@ -234,6 +354,92 @@ const ContactAdmin = () => {
           )}
         </CardContent>
       </Card>
+      
+      {/* Email Reply Dialog */}
+      <Dialog open={showReplyDialog} onOpenChange={setShowReplyDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Reply to {selectedSubmission?.name}</DialogTitle>
+            <DialogDescription>
+              Use an email template or write a custom reply
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="grid gap-4">
+              <div>
+                <Label htmlFor="template">Email Template</Label>
+                <Select 
+                  value={selectedTemplateId} 
+                  onValueChange={handleTemplateChange}
+                >
+                  <SelectTrigger id="template">
+                    <SelectValue placeholder="Select a template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No template (custom reply)</SelectItem>
+                    {emailTemplates?.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="subject">Subject</Label>
+                <Textarea 
+                  id="subject" 
+                  placeholder="Enter email subject" 
+                  className="min-h-[44px] resize-none"
+                  value={replySubject}
+                  onChange={(e) => setReplySubject(e.target.value)}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="message">Message</Label>
+                <Textarea 
+                  id="message" 
+                  placeholder="Enter your reply message" 
+                  className="min-h-[200px]"
+                  value={replyMessage}
+                  onChange={(e) => setReplyMessage(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  HTML formatting is supported. You can use {"{name}"}, {"{email}"}, and {"{message}"} as placeholders.
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowReplyDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSendReply} 
+              disabled={isReplying || !replyMessage || !replySubject}
+            >
+              {isReplying ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Mail className="h-4 w-4 mr-2" />
+                  Send Reply
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
