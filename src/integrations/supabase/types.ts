@@ -109,6 +109,7 @@ export type Database = {
           message: string
           name: string
           read: boolean | null
+          subject: string | null
           updated_at: string
         }
         Insert: {
@@ -118,6 +119,7 @@ export type Database = {
           message: string
           name: string
           read?: boolean | null
+          subject?: string | null
           updated_at?: string
         }
         Update: {
@@ -127,6 +129,7 @@ export type Database = {
           message?: string
           name?: string
           read?: boolean | null
+          subject?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -364,6 +367,7 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
+          status: string | null
           subscribed: boolean | null
           updated_at: string
         }
@@ -373,6 +377,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          status?: string | null
           subscribed?: boolean | null
           updated_at?: string
         }
@@ -382,6 +387,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          status?: string | null
           subscribed?: boolean | null
           updated_at?: string
         }

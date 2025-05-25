@@ -13,7 +13,7 @@ const createEmailTransporter = () => {
 
   // Gmail SMTP configuration
   if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
-    return nodemailer.createTransporter({
+    return nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: process.env.GMAIL_USER,
