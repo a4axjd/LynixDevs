@@ -51,6 +51,15 @@ router.post('/subscribe', async (req, res) => {
       }]);
 
     if (insertError) {
+      // Check if it's a duplicate key error
+      if (insertError.code === '23505') {
+        console.log('Email already exists (caught duplicate key error)');
+        return res.json({
+          success: true,
+          message: "You're already subscribed to our newsletter!"
+        });
+      }
+      
       console.error('Error inserting new subscriber:', insertError);
       throw new Error(`Database error: ${insertError.message}`);
     }
