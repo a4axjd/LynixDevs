@@ -33,15 +33,15 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen w-full">
       {/* Hero Section */}
-      <section className="section-padding bg-gradient-to-br from-primary/10 via-background to-secondary/10">
-        <div className="container-custom">
+      <section className="w-full bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-20 md:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="heading-1 mb-6 bg-gradient-to-r from-primary to-lynix-purple bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-lynix-purple bg-clip-text text-transparent">
               LynixDevs Digital Agency
             </h1>
-            <p className="body-text text-muted-foreground mb-8 max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               We specialize in creating exceptional digital experiences through web development, 
               UI/UX design, and strategic digital marketing solutions.
             </p>
@@ -61,11 +61,11 @@ const Index = () => {
       </section>
 
       {/* Services Section */}
-      <section className="section-padding">
-        <div className="container-custom">
+      <section className="w-full py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="heading-2 mb-4">Our Services</h2>
-            <p className="body-text text-muted-foreground max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Services</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               We offer comprehensive digital solutions to help your business thrive online
             </p>
           </div>
@@ -90,12 +90,12 @@ const Index = () => {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="section-padding bg-gray-50">
-        <div className="container-custom">
+      <section className="w-full py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="heading-2 mb-6">Why Choose LynixDevs?</h2>
-              <p className="body-text text-muted-foreground mb-8">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">Why Choose LynixDevs?</h2>
+              <p className="text-lg text-muted-foreground mb-8">
                 We combine creativity with technical expertise to deliver solutions that 
                 drive results for your business.
               </p>
@@ -128,11 +128,11 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="section-padding">
-        <div className="container-custom">
+      <section className="w-full py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
-            <h2 className="heading-2 mb-4">Ready to Start Your Project?</h2>
-            <p className="body-text text-muted-foreground mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Start Your Project?</h2>
+            <p className="text-lg text-muted-foreground mb-8">
               Let's discuss how we can help bring your vision to life with our expertise 
               in web development and digital solutions.
             </p>
