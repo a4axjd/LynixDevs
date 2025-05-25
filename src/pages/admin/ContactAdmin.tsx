@@ -38,7 +38,7 @@ interface ContactSubmission {
   id: string;
   name: string;
   email: string;
-  subject?: string; // Changed to optional to match database structure
+  subject?: string;
   message: string;
   created_at: string;
   read: boolean;
@@ -157,8 +157,8 @@ const ContactAdmin = () => {
     try {
       setIsReplying(true);
       
-      // Send email via edge function
-      const response = await fetch("/api/functions/v1/send-email", {
+      // Send email via Express server
+      const response = await fetch("http://localhost:3001/api/email/send", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

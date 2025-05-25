@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Mail, Phone, MapPin, Instagram, Twitter, Linkedin, Facebook } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 const Footer = () => {
   const year = new Date().getFullYear();
@@ -28,17 +27,24 @@ const Footer = () => {
     try {
       setIsSubmitting(true);
 
-      const { data, error } = await supabase.functions.invoke("newsletter-subscribe", {
-        body: { email },
+      const response = await fetch("http://localhost:3001/api/newsletter/subscribe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
       });
-      
-      if (error) {
-        throw new Error(error.message);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to subscribe");
       }
+
+      const data = await response.json();
       
       toast({
         title: "Subscription successful!",
-        description: "Thank you for subscribing to our newsletter.",
+        description: data.message || "Thank you for subscribing to our newsletter.",
       });
       
       setEmail("");

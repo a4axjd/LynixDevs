@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Mail, Phone, MapPin, Clock, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -40,13 +39,20 @@ const Contact = () => {
     try {
       setIsSubmitting(true);
 
-      const { data, error } = await supabase.functions.invoke("contact-submit", {
-        body: formData,
+      const response = await fetch("http://localhost:3001/api/contact/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       });
-      
-      if (error) {
-        throw new Error(error.message);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to submit contact form");
       }
+
+      const data = await response.json();
       
       // Reset form
       setFormData({
@@ -59,7 +65,7 @@ const Contact = () => {
       
       toast({
         title: "Message sent successfully!",
-        description: "Thank you for contacting us. We'll get back to you soon.",
+        description: data.message || "Thank you for contacting us. We'll get back to you soon.",
       });
     } catch (error) {
       toast({
