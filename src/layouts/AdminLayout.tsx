@@ -9,7 +9,8 @@ import {
   Mail, 
   Send, 
   MessageSquare,
-  Settings
+  Settings,
+  UserCog
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,11 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       title: "Projects",
       href: "/admin/projects",
       icon: FolderKanban,
+    },
+    {
+      title: "Client Projects",
+      href: "/admin/client-projects",
+      icon: UserCog,
     },
     {
       title: "Blog Posts",
