@@ -62,7 +62,6 @@ interface ClientProject {
   };
   profiles: {
     full_name: string | null;
-    email: string;
   };
 }
 
@@ -75,7 +74,6 @@ interface Project {
 interface User {
   id: string;
   full_name: string | null;
-  email: string;
 }
 
 const clientProjectFormSchema = z.object({
@@ -278,11 +276,11 @@ const ClientProjectsAdmin = () => {
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case "completed":
-        return "success";
+        return "default";
       case "in_progress":
         return "default";
       case "on_hold":
-        return "warning";
+        return "secondary";
       case "cancelled":
         return "destructive";
       default:

@@ -1,129 +1,111 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import NotFound from "./pages/NotFound";
-import { AuthProvider } from "./contexts/AuthContext";
-import RouteGuard from "./components/RouteGuard";
+import { Toaster } from "@/components/ui/toaster";
+import { AuthProvider } from "@/contexts/AuthContext";
+import RouteGuard from "@/components/RouteGuard";
+import MainLayout from "@/layouts/MainLayout";
+import AdminLayout from "@/layouts/AdminLayout";
 
-// Auth pages
-import Auth from "./pages/Auth";
-import AuthCallback from "./pages/AuthCallback";
-
-// Public pages
-import Home from "./pages/Home";
-import About from "./pages/About";
-import Services from "./pages/Services";
-import Portfolio from "./pages/Portfolio";
-import ProjectDetail from "./pages/ProjectDetail";
-import Blog from "./pages/Blog";
-import BlogDetail from "./pages/BlogDetail";
-import Contact from "./pages/Contact";
-import Testimonials from "./pages/Testimonials";
-
-// Protected pages
-import Dashboard from "./pages/Dashboard";
-import AdminDashboard from "./pages/AdminDashboard";
-import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
+// Import pages
+import Index from "@/pages/Index";
+import Home from "@/pages/Home";
+import About from "@/pages/About";
+import Services from "@/pages/Services";
+import Portfolio from "@/pages/Portfolio";
+import ProjectDetail from "@/pages/ProjectDetail";
+import Blog from "@/pages/Blog";
+import BlogDetail from "@/pages/BlogDetail";
+import Contact from "@/pages/Contact";
+import Auth from "@/pages/Auth";
+import AuthCallback from "@/pages/AuthCallback";
+import Dashboard from "@/pages/Dashboard";
+import ClientProjectDashboard from "@/pages/ClientProjectDashboard";
+import Profile from "@/pages/Profile";
+import Settings from "@/pages/Settings";
+import Testimonials from "@/pages/Testimonials";
+import NotFound from "@/pages/NotFound";
 
 // Admin pages
-import UsersAdmin from "./pages/admin/UsersAdmin";
-import ProjectsAdmin from "./pages/admin/ProjectsAdmin";
-import BlogAdmin from "./pages/admin/BlogAdmin";
-import EmailTemplatesAdmin from "./pages/admin/EmailTemplatesAdmin";
-import NewsletterAdmin from "./pages/admin/NewsletterAdmin";
-import ContactAdmin from "./pages/admin/ContactAdmin";
-// import AdminSettings from "./pages/admin/AdminSettings";
+import AdminDashboard from "@/pages/AdminDashboard";
+import UsersAdmin from "@/pages/admin/UsersAdmin";
+import ProjectsAdmin from "@/pages/admin/ProjectsAdmin";
+import ClientProjectsAdmin from "@/pages/admin/ClientProjectsAdmin";
+import BlogAdmin from "@/pages/admin/BlogAdmin";
+import EmailTemplatesAdmin from "@/pages/admin/EmailTemplatesAdmin";
+import NewsletterAdmin from "@/pages/admin/NewsletterAdmin";
+import ContactAdmin from "@/pages/admin/ContactAdmin";
 
-// Layout components
-import MainLayout from "./layouts/MainLayout";
-import AdminLayout from "./layouts/AdminLayout";
+import "./App.css";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Router>
           <Routes>
             {/* Public routes */}
-            <Route element={<MainLayout />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/portfolio" element={<Portfolio />} />
-              <Route path="/portfolio/:id" element={<ProjectDetail />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<BlogDetail />} />
-              <Route path="/testimonials" element={<Testimonials />} />
-              <Route path="/contact" element={<Contact />} />
+            <Route path="/" element={<MainLayout />}>
+              <Route index element={<Index />} />
+              <Route path="home" element={<Home />} />
+              <Route path="about" element={<About />} />
+              <Route path="services" element={<Services />} />
+              <Route path="portfolio" element={<Portfolio />} />
+              <Route path="portfolio/:id" element={<ProjectDetail />} />
+              <Route path="blog" element={<Blog />} />
+              <Route path="blog/:slug" element={<BlogDetail />} />
+              <Route path="contact" element={<Contact />} />
+              <Route path="testimonials" element={<Testimonials />} />
             </Route>
 
             {/* Auth routes */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
 
-            {/* User protected routes */}
-            <Route element={<RouteGuard />}>
-              <Route element={<MainLayout />}>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/settings" element={<Settings />} />
-              </Route>
+            {/* Protected user routes */}
+            <Route
+              path="/dashboard"
+              element={
+                <RouteGuard>
+                  <MainLayout />
+                </RouteGuard>
+              }
+            >
+              <Route index element={<Dashboard />} />
+              <Route path="projects" element={<ClientProjectDashboard />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="settings" element={<Settings />} />
             </Route>
 
-            {/* Admin protected routes */}
-            <Route element={<RouteGuard requiredRole="admin" />}>
-              <Route path="/admin" element={
-                <AdminLayout>
-                  <AdminDashboard />
-                </AdminLayout>
-              } />
-              <Route path="/admin/users" element={
-                <AdminLayout>
-                  <UsersAdmin />
-                </AdminLayout>
-              } />
-              <Route path="/admin/projects" element={
-                <AdminLayout>
-                  <ProjectsAdmin />
-                </AdminLayout>
-              } />
-              <Route path="/admin/blog" element={
-                <AdminLayout>
-                  <BlogAdmin />
-                </AdminLayout>
-              } />
-              <Route path="/admin/email-templates" element={
-                <AdminLayout>
-                  <EmailTemplatesAdmin />
-                </AdminLayout>
-              } />
-              <Route path="/admin/newsletter" element={
-                <AdminLayout>
-                  <NewsletterAdmin />
-                </AdminLayout>
-              } />
-              <Route path="/admin/contact" element={
-                <AdminLayout>
-                  <ContactAdmin />
-                </AdminLayout>
-              } />
+            {/* Protected admin routes */}
+            <Route
+              path="/admin"
+              element={
+                <RouteGuard requireAdmin>
+                  <AdminLayout />
+                </RouteGuard>
+              }
+            >
+              <Route index element={<AdminDashboard />} />
+              <Route path="users" element={<UsersAdmin />} />
+              <Route path="projects" element={<ProjectsAdmin />} />
+              <Route path="client-projects" element={<ClientProjectsAdmin />} />
+              <Route path="blog" element={<BlogAdmin />} />
+              <Route path="email-templates" element={<EmailTemplatesAdmin />} />
+              <Route path="newsletter" element={<NewsletterAdmin />} />
+              <Route path="contact" element={<ContactAdmin />} />
             </Route>
 
-            {/* Not found */}
+            {/* 404 route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+          <Toaster />
+        </Router>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

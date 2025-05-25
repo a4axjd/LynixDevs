@@ -113,11 +113,11 @@ const ClientProjectDashboard = () => {
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case "completed":
-        return "success";
+        return "default";
       case "in_progress":
         return "default";
       case "on_hold":
-        return "warning";
+        return "secondary";
       case "cancelled":
         return "destructive";
       default:

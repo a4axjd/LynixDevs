@@ -1,217 +1,144 @@
 
 import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { cn } from "@/lib/utils";
-import UserMenu from "./UserMenu";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import UserMenu from "@/components/UserMenu";
 
 const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const { user, isLoading } = useAuth();
+  const location = useLocation();
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+  const isActive = (path: string) => {
+    return location.pathname === path;
   };
 
-  const closeMenu = () => {
-    setIsMenuOpen(false);
-  };
+  const navItems = [
+    { name: "Home", path: "/" },
+    { name: "About", path: "/about" },
+    { name: "Services", path: "/services" },
+    { name: "Portfolio", path: "/portfolio" },
+    { name: "Blog", path: "/blog" },
+    { name: "Contact", path: "/contact" },
+  ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur">
-      <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 font-bold text-xl text-primary">
-          LynixDevs
-        </Link>
+    <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            <Link to="/" className="flex-shrink-0 flex items-center">
+              <span className="text-xl font-bold text-primary">Portfolio</span>
+            </Link>
+          </div>
 
-        {/* Mobile Menu Button */}
-        <button
-          className="block md:hidden"
-          onClick={toggleMenu}
-          aria-label={isMenuOpen ? "Close Menu" : "Open Menu"}
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`${
+                  isActive(item.path)
+                    ? "text-primary border-b-2 border-primary"
+                    : "text-gray-600 hover:text-primary"
+                } px-3 py-2 text-sm font-medium transition-colors duration-200`}
+              >
+                {item.name}
+              </Link>
+            ))}
+            
+            {user && (
+              <Link
+                to="/dashboard"
+                className={`${
+                  location.pathname.startsWith("/dashboard")
+                    ? "text-primary border-b-2 border-primary"
+                    : "text-gray-600 hover:text-primary"
+                } px-3 py-2 text-sm font-medium transition-colors duration-200`}
+              >
+                Dashboard
+              </Link>
+            )}
+          </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6">
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              cn("text-sm font-medium transition-colors hover:text-primary", {
-                "text-primary": isActive,
-                "text-muted-foreground": !isActive,
-              })
-            }
-          >
-            Home
-          </NavLink>
-          <NavLink
-            to="/about"
-            className={({ isActive }) =>
-              cn("text-sm font-medium transition-colors hover:text-primary", {
-                "text-primary": isActive,
-                "text-muted-foreground": !isActive,
-              })
-            }
-          >
-            About
-          </NavLink>
-          <NavLink
-            to="/services"
-            className={({ isActive }) =>
-              cn("text-sm font-medium transition-colors hover:text-primary", {
-                "text-primary": isActive,
-                "text-muted-foreground": !isActive,
-              })
-            }
-          >
-            Services
-          </NavLink>
-          <NavLink
-            to="/portfolio"
-            className={({ isActive }) =>
-              cn("text-sm font-medium transition-colors hover:text-primary", {
-                "text-primary": isActive,
-                "text-muted-foreground": !isActive,
-              })
-            }
-          >
-            Portfolio
-          </NavLink>
-          <NavLink
-            to="/blog"
-            className={({ isActive }) =>
-              cn("text-sm font-medium transition-colors hover:text-primary", {
-                "text-primary": isActive,
-                "text-muted-foreground": !isActive,
-              })
-            }
-          >
-            Blog
-          </NavLink>
-          <NavLink
-            to="/testimonials"
-            className={({ isActive }) =>
-              cn("text-sm font-medium transition-colors hover:text-primary", {
-                "text-primary": isActive,
-                "text-muted-foreground": !isActive,
-              })
-            }
-          >
-            Testimonials
-          </NavLink>
-          <NavLink
-            to="/contact"
-            className={({ isActive }) =>
-              cn("text-sm font-medium transition-colors hover:text-primary", {
-                "text-primary": isActive,
-                "text-muted-foreground": !isActive,
-              })
-            }
-          >
-            Contact
-          </NavLink>
-        </nav>
+          {/* Auth Section */}
+          <div className="hidden md:flex items-center">
+            {isLoading ? (
+              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+            ) : user ? (
+              <UserMenu />
+            ) : (
+              <Link to="/auth">
+                <Button variant="default">Sign In</Button>
+              </Link>
+            )}
+          </div>
 
-        {/* Mobile Navigation */}
-        <div
-          className={`fixed top-16 left-0 z-40 w-full transform bg-background px-6 py-8 shadow-lg transition-transform duration-300 md:hidden ${
-            isMenuOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
-        >
-          <nav className="flex flex-col space-y-6">
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                cn("text-base font-medium transition-colors hover:text-primary", {
-                  "text-primary": isActive,
-                  "text-muted-foreground": !isActive,
-                })
-              }
-              onClick={closeMenu}
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="text-gray-600 hover:text-primary focus:outline-none focus:text-primary"
             >
-              Home
-            </NavLink>
-            <NavLink
-              to="/about"
-              className={({ isActive }) =>
-                cn("text-base font-medium transition-colors hover:text-primary", {
-                  "text-primary": isActive,
-                  "text-muted-foreground": !isActive,
-                })
-              }
-              onClick={closeMenu}
-            >
-              About
-            </NavLink>
-            <NavLink
-              to="/services"
-              className={({ isActive }) =>
-                cn("text-base font-medium transition-colors hover:text-primary", {
-                  "text-primary": isActive,
-                  "text-muted-foreground": !isActive,
-                })
-              }
-              onClick={closeMenu}
-            >
-              Services
-            </NavLink>
-            <NavLink
-              to="/portfolio"
-              className={({ isActive }) =>
-                cn("text-base font-medium transition-colors hover:text-primary", {
-                  "text-primary": isActive,
-                  "text-muted-foreground": !isActive,
-                })
-              }
-              onClick={closeMenu}
-            >
-              Portfolio
-            </NavLink>
-            <NavLink
-              to="/blog"
-              className={({ isActive }) =>
-                cn("text-base font-medium transition-colors hover:text-primary", {
-                  "text-primary": isActive,
-                  "text-muted-foreground": !isActive,
-                })
-              }
-              onClick={closeMenu}
-            >
-              Blog
-            </NavLink>
-            <NavLink
-              to="/testimonials"
-              className={({ isActive }) =>
-                cn("text-base font-medium transition-colors hover:text-primary", {
-                  "text-primary": isActive,
-                  "text-muted-foreground": !isActive,
-                })
-              }
-              onClick={closeMenu}
-            >
-              Testimonials
-            </NavLink>
-            <NavLink
-              to="/contact"
-              className={({ isActive }) =>
-                cn("text-base font-medium transition-colors hover:text-primary", {
-                  "text-primary": isActive,
-                  "text-muted-foreground": !isActive,
-                })
-              }
-              onClick={closeMenu}
-            >
-              Contact
-            </NavLink>
-          </nav>
-        </div>
-
-        <div className="hidden md:flex items-center gap-4">
-          <UserMenu />
+              {isOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
       </div>
-    </header>
+
+      {/* Mobile Navigation */}
+      {isOpen && (
+        <div className="md:hidden">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`${
+                  isActive(item.path)
+                    ? "text-primary bg-gray-50"
+                    : "text-gray-600 hover:text-primary hover:bg-gray-50"
+                } block px-3 py-2 text-base font-medium transition-colors duration-200`}
+                onClick={() => setIsOpen(false)}
+              >
+                {item.name}
+              </Link>
+            ))}
+            
+            {user && (
+              <Link
+                to="/dashboard"
+                className={`${
+                  location.pathname.startsWith("/dashboard")
+                    ? "text-primary bg-gray-50"
+                    : "text-gray-600 hover:text-primary hover:bg-gray-50"
+                } block px-3 py-2 text-base font-medium transition-colors duration-200`}
+                onClick={() => setIsOpen(false)}
+              >
+                Dashboard
+              </Link>
+            )}
+            
+            <div className="px-3 py-2">
+              {isLoading ? (
+                <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+              ) : user ? (
+                <UserMenu />
+              ) : (
+                <Link to="/auth" onClick={() => setIsOpen(false)}>
+                  <Button variant="default" className="w-full">
+                    Sign In
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </nav>
   );
 };
 
