@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Mail, Phone, MapPin, Clock, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { config } from "@/lib/config";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -39,7 +39,7 @@ const Contact = () => {
     try {
       setIsSubmitting(true);
 
-      const response = await fetch("http://localhost:3001/api/contact/submit", {
+      const response = await fetch(`${config.serverUrl}/api/contact/submit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

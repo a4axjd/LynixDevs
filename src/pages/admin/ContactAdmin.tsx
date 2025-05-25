@@ -1,9 +1,9 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { supabase } from "@/integrations/supabase/client";
+import { config } from "@/lib/config";
 import {
   Table,
   TableBody,
@@ -158,7 +158,7 @@ const ContactAdmin = () => {
       setIsReplying(true);
       
       // Send email via Express server
-      const response = await fetch("http://localhost:3001/api/email/send", {
+      const response = await fetch(`${config.serverUrl}/api/email/send`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

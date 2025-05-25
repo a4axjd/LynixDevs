@@ -1,10 +1,10 @@
-
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, MapPin, Instagram, Twitter, Linkedin, Facebook } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { config } from "@/lib/config";
 
 const Footer = () => {
   const year = new Date().getFullYear();
@@ -27,7 +27,7 @@ const Footer = () => {
     try {
       setIsSubmitting(true);
 
-      const response = await fetch("http://localhost:3001/api/newsletter/subscribe", {
+      const response = await fetch(`${config.serverUrl}/api/newsletter/subscribe`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
