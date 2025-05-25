@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,7 +61,7 @@ interface ClientProject {
   };
   profiles: {
     full_name: string | null;
-  };
+  } | null;
 }
 
 interface Project {

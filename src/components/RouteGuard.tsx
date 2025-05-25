@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
@@ -7,10 +7,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
 interface RouteGuardProps {
-  requiredRole?: "admin" | "user"; // Optional role requirement
+  requiredRole?: "admin" | "user";
+  children?: ReactNode;
 }
 
-const RouteGuard = ({ requiredRole }: RouteGuardProps) => {
+const RouteGuard = ({ requiredRole, children }: RouteGuardProps) => {
   const { user, isLoading: authLoading } = useAuth();
   const [hasRequiredRole, setHasRequiredRole] = useState<boolean | null>(null);
   const [isCheckingRole, setIsCheckingRole] = useState(!!requiredRole);
@@ -97,8 +98,8 @@ const RouteGuard = ({ requiredRole }: RouteGuardProps) => {
     return <Navigate to="/dashboard" state={{ from: location }} replace />;
   }
 
-  // If authenticated and has required role (or no specific role required), render the child routes
-  return <Outlet />;
+  // If authenticated and has required role (or no specific role required), render the child routes or children
+  return children ? <>{children}</> : <Outlet />;
 };
 
 export default RouteGuard;

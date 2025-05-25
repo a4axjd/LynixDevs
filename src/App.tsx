@@ -81,16 +81,13 @@ function App() {
 
             {/* Protected admin routes */}
             <Route
-              path="/admin/*"
+              path="/admin"
               element={
-                <RouteGuard requireAdmin>
+                <RouteGuard requiredRole="admin">
                   <AdminLayout />
                 </RouteGuard>
               }
-            />
-
-            {/* Admin sub-routes */}
-            <Route path="/admin" element={<RouteGuard requireAdmin><AdminLayout /></RouteGuard>}>
+            >
               <Route index element={<AdminDashboard />} />
               <Route path="users" element={<UsersAdmin />} />
               <Route path="projects" element={<ProjectsAdmin />} />
