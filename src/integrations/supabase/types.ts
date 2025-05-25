@@ -51,6 +51,56 @@ export type Database = {
         }
         Relationships: []
       }
+      client_projects: {
+        Row: {
+          actual_completion: string | null
+          client_user_id: string | null
+          created_at: string
+          estimated_completion: string | null
+          id: string
+          notes: string | null
+          progress: number | null
+          project_id: string | null
+          start_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          actual_completion?: string | null
+          client_user_id?: string | null
+          created_at?: string
+          estimated_completion?: string | null
+          id?: string
+          notes?: string | null
+          progress?: number | null
+          project_id?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          actual_completion?: string | null
+          client_user_id?: string | null
+          created_at?: string
+          estimated_completion?: string | null
+          id?: string
+          notes?: string | null
+          progress?: number | null
+          project_id?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_projects_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_submissions: {
         Row: {
           created_at: string
@@ -173,6 +223,103 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      project_files: {
+        Row: {
+          client_project_id: string | null
+          created_at: string
+          description: string | null
+          file_name: string
+          file_size: number | null
+          file_url: string
+          id: string
+          is_public_to_client: boolean | null
+          mime_type: string | null
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          client_project_id?: string | null
+          created_at?: string
+          description?: string | null
+          file_name: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          is_public_to_client?: boolean | null
+          mime_type?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          client_project_id?: string | null
+          created_at?: string
+          description?: string | null
+          file_name?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          is_public_to_client?: boolean | null
+          mime_type?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_files_client_project_id_fkey"
+            columns: ["client_project_id"]
+            isOneToOne: false
+            referencedRelation: "client_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_updates: {
+        Row: {
+          client_project_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_visible_to_client: boolean | null
+          progress_percentage: number | null
+          title: string
+          update_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_project_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_visible_to_client?: boolean | null
+          progress_percentage?: number | null
+          title: string
+          update_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_project_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_visible_to_client?: boolean | null
+          progress_percentage?: number | null
+          title?: string
+          update_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_updates_client_project_id_fkey"
+            columns: ["client_project_id"]
+            isOneToOne: false
+            referencedRelation: "client_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       projects: {
         Row: {
