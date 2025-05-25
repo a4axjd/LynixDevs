@@ -14,6 +14,8 @@ const RouteGuard = ({ requiredRole }: RouteGuardProps) => {
   const { user, isLoading: authLoading } = useAuth();
   const [hasRequiredRole, setHasRequiredRole] = useState<boolean | null>(null);
   const [isCheckingRole, setIsCheckingRole] = useState(!!requiredRole);
+  const [hasShownAuthToast, setHasShownAuthToast] = useState(false);
+  const [hasShownRoleToast, setHasShownRoleToast] = useState(false);
   const location = useLocation();
   const { toast } = useToast();
 
@@ -49,6 +51,30 @@ const RouteGuard = ({ requiredRole }: RouteGuardProps) => {
     checkRole();
   }, [user, requiredRole]);
 
+  // Show authentication toast when user is not authenticated
+  useEffect(() => {
+    if (!authLoading && !user && !hasShownAuthToast) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to access this page",
+        variant: "destructive",
+      });
+      setHasShownAuthToast(true);
+    }
+  }, [authLoading, user, hasShownAuthToast, toast]);
+
+  // Show role access toast when user doesn't have required role
+  useEffect(() => {
+    if (!authLoading && !isCheckingRole && user && requiredRole && hasRequiredRole === false && !hasShownRoleToast) {
+      toast({
+        title: "Access Denied",
+        description: `You need ${requiredRole} privileges to access this page`,
+        variant: "destructive",
+      });
+      setHasShownRoleToast(true);
+    }
+  }, [authLoading, isCheckingRole, user, requiredRole, hasRequiredRole, hasShownRoleToast, toast]);
+
   // If still loading auth or checking role, show a loading indicator
   if (authLoading || isCheckingRole) {
     return (
@@ -63,23 +89,11 @@ const RouteGuard = ({ requiredRole }: RouteGuardProps) => {
 
   // If not authenticated, redirect to login page
   if (!user) {
-    toast({
-      title: "Authentication Required",
-      description: "Please sign in to access this page",
-      variant: "destructive",
-    });
-    
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   // If user doesn't have the required role, redirect to appropriate page
   if (requiredRole && hasRequiredRole === false) {
-    toast({
-      title: "Access Denied",
-      description: `You need ${requiredRole} privileges to access this page`,
-      variant: "destructive",
-    });
-    
     return <Navigate to="/dashboard" state={{ from: location }} replace />;
   }
 
