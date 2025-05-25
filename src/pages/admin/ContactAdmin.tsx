@@ -56,7 +56,7 @@ const ContactAdmin = () => {
   const { toast } = useToast();
   const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null);
   const [showReplyDialog, setShowReplyDialog] = useState(false);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("no-template");
   const [replyMessage, setReplyMessage] = useState<string>("");
   const [replySubject, setReplySubject] = useState<string>("");
   const [isReplying, setIsReplying] = useState(false);
@@ -122,7 +122,7 @@ const ContactAdmin = () => {
   const handleTemplateChange = (templateId: string) => {
     setSelectedTemplateId(templateId);
     
-    if (!templateId) {
+    if (templateId === "no-template") {
       setReplyMessage("");
       return;
     }
@@ -190,7 +190,7 @@ const ContactAdmin = () => {
       setShowReplyDialog(false);
       setReplyMessage("");
       setReplySubject("");
-      setSelectedTemplateId("");
+      setSelectedTemplateId("no-template");
     } catch (error) {
       toast({
         title: "Error sending reply",
@@ -377,7 +377,7 @@ const ContactAdmin = () => {
                     <SelectValue placeholder="Select a template" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No template (custom reply)</SelectItem>
+                    <SelectItem value="no-template">No template (custom reply)</SelectItem>
                     {emailTemplates?.map((template) => (
                       <SelectItem key={template.id} value={template.id}>
                         {template.name}
