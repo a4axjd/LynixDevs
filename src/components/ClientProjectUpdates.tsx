@@ -41,7 +41,7 @@ interface ProjectUpdate {
   created_at: string;
   updated_at: string;
   created_by: string | null;
-  profiles: {
+  creator_profile?: {
     full_name: string | null;
   } | null;
 }
@@ -102,10 +102,7 @@ const ClientProjectUpdates = ({ clientProjectId }: ClientProjectUpdatesProps) =>
       const { data, error } = await supabase
         .from("project_updates")
         .select(`
-          *,
-          profiles:created_by (
-            full_name
-          )
+          *
         `)
         .eq("client_project_id", clientProjectId)
         .eq("is_visible_to_client", true)
@@ -115,7 +112,29 @@ const ClientProjectUpdates = ({ clientProjectId }: ClientProjectUpdatesProps) =>
         throw new Error(`Error fetching project updates: ${error.message}`);
       }
 
-      return data as ProjectUpdate[];
+      // Fetch creator profiles separately to avoid join issues
+      const updatesWithProfiles = await Promise.all(
+        (data || []).map(async (update) => {
+          if (update.created_by) {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("full_name")
+              .eq("id", update.created_by)
+              .single();
+            
+            return {
+              ...update,
+              creator_profile: profile
+            };
+          }
+          return {
+            ...update,
+            creator_profile: null
+          };
+        })
+      );
+
+      return updatesWithProfiles as ProjectUpdate[];
     },
   });
 
@@ -333,9 +352,9 @@ const ClientProjectUpdates = ({ clientProjectId }: ClientProjectUpdatesProps) =>
                     {format(new Date(update.created_at), "MMM d, yyyy 'at' h:mm a")}
                   </div>
                 </div>
-                {update.profiles?.full_name && (
+                {update.creator_profile?.full_name && (
                   <CardDescription>
-                    By {update.profiles.full_name}
+                    By {update.creator_profile.full_name}
                   </CardDescription>
                 )}
               </CardHeader>

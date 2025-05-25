@@ -55,11 +55,11 @@ interface ClientProject {
   notes: string | null;
   created_at: string;
   updated_at: string;
-  projects: {
+  project_info?: {
     title: string;
     description: string | null;
-  };
-  profiles: {
+  } | null;
+  client_profile?: {
     full_name: string | null;
   } | null;
 }
@@ -114,14 +114,7 @@ const ClientProjectsAdmin = () => {
       const { data, error } = await supabase
         .from("client_projects")
         .select(`
-          *,
-          projects:project_id (
-            title,
-            description
-          ),
-          profiles:client_user_id (
-            full_name
-          )
+          *
         `)
         .order("created_at", { ascending: false });
 
@@ -129,7 +122,31 @@ const ClientProjectsAdmin = () => {
         throw new Error(`Error fetching client projects: ${error.message}`);
       }
 
-      return data as ClientProject[];
+      // Fetch related data separately to avoid join issues
+      const projectsWithDetails = await Promise.all(
+        (data || []).map(async (clientProject) => {
+          const [projectResult, profileResult] = await Promise.all([
+            supabase
+              .from("projects")
+              .select("title, description")
+              .eq("id", clientProject.project_id)
+              .single(),
+            supabase
+              .from("profiles")
+              .select("full_name")
+              .eq("id", clientProject.client_user_id)
+              .single()
+          ]);
+
+          return {
+            ...clientProject,
+            project_info: projectResult.data,
+            client_profile: profileResult.data
+          };
+        })
+      );
+
+      return projectsWithDetails as ClientProject[];
     },
   });
 
@@ -325,10 +342,10 @@ const ClientProjectsAdmin = () => {
                 clientProjects.map((clientProject) => (
                   <TableRow key={clientProject.id}>
                     <TableCell className="font-medium">
-                      {clientProject.projects?.title || "Unknown Project"}
+                      {clientProject.project_info?.title || "Unknown Project"}
                     </TableCell>
                     <TableCell>
-                      {clientProject.profiles?.full_name || "Unknown User"}
+                      {clientProject.client_profile?.full_name || "Unknown User"}
                     </TableCell>
                     <TableCell>
                       <Badge variant={getStatusBadgeVariant(clientProject.status)}>

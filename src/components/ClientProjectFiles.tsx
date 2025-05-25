@@ -41,7 +41,7 @@ interface ProjectFile {
   uploaded_by: string | null;
   created_at: string;
   updated_at: string;
-  profiles: {
+  uploader_profile?: {
     full_name: string | null;
   } | null;
 }
@@ -98,10 +98,7 @@ const ClientProjectFiles = ({ clientProjectId }: ClientProjectFilesProps) => {
       const { data, error } = await supabase
         .from("project_files")
         .select(`
-          *,
-          profiles:uploaded_by (
-            full_name
-          )
+          *
         `)
         .eq("client_project_id", clientProjectId)
         .eq("is_public_to_client", true)
@@ -111,7 +108,29 @@ const ClientProjectFiles = ({ clientProjectId }: ClientProjectFilesProps) => {
         throw new Error(`Error fetching project files: ${error.message}`);
       }
 
-      return data as ProjectFile[];
+      // Fetch uploader profiles separately to avoid join issues
+      const filesWithProfiles = await Promise.all(
+        (data || []).map(async (file) => {
+          if (file.uploaded_by) {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("full_name")
+              .eq("id", file.uploaded_by)
+              .single();
+            
+            return {
+              ...file,
+              uploader_profile: profile
+            };
+          }
+          return {
+            ...file,
+            uploader_profile: null
+          };
+        })
+      );
+
+      return filesWithProfiles as ProjectFile[];
     },
   });
 
@@ -367,7 +386,7 @@ const ClientProjectFiles = ({ clientProjectId }: ClientProjectFilesProps) => {
                     <div>
                       <CardTitle className="text-base">{file.file_name}</CardTitle>
                       <CardDescription>
-                        {formatFileSize(file.file_size)} • Uploaded by {file.profiles?.full_name || "Unknown"} • {format(new Date(file.created_at), "MMM d, yyyy")}
+                        {formatFileSize(file.file_size)} • Uploaded by {file.uploader_profile?.full_name || "Unknown"} • {format(new Date(file.created_at), "MMM d, yyyy")}
                       </CardDescription>
                     </div>
                   </div>
