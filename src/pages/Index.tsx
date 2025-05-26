@@ -50,7 +50,11 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6 animate-fade-in">
-              <Sparkles className="w-4 h-4 mr-2" />
+              <img 
+                src="/lovable-uploads/041cb83a-ded4-4d58-bdcc-8ae8bf10f151.png" 
+                alt="LynixDevs" 
+                className="w-4 h-4 mr-2 object-contain"
+              />
               Leading Digital Agency
             </div>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-lynix-purple to-primary bg-clip-text text-transparent animate-fade-in">
@@ -212,7 +216,11 @@ const Index = () => {
             <div className="absolute inset-0 bg-black/10"></div>
             <div className="relative max-w-4xl mx-auto space-y-8">
               <div className="inline-flex items-center px-6 py-3 rounded-full bg-white/20 text-white text-sm font-medium backdrop-blur-sm">
-                <Sparkles className="w-4 h-4 mr-2" />
+                <img 
+                  src="/lovable-uploads/041cb83a-ded4-4d58-bdcc-8ae8bf10f151.png" 
+                  alt="LynixDevs" 
+                  className="w-4 h-4 mr-2 object-contain"
+                />
                 Ready to Get Started?
               </div>
               <h2 className="text-3xl md:text-4xl lg:text-6xl font-bold">

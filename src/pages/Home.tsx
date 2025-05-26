@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Code, LayoutDashboard, PenTool, Server, Smartphone, Globe } from "lucide-react";
+import { ArrowRight, Code, LayoutDashboard, PenTool, Server, Smartphone } from "lucide-react";
 
 const Home = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -41,8 +41,12 @@ const Home = () => {
                   <div className="w-full h-[300px] md:h-[400px] bg-gradient-to-br from-lynix-purple to-lynix-secondary-purple rounded-lg overflow-hidden relative">
                     <div className="absolute inset-0 bg-lynix-dark/30 flex items-center justify-center">
                       <div className="text-center">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm mb-4">
-                          <Globe className="w-7 h-7 text-white" />
+                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm mb-4">
+                          <img 
+                            src="/lovable-uploads/041cb83a-ded4-4d58-bdcc-8ae8bf10f151.png" 
+                            alt="LynixDevs Logo" 
+                            className="w-12 h-12 object-contain"
+                          />
                         </div>
                         <h3 className="text-white text-xl font-bold">Digital Excellence</h3>
                         <p className="text-white/80 mt-2">Transforming ideas into reality</p>
@@ -142,7 +146,12 @@ const Home = () => {
             {/* Service 6 */}
             <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
               <div className="w-14 h-14 rounded-lg bg-lynix-purple/10 flex items-center justify-center mb-6">
-                <Globe className="text-lynix-purple" size={28} />
+                <img 
+                  src="/lovable-uploads/041cb83a-ded4-4d58-bdcc-8ae8bf10f151.png" 
+                  alt="Digital Marketing" 
+                  className="w-7 h-7 object-contain"
+                  style={{ filter: 'hue-rotate(260deg) saturate(2)' }}
+                />
               </div>
               <h3 className="text-xl font-bold mb-3">SEO & Digital Marketing</h3>
               <p className="text-gray-600 mb-6">

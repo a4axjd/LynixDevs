@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import UserMenu from "@/components/UserMenu";
@@ -30,9 +30,13 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center group">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-primary to-lynix-purple rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                  <Sparkles className="w-5 h-5 text-white" />
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                  <img 
+                    src="/lovable-uploads/041cb83a-ded4-4d58-bdcc-8ae8bf10f151.png" 
+                    alt="LynixDevs Logo" 
+                    className="w-8 h-8 object-contain"
+                  />
                 </div>
                 <span className="text-xl font-bold bg-gradient-to-r from-primary to-lynix-purple bg-clip-text text-transparent">
                   LynixDevs
