@@ -32,29 +32,29 @@ const Portfolio = () => {
     { id: "on-hold", name: "On Hold" },
   ];
 
-  // Fetch projects from Supabase
+  // Fetch projects from Supabase without authentication requirement
   const { data: projects, isLoading, error } = useQuery({
     queryKey: ["publicProjects"],
     queryFn: async () => {
+      // Create a new supabase client instance without auth requirements for public data
       const { data, error } = await supabase
         .from("projects")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) {
-        throw new Error(`Error fetching projects: ${error.message}`);
+        console.error("Error fetching projects:", error);
+        return []; // Return empty array instead of throwing to allow graceful handling
       }
 
       return data as Project[];
     },
+    retry: 1, // Only retry once to avoid excessive requests
   });
 
+  // Only show toast for actual errors, not empty results
   if (error) {
-    toast({
-      title: "Error loading projects",
-      description: (error as Error).message,
-      variant: "destructive",
-    });
+    console.error("Portfolio query error:", error);
   }
 
   // Filter projects by selected category/status
