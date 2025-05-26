@@ -12,7 +12,7 @@ type AuthContextType = {
     success: boolean;
   }>;
   signInWithGoogle: () => Promise<void>;
-  signUp: (email: string, password: string, fullName?: string) => Promise<{
+  signUp: (email: string, password: string, fullName?: string, additionalData?: any) => Promise<{
     error: string | null;
     success: boolean;
   }>;
@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
-  const signUp = async (email: string, password: string, fullName?: string) => {
+  const signUp = async (email: string, password: string, fullName?: string, additionalData?: any) => {
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -97,6 +97,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         options: {
           data: {
             full_name: fullName,
+            ...additionalData,
           },
         },
       });

@@ -14,7 +14,10 @@ const Auth = () => {
   const [isResetPassword, setIsResetPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [company, setCompany] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -44,12 +47,18 @@ const Auth = () => {
           setError(error || "Failed to send reset email");
         }
       } else if (isSignUp) {
-        const { error, success } = await signUp(email, password, fullName);
+        const fullName = `${firstName} ${lastName}`.trim();
+        const { error, success } = await signUp(email, password, fullName, {
+          first_name: firstName,
+          last_name: lastName,
+          phone: phone,
+          company: company,
+        });
         
         if (success) {
           toast({
-            title: "Account Created",
-            description: "Please check your email to confirm your account",
+            title: "Account Created Successfully!",
+            description: "Please check your email to verify your account",
           });
         } else {
           setError(error || "Failed to create account");
@@ -85,22 +94,25 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background to-primary/10 p-4">
-      <div className="w-full max-w-md rounded-lg border border-border bg-background p-8 shadow-lg">
-        <div className="mb-6 text-center">
-          <h1 className="text-3xl font-bold">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-primary/5 to-lynix-purple/10 p-4">
+      <div className="w-full max-w-md rounded-xl border border-border bg-background/95 backdrop-blur-sm p-8 shadow-2xl">
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-r from-primary to-lynix-purple rounded-2xl flex items-center justify-center">
+            <span className="text-2xl font-bold text-white">L</span>
+          </div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-lynix-purple bg-clip-text text-transparent">
             {isResetPassword 
               ? "Reset Password" 
               : isSignUp 
-                ? "Create Account" 
+                ? "Join LynixDevs" 
                 : "Welcome Back"}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {isResetPassword 
               ? "Enter your email to receive reset instructions" 
               : isSignUp 
-                ? "Create your LynixDevs account" 
-                : "Sign in to your LynixDevs account"}
+                ? "Create your account and start building amazing projects" 
+                : "Sign in to access your dashboard and projects"}
           </p>
         </div>
 
@@ -111,23 +123,36 @@ const Auth = () => {
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-4">
           {!isResetPassword && isSignUp && (
-            <div className="mb-4">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input
-                id="fullName"
-                placeholder="John Doe"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required={isSignUp}
-                className="mt-1"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="firstName">First Name *</Label>
+                <Input
+                  id="firstName"
+                  placeholder="John"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required={isSignUp}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="lastName">Last Name *</Label>
+                <Input
+                  id="lastName"
+                  placeholder="Doe"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required={isSignUp}
+                  className="mt-1"
+                />
+              </div>
             </div>
           )}
 
-          <div className="mb-4">
-            <Label htmlFor="email">Email</Label>
+          <div>
+            <Label htmlFor="email">Email Address *</Label>
             <Input
               id="email"
               type="email"
@@ -139,10 +164,36 @@ const Auth = () => {
             />
           </div>
 
+          {!isResetPassword && isSignUp && (
+            <>
+              <div>
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+1 (555) 123-4567"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="company">Company/Organization</Label>
+                <Input
+                  id="company"
+                  placeholder="Your Company Name"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+            </>
+          )}
+
           {!isResetPassword && (
-            <div className="mb-6">
+            <div>
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Password *</Label>
                 {!isSignUp && (
                   <button
                     type="button"
@@ -165,12 +216,17 @@ const Auth = () => {
                 required={!isResetPassword}
                 className="mt-1"
               />
+              {isSignUp && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Password must be at least 8 characters long
+                </p>
+              )}
             </div>
           )}
 
           <Button
             type="submit"
-            className="w-full"
+            className="w-full btn-gradient text-white shadow-lg hover:shadow-xl"
             disabled={loading}
           >
             {loading ? (
@@ -210,7 +266,7 @@ const Auth = () => {
             <Button
               type="button"
               variant="outline"
-              className="flex w-full items-center gap-3"
+              className="flex w-full items-center gap-3 hover:bg-primary/5"
               onClick={handleGoogleSignIn}
               disabled={loading}
             >

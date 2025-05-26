@@ -134,31 +134,96 @@ export type Database = {
         }
         Relationships: []
       }
+      email_template_assignments: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          is_active: boolean | null
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          is_active?: boolean | null
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          is_active?: boolean | null
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_template_assignments_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_template_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       email_templates: {
         Row: {
+          category: string | null
           content: string
           created_at: string
           id: string
+          is_default: boolean | null
           name: string
           subject: string
+          trigger_event: string | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
+          category?: string | null
           content: string
           created_at?: string
           id?: string
+          is_default?: boolean | null
           name: string
           subject: string
+          trigger_event?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
+          category?: string | null
           content?: string
           created_at?: string
           id?: string
+          is_default?: boolean | null
           name?: string
           subject?: string
+          trigger_event?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -199,31 +264,61 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
+          city: string | null
+          company: string | null
+          country: string | null
           created_at: string
+          date_of_birth: string | null
           full_name: string | null
           id: string
+          job_title: string | null
+          last_name: string | null
+          phone: string | null
+          state: string | null
           updated_at: string
           username: string | null
           website: string | null
+          zip_code: string | null
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
+          city?: string | null
+          company?: string | null
+          country?: string | null
           created_at?: string
+          date_of_birth?: string | null
           full_name?: string | null
           id: string
+          job_title?: string | null
+          last_name?: string | null
+          phone?: string | null
+          state?: string | null
           updated_at?: string
           username?: string | null
           website?: string | null
+          zip_code?: string | null
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
+          city?: string | null
+          company?: string | null
+          country?: string | null
           created_at?: string
+          date_of_birth?: string | null
           full_name?: string | null
           id?: string
+          job_title?: string | null
+          last_name?: string | null
+          phone?: string | null
+          state?: string | null
           updated_at?: string
           username?: string | null
           website?: string | null
+          zip_code?: string | null
         }
         Relationships: []
       }
