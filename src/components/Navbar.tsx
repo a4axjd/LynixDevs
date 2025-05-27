@@ -27,15 +27,15 @@ const Navbar = () => {
   return (
     <nav className="bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200/50 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between h-14 sm:h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center group">
               <div className="flex items-center">
-                <div className="h-10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                <div className="h-8 sm:h-10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                   <img 
-                    src="/lovable-uploads/01329662-a38f-40c0-83b8-4941820efc5f.png" 
+                    src="/lovable-uploads/8acf2a8b-1d28-4ce8-8395-0f8e15a7f7f6.png" 
                     alt="LynixDevs Logo" 
-                    className="h-8 object-contain"
+                    className="h-6 sm:h-8 w-auto object-contain"
                   />
                 </div>
               </div>
@@ -52,7 +52,7 @@ const Navbar = () => {
                   isActive(item.path)
                     ? "text-primary border-b-2 border-primary bg-primary/5"
                     : "text-gray-600 hover:text-primary hover:bg-primary/5"
-                } px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg border-b-2 border-transparent hover:border-primary/50`}
+                } px-3 lg:px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg border-b-2 border-transparent hover:border-primary/50`}
               >
                 {item.name}
               </Link>
@@ -65,7 +65,7 @@ const Navbar = () => {
                   location.pathname.startsWith("/dashboard")
                     ? "text-primary border-b-2 border-primary bg-primary/5"
                     : "text-gray-600 hover:text-primary hover:bg-primary/5"
-                } px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg border-b-2 border-transparent hover:border-primary/50`}
+                } px-3 lg:px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg border-b-2 border-transparent hover:border-primary/50`}
               >
                 Dashboard
               </Link>
@@ -80,7 +80,7 @@ const Navbar = () => {
               <UserMenu />
             ) : (
               <Link to="/auth">
-                <Button className="shadow-lg hover:shadow-xl">Sign In</Button>
+                <Button size="sm" className="shadow-lg hover:shadow-xl text-sm">Sign In</Button>
               </Link>
             )}
           </div>
@@ -90,8 +90,9 @@ const Navbar = () => {
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-gray-600 hover:text-primary focus:outline-none focus:text-primary p-2 rounded-lg hover:bg-primary/5 transition-colors"
+              aria-label="Toggle menu"
             >
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
+              {isOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
@@ -100,7 +101,7 @@ const Navbar = () => {
       {/* Mobile Navigation */}
       {isOpen && (
         <div className="md:hidden border-t border-gray-200/50 bg-white/95 backdrop-blur-md">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 max-h-screen overflow-y-auto">
             {navItems.map((item) => (
               <Link
                 key={item.name}
@@ -137,7 +138,7 @@ const Navbar = () => {
                 <UserMenu />
               ) : (
                 <Link to="/auth" onClick={() => setIsOpen(false)}>
-                  <Button className="w-full shadow-lg">
+                  <Button className="w-full shadow-lg text-sm">
                     Sign In
                   </Button>
                 </Link>
