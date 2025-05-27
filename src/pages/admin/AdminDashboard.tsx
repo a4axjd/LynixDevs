@@ -4,13 +4,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FolderKanban, FileText, Mail, Send, MessageSquare } from "lucide-react";
 
+interface AdminCounts {
+  users: number;
+  projects: number;
+  blog_posts: number;
+  email_templates: number;
+  newsletters: number;
+  contact_submissions: number;
+}
+
 const AdminDashboard = () => {
   const { data: counts, isLoading } = useQuery({
     queryKey: ["adminCounts"],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_admin_counts");
       if (error) throw new Error(error.message);
-      return data;
+      return data as AdminCounts;
     },
   });
 

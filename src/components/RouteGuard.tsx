@@ -11,7 +11,7 @@ interface RouteGuardProps {
 }
 
 const RouteGuard = ({ children, adminRequired = false }: RouteGuardProps) => {
-  const { user, loading } = useAuth();
+  const { user, isLoading } = useAuth();
   const location = useLocation();
 
   const { data: hasAdminRole, isLoading: roleLoading } = useQuery({
@@ -34,7 +34,7 @@ const RouteGuard = ({ children, adminRequired = false }: RouteGuardProps) => {
     enabled: !!user?.id && adminRequired,
   });
 
-  if (loading || (adminRequired && roleLoading)) {
+  if (isLoading || (adminRequired && roleLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
