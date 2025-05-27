@@ -13,7 +13,7 @@ const createEmailTransporter = () => {
 
   // Gmail SMTP configuration
   if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
-    return nodemailer.createTransport({
+    return nodemailer.createTransporter({
       service: 'gmail',
       auth: {
         user: process.env.GMAIL_USER,
@@ -33,18 +33,45 @@ const createEmailTransporter = () => {
   throw new Error('No email service configured. Please set up Brevo, Gmail, or SendGrid credentials.');
 };
 
+const getDefaultEmailSender = async () => {
+  try {
+    // This would need to be implemented to fetch from your database
+    // For now, return a default
+    return {
+      email: "noreply@lynixdevs.us",
+      name: "LynixDevs"
+    };
+  } catch (error) {
+    console.error('Error fetching default sender:', error);
+    return {
+      email: "noreply@lynixdevs.us",
+      name: "LynixDevs"
+    };
+  }
+};
+
 const sendEmail = async (emailData) => {
-  const { to, subject, html, replyTo, name } = emailData;
+  const { to, subject, html, replyTo, name, senderEmail, senderName } = emailData;
 
   try {
     const transporter = createEmailTransporter();
+    
+    // Get sender info - use provided or fetch default
+    let fromEmail = senderEmail;
+    let fromName = senderName;
+    
+    if (!fromEmail || !fromName) {
+      const defaultSender = await getDefaultEmailSender();
+      fromEmail = fromEmail || defaultSender.email;
+      fromName = fromName || defaultSender.name;
+    }
 
     // Handle Brevo API
     if (transporter.type === 'brevo') {
       const brevoPayload = {
         sender: {
-          name: "LynixDevs",
-          email: "noreply@lynixdevs.com",
+          name: fromName,
+          email: fromEmail,
         },
         to: [{ email: to, name: name || to }],
         subject: subject,
@@ -84,8 +111,8 @@ const sendEmail = async (emailData) => {
           subject: subject
         }],
         from: {
-          email: "noreply@lynixdevs.com",
-          name: "LynixDevs"
+          email: fromEmail,
+          name: fromName
         },
         content: [{
           type: "text/html",
@@ -119,7 +146,7 @@ const sendEmail = async (emailData) => {
 
     // Handle Gmail/SMTP
     const mailOptions = {
-      from: `"LynixDevs" <${process.env.GMAIL_USER}>`,
+      from: `"${fromName}" <${fromEmail}>`,
       to: to,
       subject: subject,
       html: html
@@ -139,5 +166,6 @@ const sendEmail = async (emailData) => {
 };
 
 module.exports = {
-  sendEmail
+  sendEmail,
+  getDefaultEmailSender
 };

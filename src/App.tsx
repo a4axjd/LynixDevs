@@ -1,33 +1,29 @@
-
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import RouteGuard from "@/components/RouteGuard";
+import { QueryClient } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toaster";
+
 import MainLayout from "@/layouts/MainLayout";
 import AdminLayout from "@/layouts/AdminLayout";
+import RouteGuard from "@/components/RouteGuard";
 
-// Import pages
-import Index from "@/pages/Index";
 import Home from "@/pages/Home";
 import About from "@/pages/About";
 import Services from "@/pages/Services";
 import Portfolio from "@/pages/Portfolio";
-import ProjectDetail from "@/pages/ProjectDetail";
 import Blog from "@/pages/Blog";
 import BlogDetail from "@/pages/BlogDetail";
 import Contact from "@/pages/Contact";
+import Testimonials from "@/pages/Testimonials";
 import Auth from "@/pages/Auth";
 import AuthCallback from "@/pages/AuthCallback";
 import Dashboard from "@/pages/Dashboard";
-import ClientProjectDashboard from "@/pages/ClientProjectDashboard";
 import Profile from "@/pages/Profile";
 import Settings from "@/pages/Settings";
-import Testimonials from "@/pages/Testimonials";
-import NotFound from "@/pages/NotFound";
+import ProjectDetail from "@/pages/ProjectDetail";
+import ClientProjectDashboard from "@/pages/ClientProjectDashboard";
 
-// Admin pages
-import AdminDashboard from "@/pages/AdminDashboard";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
 import UsersAdmin from "@/pages/admin/UsersAdmin";
 import ProjectsAdmin from "@/pages/admin/ProjectsAdmin";
 import ClientProjectsAdmin from "@/pages/admin/ClientProjectsAdmin";
@@ -35,55 +31,77 @@ import BlogAdmin from "@/pages/admin/BlogAdmin";
 import EmailTemplatesAdmin from "@/pages/admin/EmailTemplatesAdmin";
 import NewsletterAdmin from "@/pages/admin/NewsletterAdmin";
 import ContactAdmin from "@/pages/admin/ContactAdmin";
-
-import "./App.css";
-
-const queryClient = new QueryClient();
+import NotFound from "@/pages/NotFound";
+import EmailSettingsAdmin from "@/pages/admin/EmailSettingsAdmin";
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <BrowserRouter>
       <AuthProvider>
-        <Router>
+        <QueryClient>
+          <Toaster />
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<MainLayout />}>
-              <Route index element={<Index />} />
-              <Route path="home" element={<Home />} />
+              <Route index element={<Home />} />
               <Route path="about" element={<About />} />
               <Route path="services" element={<Services />} />
               <Route path="portfolio" element={<Portfolio />} />
-              <Route path="portfolio/:id" element={<ProjectDetail />} />
               <Route path="blog" element={<Blog />} />
               <Route path="blog/:slug" element={<BlogDetail />} />
               <Route path="contact" element={<Contact />} />
               <Route path="testimonials" element={<Testimonials />} />
+              <Route path="auth" element={<Auth />} />
+              <Route path="auth/callback" element={<AuthCallback />} />
             </Route>
 
-            {/* Auth routes */}
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-
-            {/* Protected user routes */}
+            {/* Protected routes */}
             <Route
               path="/dashboard"
               element={
-                <RouteGuard>
-                  <MainLayout />
+                <RouteGuard requireAuth>
+                  <Dashboard />
                 </RouteGuard>
               }
-            >
-              <Route index element={<Dashboard />} />
-              <Route path="projects" element={<ClientProjectDashboard />} />
-              <Route path="profile" element={<Profile />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
+            />
+            <Route
+              path="/profile"
+              element={
+                <RouteGuard requireAuth>
+                  <Profile />
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <RouteGuard requireAuth>
+                  <Settings />
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/project/:id"
+              element={
+                <RouteGuard requireAuth>
+                  <ProjectDetail />
+                </RouteGuard>
+              }
+            />
+            <Route
+              path="/client-project/:id"
+              element={
+                <RouteGuard requireAuth>
+                  <ClientProjectDashboard />
+                </RouteGuard>
+              }
+            />
 
-            {/* Protected admin routes */}
+            {/* Admin routes */}
             <Route
               path="/admin"
               element={
-                <RouteGuard requiredRole="admin">
+                <RouteGuard requireAuth requireAdmin>
                   <AdminLayout />
                 </RouteGuard>
               }
@@ -94,17 +112,16 @@ function App() {
               <Route path="client-projects" element={<ClientProjectsAdmin />} />
               <Route path="blog" element={<BlogAdmin />} />
               <Route path="email-templates" element={<EmailTemplatesAdmin />} />
+              <Route path="email-settings" element={<EmailSettingsAdmin />} />
               <Route path="newsletter" element={<NewsletterAdmin />} />
               <Route path="contact" element={<ContactAdmin />} />
             </Route>
 
-            {/* 404 route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <Toaster />
-        </Router>
+        </QueryClient>
       </AuthProvider>
-    </QueryClientProvider>
+    </BrowserRouter>
   );
 }
 

@@ -12,6 +12,8 @@ interface EmailPayload {
   html: string;
   replyTo?: string;
   name?: string;
+  senderEmail?: string;
+  senderName?: string;
 }
 
 serve(async (req) => {
@@ -29,7 +31,7 @@ serve(async (req) => {
       throw new Error("Missing required email fields");
     }
 
-    const { to, subject, html, replyTo, name } = payload as EmailPayload;
+    const { to, subject, html, replyTo, name, senderEmail, senderName } = payload as EmailPayload;
     
     // Get Brevo API configuration
     const brevoApiKey = Deno.env.get("BREVO_API_KEY");
@@ -39,11 +41,15 @@ serve(async (req) => {
       throw new Error("Server configuration error: Missing Brevo API key");
     }
 
+    // Use provided sender or default to LynixDevs
+    const fromEmail = senderEmail || "noreply@lynixdevs.us";
+    const fromName = senderName || "LynixDevs";
+
     // Prepare the email data for Brevo API
     const brevoPayload = {
       sender: {
-        name: "LynixDevs",
-        email: "noreply@lynixdevs.com",
+        name: fromName,
+        email: fromEmail,
       },
       to: [
         {

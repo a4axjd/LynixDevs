@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -43,7 +42,7 @@ const Home = () => {
                       <div className="text-center">
                         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm mb-4">
                           <img 
-                            src="/lovable-uploads/041cb83a-ded4-4d58-bdcc-8ae8bf10f151.png" 
+                            src="/lovable-uploads/d48b52d9-ede6-4bb2-8a5b-73ff16b8e5bb.png" 
                             alt="LynixDevs Logo" 
                             className="w-12 h-12 object-contain"
                           />
@@ -143,11 +142,11 @@ const Home = () => {
               </Link>
             </div>
 
-            {/* Service 6 */}
+            {/* Service 6 - Update logo */}
             <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
               <div className="w-14 h-14 rounded-lg bg-lynix-purple/10 flex items-center justify-center mb-6">
                 <img 
-                  src="/lovable-uploads/041cb83a-ded4-4d58-bdcc-8ae8bf10f151.png" 
+                  src="/lovable-uploads/d48b52d9-ede6-4bb2-8a5b-73ff16b8e5bb.png" 
                   alt="Digital Marketing" 
                   className="w-7 h-7 object-contain"
                   style={{ filter: 'hue-rotate(260deg) saturate(2)' }}

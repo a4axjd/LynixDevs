@@ -1,4 +1,3 @@
-
 import { Outlet } from "react-router-dom";
 import { Link, useLocation } from "react-router-dom";
 import { 
@@ -10,7 +9,8 @@ import {
   Send, 
   MessageSquare,
   Settings,
-  UserCog
+  UserCog,
+  AtSign
 } from "lucide-react";
 import {
   Sidebar,
@@ -59,6 +59,11 @@ const AdminLayout = () => {
       title: "Email Templates",
       href: "/admin/email-templates",
       icon: Mail,
+    },
+    {
+      title: "Email Settings",
+      href: "/admin/email-settings",
+      icon: AtSign,
     },
     {
       title: "Newsletter",
