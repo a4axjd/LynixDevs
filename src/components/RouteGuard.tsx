@@ -1,105 +1,56 @@
 
-import { useState, useEffect, ReactNode } from "react";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/components/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Navigate, useLocation } from "react-router-dom";
+import { ReactNode } from "react";
 
 interface RouteGuardProps {
-  requiredRole?: "admin" | "user";
-  children?: ReactNode;
+  children: ReactNode;
+  adminRequired?: boolean;
 }
 
-const RouteGuard = ({ requiredRole, children }: RouteGuardProps) => {
-  const { user, isLoading: authLoading } = useAuth();
-  const [hasRequiredRole, setHasRequiredRole] = useState<boolean | null>(null);
-  const [isCheckingRole, setIsCheckingRole] = useState(!!requiredRole);
-  const [hasShownAuthToast, setHasShownAuthToast] = useState(false);
-  const [hasShownRoleToast, setHasShownRoleToast] = useState(false);
+const RouteGuard = ({ children, adminRequired = false }: RouteGuardProps) => {
+  const { user, loading } = useAuth();
   const location = useLocation();
-  const { toast } = useToast();
 
-  // Check if user has the required role
-  useEffect(() => {
-    const checkRole = async () => {
-      if (requiredRole && user) {
-        try {
-          if (requiredRole === "admin") {
-            const { data, error } = await supabase.rpc("has_role", {
-              _user_id: user.id,
-              _role: "admin",
-            });
-
-            if (error) throw error;
-
-            setHasRequiredRole(!!data);
-          } else {
-            // Default role is "user", all authenticated users have this role
-            setHasRequiredRole(true);
-          }
-        } catch (error) {
-          console.error("Error checking role:", error);
-          setHasRequiredRole(false);
-        } finally {
-          setIsCheckingRole(false);
-        }
-      } else {
-        setIsCheckingRole(false);
+  const { data: hasAdminRole, isLoading: roleLoading } = useQuery({
+    queryKey: ["hasAdminRole", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return false;
+      
+      const { data, error } = await supabase.rpc("has_role", {
+        _user_id: user.id,
+        _role: "admin",
+      });
+      
+      if (error) {
+        console.error("Error checking admin role:", error);
+        return false;
       }
-    };
+      
+      return data;
+    },
+    enabled: !!user?.id && adminRequired,
+  });
 
-    checkRole();
-  }, [user, requiredRole]);
-
-  // Show authentication toast when user is not authenticated
-  useEffect(() => {
-    if (!authLoading && !user && !hasShownAuthToast) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to access this page",
-        variant: "destructive",
-      });
-      setHasShownAuthToast(true);
-    }
-  }, [authLoading, user, hasShownAuthToast, toast]);
-
-  // Show role access toast when user doesn't have required role
-  useEffect(() => {
-    if (!authLoading && !isCheckingRole && user && requiredRole && hasRequiredRole === false && !hasShownRoleToast) {
-      toast({
-        title: "Access Denied",
-        description: `You need ${requiredRole} privileges to access this page`,
-        variant: "destructive",
-      });
-      setHasShownRoleToast(true);
-    }
-  }, [authLoading, isCheckingRole, user, requiredRole, hasRequiredRole, hasShownRoleToast, toast]);
-
-  // If still loading auth or checking role, show a loading indicator
-  if (authLoading || isCheckingRole) {
+  if (loading || (adminRequired && roleLoading)) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
-          <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  // If not authenticated, redirect to login page
   if (!user) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  // If user doesn't have the required role, redirect to appropriate page
-  if (requiredRole && hasRequiredRole === false) {
-    return <Navigate to="/dashboard" state={{ from: location }} replace />;
+  if (adminRequired && !hasAdminRole) {
+    return <Navigate to="/dashboard" replace />;
   }
 
-  // If authenticated and has required role (or no specific role required), render the child routes or children
-  return children ? <>{children}</> : <Outlet />;
+  return <>{children}</>;
 };
 
 export default RouteGuard;

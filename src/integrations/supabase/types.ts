@@ -134,6 +134,33 @@ export type Database = {
         }
         Relationships: []
       }
+      email_senders: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          is_default: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          is_default?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       email_template_assignments: {
         Row: {
           created_at: string

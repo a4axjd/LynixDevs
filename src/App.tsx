@@ -1,6 +1,7 @@
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 
 import MainLayout from "@/layouts/MainLayout";
@@ -34,11 +35,13 @@ import ContactAdmin from "@/pages/admin/ContactAdmin";
 import NotFound from "@/pages/NotFound";
 import EmailSettingsAdmin from "@/pages/admin/EmailSettingsAdmin";
 
+const queryClient = new QueryClient();
+
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <QueryClient>
+        <QueryClientProvider client={queryClient}>
           <Toaster />
           <Routes>
             {/* Public routes */}
@@ -59,7 +62,7 @@ function App() {
             <Route
               path="/dashboard"
               element={
-                <RouteGuard requireAuth>
+                <RouteGuard>
                   <Dashboard />
                 </RouteGuard>
               }
@@ -67,7 +70,7 @@ function App() {
             <Route
               path="/profile"
               element={
-                <RouteGuard requireAuth>
+                <RouteGuard>
                   <Profile />
                 </RouteGuard>
               }
@@ -75,7 +78,7 @@ function App() {
             <Route
               path="/settings"
               element={
-                <RouteGuard requireAuth>
+                <RouteGuard>
                   <Settings />
                 </RouteGuard>
               }
@@ -83,7 +86,7 @@ function App() {
             <Route
               path="/project/:id"
               element={
-                <RouteGuard requireAuth>
+                <RouteGuard>
                   <ProjectDetail />
                 </RouteGuard>
               }
@@ -91,7 +94,7 @@ function App() {
             <Route
               path="/client-project/:id"
               element={
-                <RouteGuard requireAuth>
+                <RouteGuard>
                   <ClientProjectDashboard />
                 </RouteGuard>
               }
@@ -101,7 +104,7 @@ function App() {
             <Route
               path="/admin"
               element={
-                <RouteGuard requireAuth requireAdmin>
+                <RouteGuard adminRequired>
                   <AdminLayout />
                 </RouteGuard>
               }
@@ -119,7 +122,7 @@ function App() {
 
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </QueryClient>
+        </QueryClientProvider>
       </AuthProvider>
     </BrowserRouter>
   );

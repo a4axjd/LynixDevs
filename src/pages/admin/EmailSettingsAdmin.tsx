@@ -42,7 +42,7 @@ const EmailSettingsAdmin = () => {
         .order("created_at", { ascending: false });
       
       if (error) throw new Error(error.message);
-      return data as EmailSender[];
+      return data;
     },
   });
 
