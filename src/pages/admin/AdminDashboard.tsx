@@ -19,7 +19,7 @@ const AdminDashboard = () => {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_admin_counts");
       if (error) throw new Error(error.message);
-      return data as AdminCounts;
+      return data as unknown as AdminCounts;
     },
   });
 

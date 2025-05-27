@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -66,8 +67,11 @@ const Footer = () => {
           {/* Company Information */}
           <div>
             <Link to="/" className="text-white font-bold text-2xl flex items-center mb-4">
-              <span className="text-lynix-purple">Lynix</span>
-              <span>Devs</span>
+              <img 
+                src="/lovable-uploads/01329662-a38f-40c0-83b8-4941820efc5f.png" 
+                alt="LynixDevs Logo" 
+                className="h-8 object-contain"
+              />
             </Link>
             <p className="text-gray-300 mb-6">
               Creating digital experiences that transform businesses and delight users.
@@ -138,8 +142,8 @@ const Footer = () => {
               </li>
               <li className="flex items-center">
                 <Mail size={20} className="mr-2 text-lynix-purple" />
-                <a href="mailto:info@lynixdevs.com" className="text-gray-300 hover:text-lynix-purple transition-colors">
-                  info@lynixdevs.com
+                <a href="mailto:info@lynixdevs.us" className="text-gray-300 hover:text-lynix-purple transition-colors">
+                  info@lynixdevs.us
                 </a>
               </li>
             </ul>

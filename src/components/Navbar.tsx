@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
@@ -29,17 +30,14 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center group">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+              <div className="flex items-center">
+                <div className="h-10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
                   <img 
-                    src="/lovable-uploads/d48b52d9-ede6-4bb2-8a5b-73ff16b8e5bb.png" 
+                    src="/lovable-uploads/01329662-a38f-40c0-83b8-4941820efc5f.png" 
                     alt="LynixDevs Logo" 
-                    className="w-8 h-8 object-contain"
+                    className="h-8 object-contain"
                   />
                 </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-primary to-lynix-purple bg-clip-text text-transparent">
-                  LynixDevs
-                </span>
               </div>
             </Link>
           </div>
