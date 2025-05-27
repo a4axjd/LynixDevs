@@ -15,7 +15,6 @@ import Portfolio from "@/pages/Portfolio";
 import Blog from "@/pages/Blog";
 import BlogDetail from "@/pages/BlogDetail";
 import Contact from "@/pages/Contact";
-import Testimonials from "@/pages/Testimonials";
 import Auth from "@/pages/Auth";
 import AuthCallback from "@/pages/AuthCallback";
 import Dashboard from "@/pages/Dashboard";
@@ -53,7 +52,6 @@ function App() {
               <Route path="blog" element={<Blog />} />
               <Route path="blog/:slug" element={<BlogDetail />} />
               <Route path="contact" element={<Contact />} />
-              <Route path="testimonials" element={<Testimonials />} />
               <Route path="auth" element={<Auth />} />
               <Route path="auth/callback" element={<AuthCallback />} />
             </Route>

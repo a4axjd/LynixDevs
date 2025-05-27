@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Code, LayoutDashboard, PenTool, Server, Smartphone } from "lucide-react";
+import { ArrowRight, Code, LayoutDashboard, PenTool, Server, Smartphone, Star } from "lucide-react";
 
 const Home = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -9,6 +9,37 @@ const Home = () => {
   useEffect(() => {
     setIsVisible(true);
   }, []);
+
+  // Testimonials data
+  const testimonials = [
+    {
+      id: 1,
+      name: "Sarah Johnson",
+      position: "CEO",
+      company: "TechStart Inc.",
+      content: "Working with LynixDevs was a game-changer for our business. Their team delivered a website that not only looks beautiful but also performs exceptionally well.",
+      rating: 5,
+      color: "from-blue-500 to-purple-500",
+    },
+    {
+      id: 2,
+      name: "Michael Rodriguez",
+      position: "Marketing Director",
+      company: "Global Retail Solutions",
+      content: "The e-commerce platform developed by LynixDevs exceeded our expectations. Their team took the time to understand our unique requirements.",
+      rating: 5,
+      color: "from-green-500 to-teal-500",
+    },
+    {
+      id: 3,
+      name: "Emily Chen",
+      position: "Product Manager",
+      company: "InnovateTech",
+      content: "LynixDevs helped us transform our product idea into a fully-functional mobile application. Their expertise in UI/UX design was invaluable.",
+      rating: 5,
+      color: "from-red-500 to-orange-500",
+    },
+  ];
 
   return (
     <div className="overflow-hidden">
@@ -166,6 +197,49 @@ const Home = () => {
             <Button asChild className="bg-lynix-purple hover:bg-lynix-secondary-purple text-white px-8">
               <Link to="/services">View All Services</Link>
             </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="container-custom">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="heading-2 mb-4">What Our Clients Say</h2>
+            <p className="body-text text-gray-600">
+              Don't just take our word for it. See what our clients have to say about working with us.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {testimonials.map((testimonial) => (
+              <div 
+                key={testimonial.id} 
+                className="bg-white rounded-xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-shadow"
+              >
+                <div className="flex mb-6">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="fill-lynix-purple text-lynix-purple" size={16} />
+                  ))}
+                </div>
+                <blockquote className="text-gray-700 mb-6">
+                  "{testimonial.content}"
+                </blockquote>
+                <div className="flex items-center">
+                  <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${testimonial.color} flex items-center justify-center mr-4`}>
+                    <span className="text-white font-bold">
+                      {testimonial.name.charAt(0)}
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="font-bold">{testimonial.name}</h4>
+                    <p className="text-sm text-gray-500">
+                      {testimonial.position}, {testimonial.company}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
