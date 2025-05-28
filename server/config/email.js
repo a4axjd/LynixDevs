@@ -144,19 +144,28 @@ const sendEmail = async (emailData) => {
       return { success: true };
     }
 
-    // Handle Gmail/SMTP
+    // Handle Gmail/SMTP - Force the from address
     const mailOptions = {
       from: `"${fromName}" <${fromEmail}>`,
       to: to,
       subject: subject,
-      html: html
+      html: html,
+      // For Gmail, we need to set these additional headers to try to override the from
+      headers: {
+        'From': `"${fromName}" <${fromEmail}>`,
+        'Reply-To': replyTo || fromEmail,
+        'Return-Path': fromEmail
+      }
     };
 
     if (replyTo) {
       mailOptions.replyTo = replyTo;
     }
 
+    console.log('Sending email with mailOptions:', JSON.stringify(mailOptions, null, 2));
+
     const result = await transporter.sendMail(mailOptions);
+    console.log('Email sent result:', result);
     return result;
 
   } catch (error) {
