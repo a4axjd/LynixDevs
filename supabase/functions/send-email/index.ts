@@ -41,9 +41,11 @@ serve(async (req) => {
       throw new Error("Server configuration error: Missing Brevo API key");
     }
 
-    // Use provided sender or default to LynixDevs
+    // Use provided sender or default to noreply@lynixdevs.us
     const fromEmail = senderEmail || "noreply@lynixdevs.us";
     const fromName = senderName || "LynixDevs";
+
+    console.log("Using sender:", { fromEmail, fromName });
 
     // Prepare the email data for Brevo API
     const brevoPayload = {

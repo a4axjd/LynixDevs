@@ -16,7 +16,7 @@ serve(async (req) => {
   try {
     // Get Supabase configuration
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     
     if (!supabaseUrl || !supabaseKey) {
       throw new Error("Missing Supabase configuration");
@@ -42,6 +42,24 @@ serve(async (req) => {
         }
       );
     }
+
+    // Get default email sender from database
+    console.log("Fetching default email sender...");
+    const { data: defaultSender, error: senderError } = await supabase
+      .from("email_senders")
+      .select("email, name")
+      .eq("is_default", true)
+      .single();
+
+    if (senderError) {
+      console.error("Error fetching default sender:", senderError);
+    }
+
+    // Use default sender or fallback
+    const senderEmail = defaultSender?.email || "noreply@lynixdevs.us";
+    const senderName = defaultSender?.name || "LynixDevs";
+
+    console.log("Using sender:", { senderEmail, senderName });
 
     // Insert contact submission into database
     console.log("Inserting contact submission into database...");
@@ -73,7 +91,7 @@ serve(async (req) => {
         <blockquote style="border-left: 2px solid #ccc; padding-left: 10px; margin-left: 10px;">
           ${message.replace(/\n/g, "<br>")}
         </blockquote>
-        <p>Best regards,<br>The LynixDevs Team</p>
+        <p>Best regards,<br>The ${senderName} Team</p>
       `;
       
       // Send email using the send-email function
@@ -83,7 +101,9 @@ serve(async (req) => {
           subject: "We've received your message",
           html: emailHtml,
           replyTo: "info@lynixdevs.com",
-          name: name
+          name: name,
+          senderEmail: senderEmail,
+          senderName: senderName
         },
       });
 
@@ -121,7 +141,9 @@ serve(async (req) => {
           subject: `New Contact: ${subject}`,
           html: adminEmailHtml,
           replyTo: email,
-          name: name
+          name: name,
+          senderEmail: senderEmail,
+          senderName: senderName
         },
       });
 

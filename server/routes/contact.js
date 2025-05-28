@@ -1,7 +1,7 @@
 
 const express = require('express');
 const { supabase } = require('../config/supabase');
-const { sendEmail } = require('../config/email');
+const { sendEmail, getDefaultEmailSender } = require('../config/email');
 
 const router = express.Router();
 
@@ -19,6 +19,34 @@ router.post('/submit', async (req, res) => {
         error: 'Please fill in all required fields.'
       });
     }
+
+    // Get default email sender
+    console.log('Fetching default email sender...');
+    let defaultSender;
+    try {
+      const { data: senderData, error: senderError } = await supabase
+        .from('email_senders')
+        .select('email, name')
+        .eq('is_default', true)
+        .single();
+
+      if (senderError) {
+        console.error('Error fetching default sender from database:', senderError);
+        // Fallback to function
+        defaultSender = await getDefaultEmailSender();
+      } else {
+        defaultSender = senderData;
+      }
+    } catch (error) {
+      console.error('Error getting default sender:', error);
+      // Fallback to hardcoded default
+      defaultSender = {
+        email: "noreply@lynixdevs.us",
+        name: "LynixDevs"
+      };
+    }
+
+    console.log('Using sender:', defaultSender);
 
     // Insert contact submission into database
     console.log('Inserting contact submission into database...');
@@ -47,7 +75,7 @@ router.post('/submit', async (req, res) => {
         <blockquote style="border-left: 2px solid #ccc; padding-left: 10px; margin-left: 10px;">
           ${message.replace(/\n/g, "<br>")}
         </blockquote>
-        <p>Best regards,<br>The LynixDevs Team</p>
+        <p>Best regards,<br>The ${defaultSender.name} Team</p>
       `;
 
       await sendEmail({
@@ -55,7 +83,9 @@ router.post('/submit', async (req, res) => {
         subject: "We've received your message",
         html: emailHtml,
         replyTo: "info@lynixdevs.com",
-        name: name
+        name: name,
+        senderEmail: defaultSender.email,
+        senderName: defaultSender.name
       });
 
       console.log('Confirmation email sent successfully');
@@ -84,7 +114,9 @@ router.post('/submit', async (req, res) => {
         subject: `New Contact: ${subject}`,
         html: adminEmailHtml,
         replyTo: email,
-        name: name
+        name: name,
+        senderEmail: defaultSender.email,
+        senderName: defaultSender.name
       });
 
       console.log('Admin notification email sent successfully');
