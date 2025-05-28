@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import EmailEventsList from "@/components/admin/EmailEventsList";
 import {
   Card,
   CardContent,
@@ -22,7 +22,8 @@ import {
   FileText,
   Check,
   Eye,
-  Settings
+  Settings,
+  Info
 } from "lucide-react";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
@@ -106,6 +107,7 @@ const EmailTemplatesAdmin = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState<EmailTemplate | null>(null);
   const [showAssignments, setShowAssignments] = useState(false);
+  const [showEventsList, setShowEventsList] = useState(false);
   
   // Form
   const form = useForm<EmailTemplateFormValues>({
@@ -382,6 +384,13 @@ const EmailTemplatesAdmin = () => {
         actionLabel="Create Template"
         actionButton={
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowEventsList(true)}
+            >
+              <Info className="h-4 w-4 mr-2" />
+              View Events
+            </Button>
             <Button
               variant="outline"
               onClick={createDefaultTemplates}
@@ -701,6 +710,19 @@ const EmailTemplatesAdmin = () => {
               dangerouslySetInnerHTML={{ __html: showPreview?.content || '' }}
             />
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email Events List Dialog */}
+      <Dialog open={showEventsList} onOpenChange={setShowEventsList}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Available Email Events & Variables</DialogTitle>
+            <DialogDescription>
+              Reference guide for all available email events and their corresponding template variables.
+            </DialogDescription>
+          </DialogHeader>
+          <EmailEventsList />
         </DialogContent>
       </Dialog>
     </div>

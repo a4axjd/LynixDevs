@@ -1,4 +1,3 @@
-
 const nodemailer = require('nodemailer');
 
 // Email service configuration
@@ -11,8 +10,17 @@ const createEmailTransporter = () => {
     };
   }
 
-  // Gmail SMTP configuration
+  // SendGrid configuration (prioritized over Gmail for custom domains)
+  if (process.env.SENDGRID_API_KEY) {
+    return {
+      type: 'sendgrid',
+      apiKey: process.env.SENDGRID_API_KEY
+    };
+  }
+
+  // Gmail SMTP configuration (Note: Gmail SMTP cannot override sender address)
   if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+    console.warn('Warning: Gmail SMTP does not support custom "from" addresses. Emails will appear to come from your Gmail account. Consider using Brevo or SendGrid for custom domain emails.');
     return nodemailer.createTransporter({
       service: 'gmail',
       auth: {
@@ -22,15 +30,7 @@ const createEmailTransporter = () => {
     });
   }
 
-  // SendGrid configuration
-  if (process.env.SENDGRID_API_KEY) {
-    return {
-      type: 'sendgrid',
-      apiKey: process.env.SENDGRID_API_KEY
-    };
-  }
-
-  throw new Error('No email service configured. Please set up Brevo, Gmail, or SendGrid credentials.');
+  throw new Error('No email service configured. Please set up Brevo (recommended), SendGrid, or Gmail credentials.');
 };
 
 const getDefaultEmailSender = async () => {
@@ -144,17 +144,15 @@ const sendEmail = async (emailData) => {
       return { success: true };
     }
 
-    // Handle Gmail/SMTP - Force the from address
+    // Handle Gmail/SMTP - Note: Gmail will override the from address
+    console.warn('Using Gmail SMTP: The from address will be overridden to your Gmail address');
     const mailOptions = {
       from: `"${fromName}" <${fromEmail}>`,
       to: to,
       subject: subject,
       html: html,
-      // For Gmail, we need to set these additional headers to try to override the from
       headers: {
-        'From': `"${fromName}" <${fromEmail}>`,
         'Reply-To': replyTo || fromEmail,
-        'Return-Path': fromEmail
       }
     };
 
@@ -162,7 +160,7 @@ const sendEmail = async (emailData) => {
       mailOptions.replyTo = replyTo;
     }
 
-    console.log('Sending email with mailOptions:', JSON.stringify(mailOptions, null, 2));
+    console.log('Sending email with Gmail SMTP. Note: From address will be overridden by Gmail.');
 
     const result = await transporter.sendMail(mailOptions);
     console.log('Email sent result:', result);
