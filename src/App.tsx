@@ -17,6 +17,8 @@ import BlogDetail from "@/pages/BlogDetail";
 import Contact from "@/pages/Contact";
 import Auth from "@/pages/Auth";
 import AuthCallback from "@/pages/AuthCallback";
+import VerifyEmail from "@/pages/VerifyEmail";
+import ResetPassword from "@/pages/ResetPassword";
 import Dashboard from "@/pages/Dashboard";
 import Profile from "@/pages/Profile";
 import Settings from "@/pages/Settings";
@@ -55,6 +57,10 @@ function App() {
               <Route path="auth" element={<Auth />} />
               <Route path="auth/callback" element={<AuthCallback />} />
             </Route>
+
+            {/* Standalone auth pages */}
+            <Route path="verify-email" element={<VerifyEmail />} />
+            <Route path="reset-password" element={<ResetPassword />} />
 
             {/* Protected routes */}
             <Route

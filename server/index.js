@@ -8,6 +8,7 @@ const emailRoutes = require('./routes/email');
 const contactRoutes = require('./routes/contact');
 const newsletterRoutes = require('./routes/newsletter');
 const adminRoutes = require('./routes/admin');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -26,6 +27,7 @@ app.use('/api/email', emailRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/auth', authRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
