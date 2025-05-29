@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -35,6 +34,7 @@ import NewsletterAdmin from "@/pages/admin/NewsletterAdmin";
 import ContactAdmin from "@/pages/admin/ContactAdmin";
 import NotFound from "@/pages/NotFound";
 import EmailSettingsAdmin from "@/pages/admin/EmailSettingsAdmin";
+import SettingsAdmin from "@/pages/admin/SettingsAdmin";
 
 const queryClient = new QueryClient();
 
@@ -122,6 +122,7 @@ function App() {
               <Route path="email-settings" element={<EmailSettingsAdmin />} />
               <Route path="newsletter" element={<NewsletterAdmin />} />
               <Route path="contact" element={<ContactAdmin />} />
+              <Route path="settings" element={<SettingsAdmin />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

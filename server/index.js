@@ -1,4 +1,3 @@
-
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -9,6 +8,7 @@ const contactRoutes = require('./routes/contact');
 const newsletterRoutes = require('./routes/newsletter');
 const adminRoutes = require('./routes/admin');
 const authRoutes = require('./routes/auth');
+const adminSettingsRoutes = require('./routes/adminSettings');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -28,6 +28,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/admin/settings', adminSettingsRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
