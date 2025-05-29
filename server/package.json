@@ -2,7 +2,7 @@
 {
   "name": "lynixdevs-server",
   "version": "1.0.0",
-  "description": "Express.js server for LynixDevs application",
+  "description": "Backend server for LynixDevs",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -11,15 +11,12 @@
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
     "body-parser": "^1.20.2",
-    "@supabase/supabase-js": "^2.49.8",
+    "dotenv": "^16.3.1",
+    "@supabase/supabase-js": "^2.38.0",
     "nodemailer": "^6.9.7"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
-  },
-  "keywords": ["express", "nodejs", "api", "email"],
-  "author": "LynixDevs",
-  "license": "MIT"
+    "nodemon": "^3.0.1"
+  }
 }

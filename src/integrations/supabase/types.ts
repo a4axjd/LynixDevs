@@ -9,6 +9,81 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_settings: {
+        Row: {
+          account_lockout_duration_minutes: number
+          allowed_file_types: string
+          contact_form_enabled: boolean
+          created_at: string
+          email_notifications_enabled: boolean
+          email_verification_expiry_hours: number
+          file_upload_max_size_mb: number
+          from_email: string
+          from_name: string
+          id: string
+          maintenance_mode: boolean
+          max_login_attempts: number
+          newsletter_enabled: boolean
+          password_reset_expiry_hours: number
+          session_timeout_hours: number
+          smtp_host: string
+          smtp_password: string
+          smtp_port: number
+          smtp_use_tls: boolean
+          smtp_username: string
+          updated_at: string
+          user_registration_enabled: boolean
+        }
+        Insert: {
+          account_lockout_duration_minutes?: number
+          allowed_file_types?: string
+          contact_form_enabled?: boolean
+          created_at?: string
+          email_notifications_enabled?: boolean
+          email_verification_expiry_hours?: number
+          file_upload_max_size_mb?: number
+          from_email?: string
+          from_name?: string
+          id?: string
+          maintenance_mode?: boolean
+          max_login_attempts?: number
+          newsletter_enabled?: boolean
+          password_reset_expiry_hours?: number
+          session_timeout_hours?: number
+          smtp_host?: string
+          smtp_password?: string
+          smtp_port?: number
+          smtp_use_tls?: boolean
+          smtp_username?: string
+          updated_at?: string
+          user_registration_enabled?: boolean
+        }
+        Update: {
+          account_lockout_duration_minutes?: number
+          allowed_file_types?: string
+          contact_form_enabled?: boolean
+          created_at?: string
+          email_notifications_enabled?: boolean
+          email_verification_expiry_hours?: number
+          file_upload_max_size_mb?: number
+          from_email?: string
+          from_name?: string
+          id?: string
+          maintenance_mode?: boolean
+          max_login_attempts?: number
+          newsletter_enabled?: boolean
+          password_reset_expiry_hours?: number
+          session_timeout_hours?: number
+          smtp_host?: string
+          smtp_password?: string
+          smtp_port?: number
+          smtp_use_tls?: boolean
+          smtp_username?: string
+          updated_at?: string
+          user_registration_enabled?: boolean
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_id: string | null

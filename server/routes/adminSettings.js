@@ -1,6 +1,7 @@
 
 const express = require('express');
 const { supabase } = require('../config/supabase');
+const { clearTransporterCache } = require('../config/dynamicEmail');
 const router = express.Router();
 
 // Get admin settings
@@ -64,6 +65,9 @@ router.put('/', async (req, res) => {
       });
     }
 
+    // Add updated_at timestamp
+    settings.updated_at = new Date().toISOString();
+
     const { data, error } = await supabase
       .from('admin_settings')
       .upsert(settings, { onConflict: 'id' })
@@ -71,6 +75,9 @@ router.put('/', async (req, res) => {
       .single();
 
     if (error) throw error;
+
+    // Clear email transporter cache when SMTP settings are updated
+    clearTransporterCache();
 
     res.json({
       success: true,
@@ -90,8 +97,6 @@ router.post('/test-smtp', async (req, res) => {
   try {
     const { smtp_host, smtp_port, smtp_username, smtp_password, smtp_use_tls, from_email } = req.body;
     
-    // Here you would implement SMTP connection testing
-    // For now, we'll simulate a test
     if (!smtp_host || !smtp_port || !smtp_username) {
       return res.status(400).json({
         success: false,
@@ -99,19 +104,36 @@ router.post('/test-smtp', async (req, res) => {
       });
     }
 
-    // Simulate SMTP test (in real implementation, you'd actually test the connection)
-    setTimeout(() => {
-      res.json({
-        success: true,
-        message: 'SMTP connection test successful'
-      });
-    }, 1000);
+    // Import nodemailer for testing
+    const nodemailer = require('nodemailer');
+
+    // Create test transporter
+    const testTransporter = nodemailer.createTransporter({
+      host: smtp_host,
+      port: smtp_port,
+      secure: smtp_port === 465,
+      auth: {
+        user: smtp_username,
+        pass: smtp_password,
+      },
+      tls: smtp_use_tls ? {
+        rejectUnauthorized: false
+      } : undefined
+    });
+
+    // Verify connection
+    await testTransporter.verify();
+
+    res.json({
+      success: true,
+      message: 'SMTP connection test successful'
+    });
 
   } catch (error) {
     console.error('Error testing SMTP:', error);
     res.status(500).json({
       success: false,
-      error: 'SMTP connection test failed'
+      error: `SMTP connection test failed: ${error.message}`
     });
   }
 });
