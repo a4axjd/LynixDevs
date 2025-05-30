@@ -1,38 +1,40 @@
-
-const express = require('express');
-const { supabase } = require('../config/supabase');
-const { sendEmail, getSmtpConfig } = require('../config/dynamicEmail');
+const express = require("express");
+const { supabase } = require("../config/supabase");
+const { sendEmail, getSmtpConfig } = require("../config/dynamicEmail");
 const router = express.Router();
 
 // Get current user
-router.get('/user', async (req, res) => {
+router.get("/user", async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      return res.status(401).json({ error: 'No authorization header' });
+      return res.status(401).json({ error: "No authorization header" });
     }
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error } = await supabase.auth.getUser(token);
+    const token = authHeader.replace("Bearer ", "");
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(token);
 
     if (error) throw error;
 
     res.json({ user });
   } catch (error) {
-    console.error('Auth error:', error);
+    console.error("Auth error:", error);
     res.status(401).json({ error: error.message });
   }
 });
 
 // Send password reset email
-router.post('/reset-password', async (req, res) => {
+router.post("/reset-password", async (req, res) => {
   try {
     const { email } = req.body;
 
     if (!email) {
       return res.status(400).json({
         success: false,
-        error: 'Email is required'
+        error: "Email is required",
       });
     }
 
@@ -48,7 +50,7 @@ router.post('/reset-password', async (req, res) => {
     // For now, just send the email
 
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-    
+
     const emailHtml = `
       <h2>Password Reset Request</h2>
       <p>You have requested to reset your password. Click the link below to reset your password:</p>
@@ -60,46 +62,49 @@ router.post('/reset-password', async (req, res) => {
 
     await sendEmail({
       to: email,
-      subject: 'Password Reset Request',
+      subject: "Password Reset Request",
       html: emailHtml,
-      text: `You have requested to reset your password. Visit this link to reset: ${resetUrl}`
+      text: `You have requested to reset your password. Visit this link to reset: ${resetUrl}`,
     });
 
     res.json({
       success: true,
-      message: 'Password reset email sent successfully'
+      message: "Password reset email sent successfully",
     });
   } catch (error) {
-    console.error('Error sending password reset email:', error);
+    console.error("Error sending password reset email:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to send password reset email'
+      error: "Failed to send password reset email",
     });
   }
 });
 
 // Send email verification
-router.post('/send-verification', async (req, res) => {
+router.post("/send-verification", async (req, res) => {
   try {
     const { email } = req.body;
 
     if (!email) {
       return res.status(400).json({
         success: false,
-        error: 'Email is required'
+        error: "Email is required",
       });
     }
 
     // Get settings for email expiry
     const config = await getSmtpConfig();
-    const verificationExpiryHours = config.email_verification_expiry_hours || 24;
+    const verificationExpiryHours =
+      config.email_verification_expiry_hours || 24;
 
     // Generate verification token
     const verificationToken = Math.random().toString(36).substring(2, 15);
-    const expiresAt = new Date(Date.now() + verificationExpiryHours * 60 * 60 * 1000);
+    const expiresAt = new Date(
+      Date.now() + verificationExpiryHours * 60 * 60 * 1000
+    );
 
     const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
-    
+
     const emailHtml = `
       <h2>Email Verification</h2>
       <p>Thank you for signing up! Please verify your email address by clicking the link below:</p>
@@ -111,20 +116,20 @@ router.post('/send-verification', async (req, res) => {
 
     await sendEmail({
       to: email,
-      subject: 'Verify Your Email Address',
+      subject: "Verify Your Email Address",
       html: emailHtml,
-      text: `Thank you for signing up! Please verify your email address by visiting: ${verificationUrl}`
+      text: `Thank you for signing up! Please verify your email address by visiting: ${verificationUrl}`,
     });
 
     res.json({
       success: true,
-      message: 'Verification email sent successfully'
+      message: "Verification email sent successfully",
     });
   } catch (error) {
-    console.error('Error sending verification email:', error);
+    console.error("Error sending verification email:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to send verification email'
+      error: "Failed to send verification email",
     });
   }
 });

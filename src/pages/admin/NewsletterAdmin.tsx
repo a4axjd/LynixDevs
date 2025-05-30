@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
@@ -22,7 +21,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
-import { Download, Loader2, MailPlus, Send, Trash, UserPlus, Users } from "lucide-react";
+import {
+  Download,
+  Loader2,
+  MailPlus,
+  Send,
+  Trash,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -36,7 +43,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -79,7 +93,7 @@ const NewsletterAdmin = () => {
   const { toast } = useToast();
   const [showAddSubscriber, setShowAddSubscriber] = useState(false);
   const [showCreateNewsletter, setShowCreateNewsletter] = useState(false);
-  
+
   // Add subscriber form
   const addSubscriberForm = useForm<AddSubscriberFormValues>({
     resolver: zodResolver(addSubscriberSchema),
@@ -100,9 +114,9 @@ const NewsletterAdmin = () => {
   });
 
   // Fetch subscribers
-  const { 
-    data: subscribers, 
-    isLoading: isLoadingSubscribers, 
+  const {
+    data: subscribers,
+    isLoading: isLoadingSubscribers,
     error: subscribersError,
     refetch: refetchSubscribers,
   } = useQuery({
@@ -112,16 +126,16 @@ const NewsletterAdmin = () => {
         .from("subscribers")
         .select("*")
         .order("created_at", { ascending: false });
-      
+
       if (error) throw new Error(error.message);
       return data as Subscriber[];
     },
   });
 
   // Fetch newsletters
-  const { 
-    data: newsletters, 
-    isLoading: isLoadingNewsletters, 
+  const {
+    data: newsletters,
+    isLoading: isLoadingNewsletters,
     error: newslettersError,
     refetch: refetchNewsletters,
   } = useQuery({
@@ -131,7 +145,7 @@ const NewsletterAdmin = () => {
         .from("newsletters")
         .select("*")
         .order("created_at", { ascending: false });
-      
+
       if (error) throw new Error(error.message);
       return data as Newsletter[];
     },
@@ -140,24 +154,22 @@ const NewsletterAdmin = () => {
   // Add subscriber handler
   const onSubmitAddSubscriber = async (values: AddSubscriberFormValues) => {
     try {
-      const { data, error } = await supabase
-        .from("subscribers")
-        .insert([
-          {
-            email: values.email,
-            first_name: values.first_name || null,
-            last_name: values.last_name || null,
-            subscribed: true,
-          },
-        ]);
-      
+      const { data, error } = await supabase.from("subscribers").insert([
+        {
+          email: values.email,
+          first_name: values.first_name || null,
+          last_name: values.last_name || null,
+          subscribed: true,
+        },
+      ]);
+
       if (error) throw new Error(error.message);
-      
+
       toast({
         title: "Subscriber added",
         description: "The subscriber has been added successfully.",
       });
-      
+
       setShowAddSubscriber(false);
       addSubscriberForm.reset();
       refetchSubscribers();
@@ -171,24 +183,24 @@ const NewsletterAdmin = () => {
   };
 
   // Create newsletter handler
-  const onSubmitCreateNewsletter = async (values: CreateNewsletterFormValues) => {
+  const onSubmitCreateNewsletter = async (
+    values: CreateNewsletterFormValues
+  ) => {
     try {
-      const { data, error } = await supabase
-        .from("newsletters")
-        .insert([
-          {
-            subject: values.subject,
-            content: values.content,
-          },
-        ]);
-      
+      const { data, error } = await supabase.from("newsletters").insert([
+        {
+          subject: values.subject,
+          content: values.content,
+        },
+      ]);
+
       if (error) throw new Error(error.message);
-      
+
       toast({
         title: "Newsletter created",
         description: "The newsletter has been created and is ready to send.",
       });
-      
+
       setShowCreateNewsletter(false);
       createNewsletterForm.reset();
       refetchNewsletters();
@@ -208,27 +220,35 @@ const NewsletterAdmin = () => {
         title: "Sending newsletter",
         description: "The newsletter is being sent to all subscribers.",
       });
-      
-      // Here you would call your edge function to send the newsletter
-      // For now, let's just update the sent_at date and recipient count
-      
-      const subscriberCount = subscribers?.filter(s => s.subscribed)?.length || 0;
-      
-      const { error } = await supabase
-        .from("newsletters")
-        .update({ 
-          sent_at: new Date().toISOString(),
-          recipient_count: subscriberCount,
-        })
-        .eq("id", newsletterId);
-      
-      if (error) throw new Error(error.message);
-      
+
+      const newsletter = newsletters?.find((n) => n.id === newsletterId);
+      if (!newsletter) throw new Error("Newsletter not found.");
+
+      // Use your Vite environment variable
+      const serverUrl = import.meta.env.VITE_SERVER_URL;
+      if (!serverUrl) throw new Error("Server URL not configured.");
+
+      // Call the backend at /api/newsletter/send
+      const res = await fetch(`${serverUrl}/api/newsletter/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject: newsletter.subject,
+          html: newsletter.content,
+          newsletter_id: newsletter.id,
+        }),
+      });
+
+      const result = await res.json();
+
+      if (!result.success)
+        throw new Error(result.error || "Failed to send newsletter");
+
       toast({
         title: "Newsletter sent",
-        description: `The newsletter has been sent to ${subscriberCount} subscribers.`,
+        description: `Sent to ${result.sentCount} subscribers.`,
       });
-      
+
       refetchNewsletters();
     } catch (error) {
       toast({
@@ -246,14 +266,14 @@ const NewsletterAdmin = () => {
         .from("subscribers")
         .delete()
         .eq("id", subscriberId);
-      
+
       if (error) throw new Error(error.message);
-      
+
       toast({
         title: "Subscriber deleted",
         description: "The subscriber has been deleted successfully.",
       });
-      
+
       refetchSubscribers();
     } catch (error) {
       toast({
@@ -267,21 +287,21 @@ const NewsletterAdmin = () => {
   // Export subscribers
   const handleExportSubscribers = () => {
     if (!subscribers?.length) return;
-    
-    const activeSubscribers = subscribers.filter(s => s.subscribed);
-    
+
+    const activeSubscribers = subscribers.filter((s) => s.subscribed);
+
     const csvContent = [
       ["Email", "First Name", "Last Name", "Subscribed At"].join(","),
-      ...activeSubscribers.map(sub => 
+      ...activeSubscribers.map((sub) =>
         [
-          sub.email, 
-          sub.first_name || "", 
-          sub.last_name || "", 
-          new Date(sub.created_at).toISOString()
+          sub.email,
+          sub.first_name || "",
+          sub.last_name || "",
+          new Date(sub.created_at).toISOString(),
         ].join(",")
-      )
+      ),
     ].join("\n");
-    
+
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -291,7 +311,7 @@ const NewsletterAdmin = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     toast({
       title: "Subscribers exported",
       description: "The subscriber list has been exported as a CSV file.",
@@ -300,24 +320,26 @@ const NewsletterAdmin = () => {
 
   return (
     <div className="container p-6">
-      <AdminPageHeader 
-        title="Newsletter Management" 
-        description="Manage newsletter subscribers and send newsletters." 
+      <AdminPageHeader
+        title="Newsletter Management"
+        description="Manage newsletter subscribers and send newsletters."
       />
-      
+
       <Tabs defaultValue="subscribers" className="mt-6">
         <TabsList>
           <TabsTrigger value="subscribers">Subscribers</TabsTrigger>
           <TabsTrigger value="newsletters">Newsletters</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="subscribers" className="mt-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Subscribers</CardTitle>
                 <CardDescription>
-                  You have {subscribers?.filter(s => s.subscribed)?.length || 0} active subscribers.
+                  You have{" "}
+                  {subscribers?.filter((s) => s.subscribed)?.length || 0} active
+                  subscribers.
                 </CardDescription>
               </div>
               <div className="flex gap-2">
@@ -363,7 +385,9 @@ const NewsletterAdmin = () => {
                     <TableBody>
                       {subscribers?.map((subscriber) => (
                         <TableRow key={subscriber.id}>
-                          <TableCell className="font-medium">{subscriber.email}</TableCell>
+                          <TableCell className="font-medium">
+                            {subscriber.email}
+                          </TableCell>
                           <TableCell>
                             {[subscriber.first_name, subscriber.last_name]
                               .filter(Boolean)
@@ -373,15 +397,23 @@ const NewsletterAdmin = () => {
                             {format(new Date(subscriber.created_at), "PPP")}
                           </TableCell>
                           <TableCell>
-                            <Badge variant={subscriber.subscribed ? "default" : "outline"}>
-                              {subscriber.subscribed ? "Active" : "Unsubscribed"}
+                            <Badge
+                              variant={
+                                subscriber.subscribed ? "default" : "outline"
+                              }
+                            >
+                              {subscriber.subscribed
+                                ? "Active"
+                                : "Unsubscribed"}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDeleteSubscriber(subscriber.id)}
+                              onClick={() =>
+                                handleDeleteSubscriber(subscriber.id)
+                              }
                             >
                               <Trash className="h-4 w-4 text-destructive" />
                             </Button>
@@ -395,7 +427,7 @@ const NewsletterAdmin = () => {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="newsletters" className="mt-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -438,10 +470,18 @@ const NewsletterAdmin = () => {
                     <TableBody>
                       {newsletters?.map((newsletter) => (
                         <TableRow key={newsletter.id}>
-                          <TableCell className="font-medium">{newsletter.subject}</TableCell>
-                          <TableCell>{format(new Date(newsletter.created_at), "PPP")}</TableCell>
+                          <TableCell className="font-medium">
+                            {newsletter.subject}
+                          </TableCell>
                           <TableCell>
-                            <Badge variant={newsletter.sent_at ? "outline" : "default"}>
+                            {format(new Date(newsletter.created_at), "PPP")}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                newsletter.sent_at ? "outline" : "default"
+                              }
+                            >
                               {newsletter.sent_at ? "Sent" : "Draft"}
                             </Badge>
                           </TableCell>
@@ -460,7 +500,9 @@ const NewsletterAdmin = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleSendNewsletter(newsletter.id)}
+                                onClick={() =>
+                                  handleSendNewsletter(newsletter.id)
+                                }
                               >
                                 <Send className="h-4 w-4 mr-2" />
                                 Send
@@ -477,7 +519,7 @@ const NewsletterAdmin = () => {
           </Card>
         </TabsContent>
       </Tabs>
-      
+
       {/* Add Subscriber Dialog */}
       <Dialog open={showAddSubscriber} onOpenChange={setShowAddSubscriber}>
         <DialogContent>
@@ -488,7 +530,10 @@ const NewsletterAdmin = () => {
             </DialogDescription>
           </DialogHeader>
           <Form {...addSubscriberForm}>
-            <form onSubmit={addSubscriberForm.handleSubmit(onSubmitAddSubscriber)} className="space-y-4">
+            <form
+              onSubmit={addSubscriberForm.handleSubmit(onSubmitAddSubscriber)}
+              className="space-y-4"
+            >
               <FormField
                 control={addSubscriberForm.control}
                 name="email"
@@ -537,9 +582,12 @@ const NewsletterAdmin = () => {
           </Form>
         </DialogContent>
       </Dialog>
-      
+
       {/* Create Newsletter Dialog */}
-      <Dialog open={showCreateNewsletter} onOpenChange={setShowCreateNewsletter}>
+      <Dialog
+        open={showCreateNewsletter}
+        onOpenChange={setShowCreateNewsletter}
+      >
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Create Newsletter</DialogTitle>
@@ -548,7 +596,12 @@ const NewsletterAdmin = () => {
             </DialogDescription>
           </DialogHeader>
           <Form {...createNewsletterForm}>
-            <form onSubmit={createNewsletterForm.handleSubmit(onSubmitCreateNewsletter)} className="space-y-4">
+            <form
+              onSubmit={createNewsletterForm.handleSubmit(
+                onSubmitCreateNewsletter
+              )}
+              className="space-y-4"
+            >
               <FormField
                 control={createNewsletterForm.control}
                 name="subject"
@@ -569,10 +622,10 @@ const NewsletterAdmin = () => {
                   <FormItem>
                     <FormLabel>Content (HTML)</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="<h1>Newsletter Content</h1><p>Your content here...</p>" 
+                      <Textarea
+                        placeholder="<h1>Newsletter Content</h1><p>Your content here...</p>"
                         className="min-h-[300px] font-mono text-sm"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />

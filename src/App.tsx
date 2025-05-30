@@ -56,53 +56,52 @@ function App() {
               <Route path="contact" element={<Contact />} />
               <Route path="auth" element={<Auth />} />
               <Route path="auth/callback" element={<AuthCallback />} />
+              {/* Standalone auth pages */}
+              <Route path="verify-email" element={<VerifyEmail />} />
+              <Route path="reset-password" element={<ResetPassword />} />
+
+              {/* Protected routes */}
+              <Route
+                path="/dashboard"
+                element={
+                  <RouteGuard>
+                    <Dashboard />
+                  </RouteGuard>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <RouteGuard>
+                    <Profile />
+                  </RouteGuard>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <RouteGuard>
+                    <Settings />
+                  </RouteGuard>
+                }
+              />
+              <Route
+                path="/project/:id"
+                element={
+                  <RouteGuard>
+                    <ProjectDetail />
+                  </RouteGuard>
+                }
+              />
+              <Route
+                path="/client-project/:id"
+                element={
+                  <RouteGuard>
+                    <ClientProjectDashboard />
+                  </RouteGuard>
+                }
+              />
             </Route>
-
-            {/* Standalone auth pages */}
-            <Route path="verify-email" element={<VerifyEmail />} />
-            <Route path="reset-password" element={<ResetPassword />} />
-
-            {/* Protected routes */}
-            <Route
-              path="/dashboard"
-              element={
-                <RouteGuard>
-                  <Dashboard />
-                </RouteGuard>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <RouteGuard>
-                  <Profile />
-                </RouteGuard>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <RouteGuard>
-                  <Settings />
-                </RouteGuard>
-              }
-            />
-            <Route
-              path="/project/:id"
-              element={
-                <RouteGuard>
-                  <ProjectDetail />
-                </RouteGuard>
-              }
-            />
-            <Route
-              path="/client-project/:id"
-              element={
-                <RouteGuard>
-                  <ClientProjectDashboard />
-                </RouteGuard>
-              }
-            />
 
             {/* Admin routes */}
             <Route
