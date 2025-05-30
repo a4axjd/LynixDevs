@@ -2,6 +2,7 @@
 const express = require('express');
 const { supabase } = require('../config/supabase');
 const { clearTransporterCache } = require('../config/dynamicEmail');
+const nodemailer = require('nodemailer');
 const router = express.Router();
 
 // Get admin settings
@@ -68,20 +69,42 @@ router.put('/', async (req, res) => {
     // Add updated_at timestamp
     settings.updated_at = new Date().toISOString();
 
-    const { data, error } = await supabase
+    // First check if any settings exist
+    const { data: existingData } = await supabase
       .from('admin_settings')
-      .upsert(settings, { onConflict: 'id' })
-      .select()
+      .select('id')
       .single();
 
-    if (error) throw error;
+    let result;
+    if (existingData) {
+      // Update existing settings
+      const { data, error } = await supabase
+        .from('admin_settings')
+        .update(settings)
+        .eq('id', existingData.id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      result = data;
+    } else {
+      // Insert new settings
+      const { data, error } = await supabase
+        .from('admin_settings')
+        .insert(settings)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      result = data;
+    }
 
     // Clear email transporter cache when SMTP settings are updated
     clearTransporterCache();
 
     res.json({
       success: true,
-      settings: data
+      settings: result
     });
   } catch (error) {
     console.error('Error updating admin settings:', error);
@@ -104,14 +127,11 @@ router.post('/test-smtp', async (req, res) => {
       });
     }
 
-    // Import nodemailer for testing
-    const nodemailer = require('nodemailer');
-
-    // Create test transporter
+    // Create test transporter with correct nodemailer syntax
     const testTransporter = nodemailer.createTransporter({
       host: smtp_host,
-      port: smtp_port,
-      secure: smtp_port === 465,
+      port: parseInt(smtp_port),
+      secure: parseInt(smtp_port) === 465,
       auth: {
         user: smtp_username,
         pass: smtp_password,
