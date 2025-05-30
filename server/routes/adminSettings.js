@@ -8,7 +8,7 @@ const router = express.Router();
 // Get admin settings
 router.get('/', async (req, res) => {
   try {
-    // Use service role client for admin operations
+    // Use service role client for admin operations to bypass RLS
     const client = supabaseAdmin || supabase;
     const { data, error } = await client
       .from('admin_settings')
@@ -74,7 +74,7 @@ router.put('/', async (req, res) => {
 
     console.log('Attempting to save settings:', settings);
 
-    // Use service role client for admin operations
+    // Use service role client for admin operations to bypass RLS
     const client = supabaseAdmin || supabase;
 
     // First check if any settings exist

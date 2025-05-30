@@ -8,7 +8,7 @@ let lastConfigUpdate = null;
 // Get SMTP configuration from database
 async function getSmtpConfig() {
   try {
-    // Use service role client for admin operations
+    // Use service role client for admin operations to bypass RLS
     const client = supabaseAdmin || supabase;
     const { data, error } = await client
       .from('admin_settings')
