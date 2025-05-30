@@ -128,7 +128,7 @@ router.post('/test-smtp', async (req, res) => {
     }
 
     // Create test transporter with correct nodemailer syntax
-    const testTransporter = nodemailer.createTransporter({
+    const testTransporter = nodemailer.createTransport({
       host: smtp_host,
       port: parseInt(smtp_port),
       secure: parseInt(smtp_port) === 465,

@@ -51,7 +51,7 @@ async function createTransporter() {
     throw new Error('SMTP configuration is incomplete');
   }
 
-  return nodemailer.createTransporter({
+  return nodemailer.createTransport({
     host: config.smtp_host,
     port: config.smtp_port,
     secure: config.smtp_port === 465, // true for 465, false for other ports
