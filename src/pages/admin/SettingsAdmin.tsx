@@ -39,6 +39,7 @@ interface AdminSettings {
   smtp_username: string;
   smtp_password: string;
   smtp_use_tls: boolean;
+  smtp_reply_to: string;
   from_email: string;
   from_name: string;
   maintenance_mode: boolean;
@@ -84,7 +85,10 @@ const SettingsAdmin = () => {
         body: JSON.stringify(newSettings),
       });
       
-      if (!response.ok) throw new Error('Failed to update settings');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update settings');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -289,6 +293,19 @@ const SettingsAdmin = () => {
                     onChange={(e) => updateSetting('from_name', e.target.value)}
                   />
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="smtpReplyTo">Reply-To Email</Label>
+                <Input
+                  id="smtpReplyTo"
+                  placeholder="support@lynixdevs.us"
+                  value={settings.smtp_reply_to}
+                  onChange={(e) => updateSetting('smtp_reply_to', e.target.value)}
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Email address where replies will be sent (optional)
+                </p>
               </div>
 
               <div className="flex items-center justify-between">

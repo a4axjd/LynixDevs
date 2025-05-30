@@ -10,7 +10,7 @@ async function getSmtpConfig() {
   try {
     const { data, error } = await supabase
       .from('admin_settings')
-      .select('smtp_host, smtp_port, smtp_username, smtp_password, smtp_use_tls, from_email, from_name')
+      .select('smtp_host, smtp_port, smtp_username, smtp_password, smtp_use_tls, smtp_reply_to, from_email, from_name')
       .single();
 
     if (error) {
@@ -22,6 +22,7 @@ async function getSmtpConfig() {
         smtp_username: process.env.SMTP_USER || '',
         smtp_password: process.env.SMTP_PASSWORD || '',
         smtp_use_tls: true,
+        smtp_reply_to: '',
         from_email: process.env.SMTP_FROM_EMAIL || 'noreply@lynixdevs.us',
         from_name: 'LynixDevs'
       };
@@ -37,6 +38,7 @@ async function getSmtpConfig() {
       smtp_username: process.env.SMTP_USER || '',
       smtp_password: process.env.SMTP_PASSWORD || '',
       smtp_use_tls: true,
+      smtp_reply_to: '',
       from_email: process.env.SMTP_FROM_EMAIL || 'noreply@lynixdevs.us',
       from_name: 'LynixDevs'
     };
@@ -84,7 +86,7 @@ async function getTransporter() {
 }
 
 // Send email function
-async function sendEmail({ to, subject, html, text }) {
+async function sendEmail({ to, subject, html, text, replyTo }) {
   try {
     const transporter = await getTransporter();
     const config = await getSmtpConfig();
@@ -94,7 +96,8 @@ async function sendEmail({ to, subject, html, text }) {
       to,
       subject,
       html,
-      text
+      text,
+      replyTo: replyTo || config.smtp_reply_to || config.from_email
     };
 
     const result = await transporter.sendMail(mailOptions);

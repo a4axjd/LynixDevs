@@ -1,8 +1,7 @@
 
 const express = require('express');
 const { supabase } = require('../config/supabase');
-const { sendEmail, getDefaultEmailSender } = require('../config/email');
-
+const { sendEmail } = require('../config/dynamicEmail');
 const router = express.Router();
 
 // Submit contact form
@@ -10,130 +9,107 @@ router.post('/submit', async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
 
-    console.log('Received contact submission:', { name, email, subject, message });
-
-    // Validate form data
     if (!name || !email || !subject || !message) {
       return res.status(400).json({
         success: false,
-        error: 'Please fill in all required fields.'
+        error: 'All fields are required'
       });
     }
 
-    // Get default email sender
-    console.log('Fetching default email sender...');
-    let defaultSender;
-    try {
-      const { data: senderData, error: senderError } = await supabase
-        .from('email_senders')
-        .select('email, name')
-        .eq('is_default', true)
-        .single();
-
-      if (senderError) {
-        console.error('Error fetching default sender from database:', senderError);
-        // Fallback to function
-        defaultSender = await getDefaultEmailSender();
-      } else {
-        defaultSender = senderData;
-      }
-    } catch (error) {
-      console.error('Error getting default sender:', error);
-      // Fallback to hardcoded default
-      defaultSender = {
-        email: "noreply@lynixdevs.us",
-        name: "LynixDevs"
-      };
-    }
-
-    console.log('Using sender:', defaultSender);
-
-    // Insert contact submission into database
-    console.log('Inserting contact submission into database...');
+    // Save to database
     const { data, error } = await supabase
       .from('contact_submissions')
-      .insert([{
-        name,
-        email,
-        subject,
-        message,
-      }]);
+      .insert([
+        {
+          name,
+          email,
+          subject,
+          message,
+          submitted_at: new Date().toISOString()
+        }
+      ])
+      .select()
+      .single();
 
-    if (error) {
-      console.error('Database error:', error);
-      throw new Error(`Database error: ${error.message}`);
-    }
+    if (error) throw error;
 
-    // Send confirmation email to the user
-    try {
-      console.log('Sending confirmation email...');
-
-      const emailHtml = `
-        <h1>Thank you for contacting us, ${name}!</h1>
-        <p>We have received your message regarding "${subject}" and will get back to you as soon as possible.</p>
-        <p>Here's a copy of your message:</p>
-        <blockquote style="border-left: 2px solid #ccc; padding-left: 10px; margin-left: 10px;">
-          ${message.replace(/\n/g, "<br>")}
-        </blockquote>
-        <p>Best regards,<br>The ${defaultSender.name} Team</p>
-      `;
-
-      await sendEmail({
-        to: email,
-        subject: "We've received your message",
-        html: emailHtml,
-        replyTo: "info@lynixdevs.com",
-        name: name,
-        senderEmail: defaultSender.email,
-        senderName: defaultSender.name
-      });
-
-      console.log('Confirmation email sent successfully');
-    } catch (emailError) {
-      console.error('Error sending confirmation email:', emailError);
-      // Continue execution - don't fail the request just because email failed
-    }
+    // Send confirmation email to user
+    const userEmailHtml = `
+      <h2>Thank you for contacting us!</h2>
+      <p>Dear ${name},</p>
+      <p>We have received your message and will get back to you as soon as possible.</p>
+      <p><strong>Your message:</strong></p>
+      <p>${message}</p>
+      <p>Best regards,<br>LynixDevs Team</p>
+    `;
 
     // Send notification email to admin
+    const adminEmailHtml = `
+      <h2>New Contact Form Submission</h2>
+      <p><strong>From:</strong> ${name} (${email})</p>
+      <p><strong>Subject:</strong> ${subject}</p>
+      <p><strong>Message:</strong></p>
+      <p>${message}</p>
+      <p><strong>Submitted at:</strong> ${new Date().toLocaleString()}</p>
+    `;
+
     try {
-      console.log('Sending notification email to admin...');
-
-      const adminEmailHtml = `
-        <h1>New Contact Form Submission</h1>
-        <p><strong>From:</strong> ${name} (${email})</p>
-        <p><strong>Subject:</strong> ${subject}</p>
-        <p><strong>Message:</strong></p>
-        <blockquote style="border-left: 2px solid #ccc; padding-left: 10px; margin-left: 10px;">
-          ${message.replace(/\n/g, "<br>")}
-        </blockquote>
-        <p>You can reply directly to this email to respond to the customer.</p>
-      `;
-
+      // Send confirmation to user
       await sendEmail({
-        to: "info@lynixdevs.com",
-        subject: `New Contact: ${subject}`,
-        html: adminEmailHtml,
-        replyTo: email,
-        name: name,
-        senderEmail: defaultSender.email,
-        senderName: defaultSender.name
+        to: email,
+        subject: 'Thank you for contacting us',
+        html: userEmailHtml,
+        text: `Thank you for contacting us, ${name}! We have received your message and will get back to you as soon as possible.`
       });
 
-      console.log('Admin notification email sent successfully');
-    } catch (adminEmailError) {
-      console.error('Error sending admin notification email:', adminEmailError);
+      // Send notification to admin (you can configure this email in your settings)
+      await sendEmail({
+        to: 'admin@lynixdevs.us', // You might want to make this configurable
+        subject: `New Contact: ${subject}`,
+        html: adminEmailHtml,
+        text: `New contact form submission from ${name} (${email}): ${message}`,
+        replyTo: email
+      });
+
+      console.log('Contact form emails sent successfully');
+    } catch (emailError) {
+      console.error('Error sending contact emails:', emailError);
+      // Don't fail the whole request if email fails
     }
 
     res.json({
       success: true,
-      message: "Thank you for your message. We'll get back to you soon!"
+      message: 'Contact form submitted successfully',
+      submission: data
     });
-
   } catch (error) {
-    console.error('Error processing contact submission:', error);
+    console.error('Error submitting contact form:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'An error occurred while processing your submission'
+      error: 'Failed to submit contact form'
+    });
+  }
+});
+
+// Get contact submissions (admin only)
+router.get('/submissions', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('contact_submissions')
+      .select('*')
+      .order('submitted_at', { ascending: false });
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      submissions: data
+    });
+  } catch (error) {
+    console.error('Error fetching contact submissions:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch contact submissions'
     });
   }
 });

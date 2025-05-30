@@ -29,6 +29,7 @@ router.get('/', async (req, res) => {
       smtp_username: '',
       smtp_password: '',
       smtp_use_tls: true,
+      smtp_reply_to: '',
       from_email: 'noreply@lynixdevs.us',
       from_name: 'LynixDevs',
       maintenance_mode: false,
@@ -69,38 +70,55 @@ router.put('/', async (req, res) => {
     // Add updated_at timestamp
     settings.updated_at = new Date().toISOString();
 
+    console.log('Attempting to save settings:', settings);
+
     // First check if any settings exist
-    const { data: existingData } = await supabase
+    const { data: existingData, error: fetchError } = await supabase
       .from('admin_settings')
       .select('id')
-      .single();
+      .limit(1);
+
+    if (fetchError) {
+      console.error('Error fetching existing settings:', fetchError);
+      throw fetchError;
+    }
 
     let result;
-    if (existingData) {
+    if (existingData && existingData.length > 0) {
       // Update existing settings
+      console.log('Updating existing settings with ID:', existingData[0].id);
       const { data, error } = await supabase
         .from('admin_settings')
         .update(settings)
-        .eq('id', existingData.id)
+        .eq('id', existingData[0].id)
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating settings:', error);
+        throw error;
+      }
       result = data;
     } else {
       // Insert new settings
+      console.log('Inserting new settings');
       const { data, error } = await supabase
         .from('admin_settings')
-        .insert(settings)
+        .insert([settings])
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error inserting settings:', error);
+        throw error;
+      }
       result = data;
     }
 
     // Clear email transporter cache when SMTP settings are updated
     clearTransporterCache();
+
+    console.log('Settings saved successfully:', result);
 
     res.json({
       success: true,
@@ -110,7 +128,7 @@ router.put('/', async (req, res) => {
     console.error('Error updating admin settings:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to update admin settings'
+      error: `Failed to update admin settings: ${error.message}`
     });
   }
 });
