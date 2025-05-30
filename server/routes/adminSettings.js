@@ -1,6 +1,6 @@
 
 const express = require('express');
-const { supabase } = require('../config/supabase');
+const { supabase, supabaseAdmin } = require('../config/supabase');
 const { clearTransporterCache } = require('../config/dynamicEmail');
 const nodemailer = require('nodemailer');
 const router = express.Router();
@@ -8,7 +8,9 @@ const router = express.Router();
 // Get admin settings
 router.get('/', async (req, res) => {
   try {
-    const { data, error } = await supabase
+    // Use service role client for admin operations
+    const client = supabaseAdmin || supabase;
+    const { data, error } = await client
       .from('admin_settings')
       .select('*')
       .single();
@@ -72,8 +74,11 @@ router.put('/', async (req, res) => {
 
     console.log('Attempting to save settings:', settings);
 
+    // Use service role client for admin operations
+    const client = supabaseAdmin || supabase;
+
     // First check if any settings exist
-    const { data: existingData, error: fetchError } = await supabase
+    const { data: existingData, error: fetchError } = await client
       .from('admin_settings')
       .select('id')
       .limit(1);
@@ -87,7 +92,7 @@ router.put('/', async (req, res) => {
     if (existingData && existingData.length > 0) {
       // Update existing settings
       console.log('Updating existing settings with ID:', existingData[0].id);
-      const { data, error } = await supabase
+      const { data, error } = await client
         .from('admin_settings')
         .update(settings)
         .eq('id', existingData[0].id)
@@ -102,7 +107,7 @@ router.put('/', async (req, res) => {
     } else {
       // Insert new settings
       console.log('Inserting new settings');
-      const { data, error } = await supabase
+      const { data, error } = await client
         .from('admin_settings')
         .insert([settings])
         .select()
@@ -146,7 +151,7 @@ router.post('/test-smtp', async (req, res) => {
     }
 
     // Create test transporter with correct nodemailer syntax
-    const testTransporter = nodemailer.createTransport({
+    const testTransporter = nodemailer.createTransporter({
       host: smtp_host,
       port: parseInt(smtp_port),
       secure: parseInt(smtp_port) === 465,

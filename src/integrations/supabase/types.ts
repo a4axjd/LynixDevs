@@ -691,6 +691,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin_user: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
       make_user_admin: {
         Args: { _user_id: string }
         Returns: undefined

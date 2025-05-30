@@ -1,6 +1,6 @@
 
 const nodemailer = require('nodemailer');
-const { supabase } = require('./supabase');
+const { supabase, supabaseAdmin } = require('./supabase');
 
 let cachedTransporter = null;
 let lastConfigUpdate = null;
@@ -8,7 +8,9 @@ let lastConfigUpdate = null;
 // Get SMTP configuration from database
 async function getSmtpConfig() {
   try {
-    const { data, error } = await supabase
+    // Use service role client for admin operations
+    const client = supabaseAdmin || supabase;
+    const { data, error } = await client
       .from('admin_settings')
       .select('smtp_host, smtp_port, smtp_username, smtp_password, smtp_use_tls, smtp_reply_to, from_email, from_name')
       .single();
@@ -53,7 +55,7 @@ async function createTransporter() {
     throw new Error('SMTP configuration is incomplete');
   }
 
-  return nodemailer.createTransport({
+  return nodemailer.createTransporter({
     host: config.smtp_host,
     port: config.smtp_port,
     secure: config.smtp_port === 465, // true for 465, false for other ports
