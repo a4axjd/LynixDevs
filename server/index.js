@@ -29,11 +29,16 @@ async function initializeServer() {
     const newsletterRoutes = require("./routes/newsletter");
     const emailRoutes = require("./routes/email");
     const adminSettingsRoutes = require("./routes/adminSettings");
+    const adminCountsRoutes = require("./routes/adminCounts");
     
     // New API routes that replace edge functions
     const usersRoutes = require("./routes/users");
     const contactNewRoutes = require("./routes/contactNew");
     const newsletterNewRoutes = require("./routes/newsletterNew");
+    
+    // New public API routes
+    const blogRoutes = require("./routes/blog");
+    const projectsRoutes = require("./routes/projects");
 
     // Register existing routes
     app.use("/api/admin", adminRoutes);
@@ -41,11 +46,16 @@ async function initializeServer() {
     app.use("/api/newsletter", newsletterRoutes);
     app.use("/api/email", emailRoutes);
     app.use("/api/admin/settings", adminSettingsRoutes);
+    app.use("/api/admin", adminCountsRoutes);
     
     // Register new routes that replace edge functions
     app.use("/api/users", usersRoutes);
     app.use("/api/contact-new", contactNewRoutes);
     app.use("/api/newsletter-new", newsletterNewRoutes);
+    
+    // Register new public routes
+    app.use("/api/blog", blogRoutes);
+    app.use("/api/projects", projectsRoutes);
 
     // Health check endpoint
     app.get("/health", (req, res) => {

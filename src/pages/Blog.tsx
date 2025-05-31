@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { Search, Calendar, ArrowRight, User, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
@@ -30,20 +29,17 @@ const Blog = () => {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch published blog posts
+  // Fetch published blog posts from backend
   const { data: blogPosts, isLoading, error } = useQuery({
     queryKey: ["publicBlogPosts"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("blog_posts")
-        .select("*")
-        .eq("published", true)
-        .order("published_at", { ascending: false });
-
-      if (error) {
-        throw new Error(`Error fetching blog posts: ${error.message}`);
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'}/api/blog/published`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch blog posts: ${response.statusText}`);
       }
 
+      const data = await response.json();
       return data as BlogPost[];
     },
   });
@@ -73,12 +69,18 @@ const Blog = () => {
     try {
       setIsSubmitting(true);
 
-      const { data, error } = await supabase.functions.invoke("newsletter-subscribe", {
-        body: { email },
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'}/api/newsletter-new/subscribe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
       });
 
-      if (error) {
-        throw error;
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Subscription failed');
       }
 
       toast({

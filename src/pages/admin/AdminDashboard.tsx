@@ -1,6 +1,5 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FolderKanban, FileText, Mail, Send, MessageSquare } from "lucide-react";
 
@@ -17,9 +16,14 @@ const AdminDashboard = () => {
   const { data: counts, isLoading } = useQuery({
     queryKey: ["adminCounts"],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_admin_counts");
-      if (error) throw new Error(error.message);
-      return data as unknown as AdminCounts;
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'}/api/admin/counts`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch admin counts: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      return data as AdminCounts;
     },
   });
 

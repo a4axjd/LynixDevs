@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
@@ -32,21 +31,18 @@ const Portfolio = () => {
     { id: "on-hold", name: "On Hold" },
   ];
 
-  // Fetch projects from Supabase without authentication requirement
+  // Fetch projects from backend server
   const { data: projects, isLoading, error } = useQuery({
     queryKey: ["publicProjects"],
     queryFn: async () => {
-      // Create a new supabase client instance without auth requirements for public data
-      const { data, error } = await supabase
-        .from("projects")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching projects:", error);
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'}/api/projects/public`);
+      
+      if (!response.ok) {
+        console.error("Error fetching projects:", response.statusText);
         return []; // Return empty array instead of throwing to allow graceful handling
       }
 
+      const data = await response.json();
       return data as Project[];
     },
     retry: 1, // Only retry once to avoid excessive requests
