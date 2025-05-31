@@ -2,12 +2,12 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Calendar, User, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
+import { Helmet } from "react-helmet";
 
 interface BlogPost {
   id: string;
@@ -27,21 +27,17 @@ const BlogDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { toast } = useToast();
 
-  // Fetch the specific blog post by slug
+  // Fetch the specific blog post by slug from backend
   const { data: post, isLoading, error } = useQuery({
     queryKey: ["blogPost", slug],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("blog_posts")
-        .select("*")
-        .eq("slug", slug)
-        .eq("published", true)
-        .single();
-
-      if (error) {
-        throw new Error(`Error fetching blog post: ${error.message}`);
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'}/api/blog/slug/${slug}`);
+      
+      if (!response.ok) {
+        throw new Error(`Error fetching blog post: ${response.statusText}`);
       }
 
+      const data = await response.json();
       return data as BlogPost;
     },
   });
@@ -62,8 +58,45 @@ const BlogDetail = () => {
     return format(new Date(dateString), "MMM d, yyyy");
   };
 
+  // SEO meta data
+  const pageTitle = post ? `${post.title} | LynixDevs Blog` : "Blog Post | LynixDevs";
+  const pageDescription = post?.excerpt || post?.content?.substring(0, 160) || "Read our latest blog post about web development, design, and technology.";
+  const pageImage = post?.image_url || "/placeholder.svg";
+  const pageUrl = `${window.location.origin}/blog/${slug}`;
+
   return (
     <div className="pt-20">
+      {/* Dynamic SEO Meta Tags */}
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        
+        {/* Open Graph Tags */}
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:image" content={pageImage} />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:type" content="article" />
+        <meta property="og:site_name" content="LynixDevs" />
+        
+        {/* Twitter Card Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={pageImage} />
+        
+        {/* Additional SEO Tags */}
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={pageUrl} />
+        
+        {post?.published_at && (
+          <meta property="article:published_time" content={post.published_at} />
+        )}
+        {post?.updated_at && (
+          <meta property="article:modified_time" content={post.updated_at} />
+        )}
+      </Helmet>
+
       {isLoading ? (
         <div className="flex justify-center my-20">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />

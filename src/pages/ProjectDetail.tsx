@@ -2,13 +2,13 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Calendar, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Helmet } from "react-helmet";
 
 interface Project {
   id: string;
@@ -27,20 +27,17 @@ const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
 
-  // Fetch the specific project by id
+  // Fetch the specific project by id from backend
   const { data: project, isLoading, error } = useQuery({
     queryKey: ["project", id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("projects")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-      if (error) {
-        throw new Error(`Error fetching project: ${error.message}`);
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'}/api/projects/${id}`);
+      
+      if (!response.ok) {
+        throw new Error(`Error fetching project: ${response.statusText}`);
       }
 
+      const data = await response.json();
       return data as Project;
     },
   });
@@ -76,8 +73,46 @@ const ProjectDetail = () => {
     return format(new Date(dateString), "MMM d, yyyy");
   };
 
+  // SEO meta data
+  const pageTitle = project ? `${project.title} | LynixDevs Portfolio` : "Project | LynixDevs Portfolio";
+  const pageDescription = project?.description || "Explore our latest project showcasing innovative web development and design solutions.";
+  const pageImage = project?.image_url || "/placeholder.svg";
+  const pageUrl = `${window.location.origin}/portfolio/${id}`;
+
   return (
     <div className="pt-20">
+      {/* Dynamic SEO Meta Tags */}
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        
+        {/* Open Graph Tags */}
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:image" content={pageImage} />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="LynixDevs" />
+        
+        {/* Twitter Card Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={pageImage} />
+        
+        {/* Additional SEO Tags */}
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={pageUrl} />
+        
+        {project && (
+          <>
+            <meta property="article:published_time" content={project.created_at} />
+            <meta property="article:modified_time" content={project.updated_at} />
+            {project.client && <meta name="author" content={project.client} />}
+          </>
+        )}
+      </Helmet>
+
       {isLoading ? (
         <div className="flex justify-center my-20">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />

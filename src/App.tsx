@@ -52,6 +52,7 @@ function App() {
               <Route path="about" element={<About />} />
               <Route path="services" element={<Services />} />
               <Route path="portfolio" element={<Portfolio />} />
+              <Route path="portfolio/:id" element={<ProjectDetail />} />
               <Route path="blog" element={<Blog />} />
               <Route path="blog/:slug" element={<BlogDetail />} />
               <Route path="contact" element={<Contact />} />
@@ -83,14 +84,6 @@ function App() {
                 element={
                   <RouteGuard>
                     <Settings />
-                  </RouteGuard>
-                }
-              />
-              <Route
-                path="/project/:id"
-                element={
-                  <RouteGuard>
-                    <ProjectDetail />
                   </RouteGuard>
                 }
               />

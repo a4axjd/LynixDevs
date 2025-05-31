@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -6,6 +5,7 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
+import SEOHead from "@/components/SEOHead";
 
 // Define project type based on Supabase schema
 interface Project {
@@ -94,6 +94,13 @@ const Portfolio = () => {
 
   return (
     <div className="pt-20">
+      {/* SEO Meta Tags */}
+      <SEOHead
+        title="Portfolio | LynixDevs - Our Latest Projects"
+        description="Explore our portfolio of innovative web development and design projects. See how we've helped businesses achieve their digital goals."
+        url={`${window.location.origin}/portfolio`}
+      />
+
       {/* Hero Section */}
       <section className="bg-lynix-dark text-white py-20 md:py-28">
         <div className="container-custom">
