@@ -18,6 +18,7 @@ import Contact from "@/pages/Contact";
 import Auth from "@/pages/Auth";
 import AuthCallback from "@/pages/AuthCallback";
 import ResetPassword from "@/pages/ResetPassword";
+import VerifyEmail from "@/pages/VerifyEmail";
 import Dashboard from "@/pages/Dashboard";
 import Profile from "@/pages/Profile";
 import Settings from "@/pages/Settings";
@@ -58,6 +59,7 @@ function App() {
               <Route path="auth/callback" element={<AuthCallback />} />
               {/* Supabase auth redirects */}
               <Route path="reset-password" element={<ResetPassword />} />
+              <Route path="verify-email" element={<VerifyEmail />} />
 
               {/* Protected routes */}
               <Route

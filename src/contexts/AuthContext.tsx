@@ -42,13 +42,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
+        
+        // Only set loading to false after we've handled the initial session
+        if (event !== 'INITIAL_SESSION') {
+          setIsLoading(false);
+        }
       }
     );
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
@@ -61,6 +68,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
+      setIsLoading(true);
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -77,20 +85,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         error: "An unexpected error occurred during sign in", 
         success: false 
       };
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const signInWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: window.location.origin + "/auth/callback",
-      },
-    });
+    try {
+      setIsLoading(true);
+      await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin + "/auth/callback",
+        },
+      });
+    } catch (error) {
+      console.error("Google sign in error:", error);
+      setIsLoading(false);
+    }
   };
 
   const signUp = async (email: string, password: string, fullName?: string, additionalData?: any) => {
     try {
+      setIsLoading(true);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -103,7 +120,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             company: additionalData?.company,
             ...additionalData,
           },
-          emailRedirectTo: window.location.origin + "/auth/callback",
+          emailRedirectTo: window.location.origin + "/verify-email",
         },
       });
 
@@ -118,11 +135,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         error: "An unexpected error occurred during sign up", 
         success: false 
       };
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      setIsLoading(true);
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error("Sign out error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const resetPassword = async (email: string) => {
