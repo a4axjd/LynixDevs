@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, AlertCircle, Mail } from "lucide-react";
@@ -12,31 +12,34 @@ const VerifyEmail = () => {
   const [isVerified, setIsVerified] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const { verifyEmail } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
   const token = searchParams.get("token");
+  const type = searchParams.get("type");
 
   useEffect(() => {
     const handleEmailVerification = async () => {
-      if (!token) {
+      if (!token || type !== "signup") {
         setError("Invalid verification link");
         setIsVerifying(false);
         return;
       }
 
       try {
-        const { error, success } = await verifyEmail(token);
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: token,
+          type: "signup"
+        });
         
-        if (success) {
+        if (error) {
+          setError(error.message);
+        } else {
           setIsVerified(true);
           toast({
             title: "Email Verified Successfully!",
             description: "Your account has been activated. You can now sign in.",
           });
-        } else {
-          setError(error || "Failed to verify email");
         }
       } catch (err) {
         console.error("Email verification error:", err);
@@ -47,7 +50,7 @@ const VerifyEmail = () => {
     };
 
     handleEmailVerification();
-  }, [token, verifyEmail, toast]);
+  }, [token, type, toast]);
 
   const handleContinue = () => {
     navigate("/auth");

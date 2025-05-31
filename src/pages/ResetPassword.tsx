@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,26 +17,22 @@ const ResetPassword = () => {
   const [loading, setLoading] = useState(false);
   const [isReset, setIsReset] = useState(false);
   
-  const { updatePassword } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  const token = searchParams.get("token");
-
+  // Supabase handles the token validation automatically
   useEffect(() => {
-    if (!token) {
-      setError("Invalid reset link");
-    }
-  }, [token]);
+    // Check if we have a valid session for password reset
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        setError("Invalid or expired reset link");
+      }
+    });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    if (!token) {
-      setError("Invalid reset link");
-      return;
-    }
 
     if (newPassword.length < 8) {
       setError("Password must be at least 8 characters long");
@@ -51,16 +47,18 @@ const ResetPassword = () => {
     setLoading(true);
 
     try {
-      const { error, success } = await updatePassword(token, newPassword);
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
       
-      if (success) {
+      if (error) {
+        setError(error.message);
+      } else {
         setIsReset(true);
         toast({
           title: "Password Reset Successfully!",
           description: "You can now sign in with your new password.",
         });
-      } else {
-        setError(error || "Failed to reset password");
       }
     } catch (err) {
       console.error("Password reset error:", err);
@@ -161,7 +159,7 @@ const ResetPassword = () => {
           <Button
             type="submit"
             className="w-full btn-gradient text-white shadow-lg hover:shadow-xl"
-            disabled={loading || !token}
+            disabled={loading}
           >
             {loading ? (
               <>

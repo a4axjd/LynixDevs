@@ -1,3 +1,4 @@
+
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -14,7 +15,6 @@ app.use(bodyParser.json());
 const adminRoutes = require("./routes/admin");
 const contactRoutes = require("./routes/contact");
 const newsletterRoutes = require("./routes/newsletter");
-const authRoutes = require("./routes/auth");
 const emailRoutes = require("./routes/email");
 const adminSettingsRoutes = require("./routes/adminSettings");
 
@@ -22,7 +22,6 @@ const adminSettingsRoutes = require("./routes/adminSettings");
 app.use("/api/admin", adminRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/newsletter", newsletterRoutes);
-app.use("/api/auth", authRoutes);
 app.use("/api/email", emailRoutes);
 app.use("/api/admin/settings", adminSettingsRoutes);
 

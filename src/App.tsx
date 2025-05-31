@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -16,7 +17,6 @@ import BlogDetail from "@/pages/BlogDetail";
 import Contact from "@/pages/Contact";
 import Auth from "@/pages/Auth";
 import AuthCallback from "@/pages/AuthCallback";
-import VerifyEmail from "@/pages/VerifyEmail";
 import ResetPassword from "@/pages/ResetPassword";
 import Dashboard from "@/pages/Dashboard";
 import Profile from "@/pages/Profile";
@@ -56,8 +56,7 @@ function App() {
               <Route path="contact" element={<Contact />} />
               <Route path="auth" element={<Auth />} />
               <Route path="auth/callback" element={<AuthCallback />} />
-              {/* Standalone auth pages */}
-              <Route path="verify-email" element={<VerifyEmail />} />
+              {/* Supabase auth redirects */}
               <Route path="reset-password" element={<ResetPassword />} />
 
               {/* Protected routes */}

@@ -21,14 +21,6 @@ type AuthContextType = {
     error: string | null;
     success: boolean;
   }>;
-  verifyEmail: (token: string) => Promise<{
-    error: string | null;
-    success: boolean;
-  }>;
-  updatePassword: (token: string, newPassword: string) => Promise<{
-    error: string | null;
-    success: boolean;
-  }>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -105,36 +97,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         options: {
           data: {
             full_name: fullName,
+            first_name: additionalData?.first_name,
+            last_name: additionalData?.last_name,
+            phone: additionalData?.phone,
+            company: additionalData?.company,
             ...additionalData,
           },
-          emailRedirectTo: undefined, // Disable Supabase's email confirmation
+          emailRedirectTo: window.location.origin + "/auth/callback",
         },
       });
 
       if (error) {
         return { error: error.message, success: false };
-      }
-
-      // Send custom verification email
-      if (data.user && !data.user.email_confirmed_at) {
-        try {
-          const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/send-verification`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email: email,
-              userId: data.user.id,
-            }),
-          });
-
-          if (!response.ok) {
-            console.error('Failed to send verification email');
-          }
-        } catch (verificationError) {
-          console.error('Error sending verification email:', verificationError);
-        }
       }
 
       return { error: null, success: true };
@@ -153,18 +127,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const resetPassword = async (email: string) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/send-reset`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + "/reset-password",
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        return { error: result.error || 'Failed to send reset email', success: false };
+      if (error) {
+        return { error: error.message, success: false };
       }
 
       return { error: null, success: true };
@@ -172,61 +140,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error("Reset password error:", error);
       return { 
         error: "An unexpected error occurred during password reset", 
-        success: false 
-      };
-    }
-  };
-
-  const verifyEmail = async (token: string) => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/verify-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        return { error: result.error || 'Failed to verify email', success: false };
-      }
-
-      // Refresh the session to get updated user data
-      await supabase.auth.refreshSession();
-
-      return { error: null, success: true };
-    } catch (error) {
-      console.error("Verify email error:", error);
-      return { 
-        error: "An unexpected error occurred during email verification", 
-        success: false 
-      };
-    }
-  };
-
-  const updatePassword = async (token: string, newPassword: string) => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/reset-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token, newPassword }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        return { error: result.error || 'Failed to reset password', success: false };
-      }
-
-      return { error: null, success: true };
-    } catch (error) {
-      console.error("Update password error:", error);
-      return { 
-        error: "An unexpected error occurred during password update", 
         success: false 
       };
     }
@@ -241,8 +154,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signUp,
     signOut,
     resetPassword,
-    verifyEmail,
-    updatePassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
