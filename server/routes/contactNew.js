@@ -1,51 +1,76 @@
 
 const express = require('express');
+const { supabase, supabaseAdmin } = require('../config/supabase');
+const emailAutomationService = require('../services/emailAutomationService');
 const router = express.Router();
-const contactService = require('../services/contactService');
 
 // Submit contact form
 router.post('/submit', async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
-    const result = await contactService.submitContactForm({
-      name,
-      email,
-      subject,
-      message
+
+    // Validate required fields
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({
+        success: false,
+        error: 'All fields are required'
+      });
+    }
+
+    console.log('Processing contact form submission:', { name, email, subject });
+
+    // Use service role client for admin operations to bypass RLS
+    const client = supabaseAdmin || supabase;
+
+    // Save contact submission to database
+    const { data: submission, error: dbError } = await client
+      .from('contact_submissions')
+      .insert({
+        name,
+        email,
+        subject,
+        message,
+        read: false
+      })
+      .select()
+      .single();
+
+    if (dbError) {
+      console.error('Database error:', dbError);
+      throw new Error('Failed to save contact submission');
+    }
+
+    console.log('Contact submission saved:', submission.id);
+
+    // Trigger automated email reply
+    try {
+      const automationResult = await emailAutomationService.sendContactFormAutoReply(
+        email,
+        name,
+        message
+      );
+
+      if (automationResult.success) {
+        console.log('Auto-reply email sent successfully');
+      } else {
+        console.log('Auto-reply email failed or no automation rule found:', automationResult.error);
+      }
+    } catch (automationError) {
+      console.error('Error in email automation:', automationError);
+      // Don't fail the contact form submission if email automation fails
+    }
+
+    res.json({
+      success: true,
+      message: 'Contact form submitted successfully',
+      submission_id: submission.id
     });
-    res.json(result);
+
   } catch (error) {
-    console.error('Error submitting contact form:', error);
-    res.status(500).json({ 
+    console.error('Error processing contact form:', error);
+    res.status(500).json({
       success: false,
-      error: error.message || 'An error occurred while processing your submission' 
-    });
-  }
-});
-
-// Get all contact submissions (admin only)
-router.get('/submissions', async (req, res) => {
-  try {
-    const submissions = await contactService.getContactSubmissions();
-    res.json(submissions);
-  } catch (error) {
-    console.error('Error fetching contact submissions:', error);
-    res.status(500).json({ 
-      error: error.message || 'An error occurred while fetching submissions' 
-    });
-  }
-});
-
-// Mark submission as read
-router.patch('/submissions/:id/read', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const result = await contactService.markAsRead(id);
-    res.json(result);
-  } catch (error) {
-    console.error('Error marking submission as read:', error);
-    res.status(500).json({ 
-      error: error.message || 'An error occurred while updating submission' 
+      error: 'Failed to submit contact form'
     });
   }
 });

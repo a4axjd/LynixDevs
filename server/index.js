@@ -39,6 +39,9 @@ async function initializeServer() {
     // New public API routes
     const blogRoutes = require("./routes/blog");
     const projectsRoutes = require("./routes/projects");
+    
+    // Email automation routes
+    const emailAutomationRoutes = require("./routes/emailAutomation");
 
     // Register existing routes
     app.use("/api/admin", adminRoutes);
@@ -56,6 +59,9 @@ async function initializeServer() {
     // Register new public routes
     app.use("/api/blog", blogRoutes);
     app.use("/api/projects", projectsRoutes);
+    
+    // Register email automation routes
+    app.use("/api/email-automation", emailAutomationRoutes);
 
     // Health check endpoint
     app.get("/health", (req, res) => {
