@@ -1,8 +1,9 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
+import { Sonner } from "@/components/ui/sonner";
 
 import MainLayout from "@/layouts/MainLayout";
 import AdminLayout from "@/layouts/AdminLayout";
@@ -36,93 +37,98 @@ import ContactAdmin from "@/pages/admin/ContactAdmin";
 import NotFound from "@/pages/NotFound";
 import EmailSettingsAdmin from "@/pages/admin/EmailSettingsAdmin";
 import SettingsAdmin from "@/pages/admin/SettingsAdmin";
+import EmailAutomationAdmin from "@/pages/admin/EmailAutomationAdmin";
 
 const queryClient = new QueryClient();
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <QueryClientProvider client={queryClient}>
-          <Toaster />
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<MainLayout />}>
-              <Route index element={<Home />} />
-              <Route path="about" element={<About />} />
-              <Route path="services" element={<Services />} />
-              <Route path="portfolio" element={<Portfolio />} />
-              <Route path="portfolio/:id" element={<ProjectDetail />} />
-              <Route path="blog" element={<Blog />} />
-              <Route path="blog/:slug" element={<BlogDetail />} />
-              <Route path="contact" element={<Contact />} />
-              <Route path="auth" element={<Auth />} />
-              <Route path="auth/callback" element={<AuthCallback />} />
-              {/* Supabase auth redirects */}
-              <Route path="reset-password" element={<ResetPassword />} />
-              <Route path="verify-email" element={<VerifyEmail />} />
+    <QueryClient client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<MainLayout />}>
+                <Route index element={<Home />} />
+                <Route path="about" element={<About />} />
+                <Route path="services" element={<Services />} />
+                <Route path="portfolio" element={<Portfolio />} />
+                <Route path="portfolio/:id" element={<ProjectDetail />} />
+                <Route path="blog" element={<Blog />} />
+                <Route path="blog/:slug" element={<BlogDetail />} />
+                <Route path="contact" element={<Contact />} />
+                <Route path="auth" element={<Auth />} />
+                <Route path="auth/callback" element={<AuthCallback />} />
+                {/* Supabase auth redirects */}
+                <Route path="reset-password" element={<ResetPassword />} />
+                <Route path="verify-email" element={<VerifyEmail />} />
 
-              {/* Protected routes */}
-              <Route
-                path="/dashboard"
-                element={
-                  <RouteGuard>
-                    <Dashboard />
-                  </RouteGuard>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <RouteGuard>
-                    <Profile />
-                  </RouteGuard>
-                }
-              />
-              <Route
-                path="/settings"
-                element={
-                  <RouteGuard>
-                    <Settings />
-                  </RouteGuard>
-                }
-              />
-              <Route
-                path="/client-project/:id"
-                element={
-                  <RouteGuard>
-                    <ClientProjectDashboard />
-                  </RouteGuard>
-                }
-              />
-            </Route>
+                {/* Protected routes */}
+                <Route
+                  path="/dashboard"
+                  element={
+                    <RouteGuard>
+                      <Dashboard />
+                    </RouteGuard>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <RouteGuard>
+                      <Profile />
+                    </RouteGuard>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <RouteGuard>
+                      <Settings />
+                    </RouteGuard>
+                  }
+                />
+                <Route
+                  path="/client-project/:id"
+                  element={
+                    <RouteGuard>
+                      <ClientProjectDashboard />
+                    </RouteGuard>
+                  }
+                />
+              </Route>
 
-            {/* Admin routes */}
-            <Route
-              path="/admin"
-              element={
-                <RouteGuard adminRequired>
-                  <AdminLayout />
-                </RouteGuard>
-              }
-            >
-              <Route index element={<AdminDashboard />} />
-              <Route path="users" element={<UsersAdmin />} />
-              <Route path="projects" element={<ProjectsAdmin />} />
-              <Route path="client-projects" element={<ClientProjectsAdmin />} />
-              <Route path="blog" element={<BlogAdmin />} />
-              <Route path="email-templates" element={<EmailTemplatesAdmin />} />
-              <Route path="email-settings" element={<EmailSettingsAdmin />} />
-              <Route path="newsletter" element={<NewsletterAdmin />} />
-              <Route path="contact" element={<ContactAdmin />} />
-              <Route path="settings" element={<SettingsAdmin />} />
-            </Route>
+              {/* Admin routes */}
+              <Route
+                path="/admin"
+                element={
+                  <RouteGuard adminRequired>
+                    <AdminLayout />
+                  </RouteGuard>
+                }
+              >
+                <Route index element={<AdminDashboard />} />
+                <Route path="users" element={<UsersAdmin />} />
+                <Route path="projects" element={<ProjectsAdmin />} />
+                <Route path="client-projects" element={<ClientProjectsAdmin />} />
+                <Route path="blog" element={<BlogAdmin />} />
+                <Route path="email-templates" element={<EmailTemplatesAdmin />} />
+                <Route path="email-settings" element={<EmailSettingsAdmin />} />
+                <Route path="newsletter" element={<NewsletterAdmin />} />
+                <Route path="contact" element={<ContactAdmin />} />
+                <Route path="settings" element={<SettingsAdmin />} />
+                <Route path="email-automation" element={<EmailAutomationAdmin />} />
+              </Route>
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </QueryClientProvider>
-      </AuthProvider>
-    </BrowserRouter>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClient>
   );
 }
 

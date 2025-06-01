@@ -61,6 +61,11 @@ const AdminLayout = () => {
       icon: Mail,
     },
     {
+      title: "Email Automation",
+      href: "/admin/email-automation",
+      icon: Send,
+    },
+    {
       title: "Email Settings",
       href: "/admin/email-settings",
       icon: AtSign,
