@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Calendar, Loader2 } from "lucide-react";
@@ -86,7 +85,6 @@ const ProjectDetail = () => {
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
         
-        {/* Open Graph Tags */}
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         <meta property="og:image" content={pageImage} />
@@ -94,23 +92,17 @@ const ProjectDetail = () => {
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="LynixDevs" />
         
-        {/* Twitter Card Tags */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image" content={pageImage} />
         
-        {/* Additional SEO Tags */}
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={pageUrl} />
         
-        {project && (
-          <>
-            <meta property="article:published_time" content={project.created_at} />
-            <meta property="article:modified_time" content={project.updated_at} />
-            {project.client && <meta name="author" content={project.client} />}
-          </>
-        )}
+        {project && <meta property="article:published_time" content={project.created_at} />}
+        {project && <meta property="article:modified_time" content={project.updated_at} />}
+        {project && project.client && <meta name="author" content={project.client} />}
       </Helmet>
 
       {isLoading ? (
