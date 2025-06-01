@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Calendar, User, Loader2 } from "lucide-react";
@@ -27,7 +26,7 @@ const BlogDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { toast } = useToast();
 
-  // Fetch the specific blog post by slug from backend
+  // Fetch the specific blog post by slug from backend server
   const { data: post, isLoading, error } = useQuery({
     queryKey: ["blogPost", slug],
     queryFn: async () => {
@@ -71,7 +70,6 @@ const BlogDetail = () => {
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
         
-        {/* Open Graph Tags */}
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         <meta property="og:image" content={pageImage} />
@@ -79,13 +77,11 @@ const BlogDetail = () => {
         <meta property="og:type" content="article" />
         <meta property="og:site_name" content="LynixDevs" />
         
-        {/* Twitter Card Tags */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image" content={pageImage} />
         
-        {/* Additional SEO Tags */}
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={pageUrl} />
         

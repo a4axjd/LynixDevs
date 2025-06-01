@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Calendar, Loader2 } from "lucide-react";
@@ -26,7 +27,7 @@ const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
 
-  // Fetch the specific project by id from backend
+  // Fetch the specific project by id from backend server
   const { data: project, isLoading, error } = useQuery({
     queryKey: ["project", id],
     queryFn: async () => {

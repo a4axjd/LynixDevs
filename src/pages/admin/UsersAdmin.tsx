@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,14 +26,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
-interface Profile {
-  id: string;
-  full_name: string | null;
-  avatar_url: string | null;
-  username: string | null;
-  created_at: string;
-}
-
 interface User {
   id: string;
   email?: string;
@@ -54,47 +45,16 @@ const UsersAdmin = () => {
     queryKey: ['adminUsers'],
     queryFn: async () => {
       try {
-        console.log("Fetching profiles from database");
+        console.log("Fetching users from server");
         
-        // Fetch profiles from the database
-        const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('*');
+        const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'}/api/users`);
         
-        if (profilesError) {
-          console.error("Profiles error:", profilesError);
-          throw new Error(`Error fetching profiles: ${profilesError.message}`);
+        if (!response.ok) {
+          throw new Error(`Error fetching users: ${response.statusText}`);
         }
         
-        if (!profiles) {
-          throw new Error("No profiles data returned");
-        }
-
-        // For each profile, check if they are an admin
-        const usersWithRoles = await Promise.all(profiles.map(async (profile) => {
-          const { data: isAdmin, error: roleError } = await supabase.rpc(
-            "has_role",
-            {
-              _user_id: profile.id,
-              _role: "admin",
-            }
-          );
-          
-          // Get user email if needed (additional query)
-          // This is simplified and might not work depending on your Supabase setup
-          // Email typically isn't directly accessible from public schemas
-          
-          return {
-            id: profile.id,
-            full_name: profile.full_name,
-            avatar_url: profile.avatar_url,
-            username: profile.username,
-            created_at: profile.created_at,
-            isAdmin: !!isAdmin,
-          };
-        }));
-        
-        return usersWithRoles as User[];
+        const data = await response.json();
+        return data as User[];
       } catch (err: any) {
         console.error("Error fetching users:", err);
         setErrorDetails(`Error: ${err.message}`);
@@ -106,9 +66,13 @@ const UsersAdmin = () => {
 
   const makeAdmin = async (userId: string) => {
     try {
-      const { error } = await supabase.rpc('make_user_admin', { _user_id: userId });
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'}/api/users/${userId}/make-admin`, {
+        method: 'POST',
+      });
       
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error('Failed to make user admin');
+      }
       
       toast({
         title: "Success",
@@ -149,7 +113,7 @@ const UsersAdmin = () => {
           <AlertTitle>Error loading users</AlertTitle>
           <AlertDescription>
             <p className="mb-2">{errorDetails}</p>
-            <p className="mb-2">We're fetching users from the profiles table instead of directly from auth.</p>
+            <p className="mb-2">We're fetching users from the server instead of directly from Supabase.</p>
           </AlertDescription>
         </Alert>
       )}
@@ -175,6 +139,7 @@ const UsersAdmin = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>User</TableHead>
+                <TableHead>Email</TableHead>
                 <TableHead>Username</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Created</TableHead>
@@ -189,7 +154,7 @@ const UsersAdmin = () => {
                       <Avatar>
                         <AvatarImage src={user.avatar_url || ''} />
                         <AvatarFallback>
-                          {(user.full_name || "User")
+                          {(user.full_name || user.email || "User")
                             .split(" ")
                             .map(name => name[0])
                             .join("")
@@ -204,6 +169,7 @@ const UsersAdmin = () => {
                       </div>
                     </div>
                   </TableCell>
+                  <TableCell>{user.email || "-"}</TableCell>
                   <TableCell>{user.username || "-"}</TableCell>
                   <TableCell>
                     {user.isAdmin ? (
