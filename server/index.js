@@ -43,6 +43,9 @@ async function initializeServer() {
     // Email automation routes
     const emailAutomationRoutes = require("./routes/emailAutomation");
 
+    // Chat AI routes
+    const chatRoutes = require("./routes/chat");
+
     // Register existing routes
     app.use("/api/admin", adminRoutes);
     app.use("/api/contact", contactRoutes);
@@ -62,6 +65,9 @@ async function initializeServer() {
     
     // Register email automation routes
     app.use("/api/email-automation", emailAutomationRoutes);
+
+    // Register chat AI routes
+    app.use("/api/chat", chatRoutes);
 
     // Health check endpoint
     app.get("/health", (req, res) => {
