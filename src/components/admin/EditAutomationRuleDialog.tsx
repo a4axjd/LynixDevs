@@ -65,7 +65,8 @@ const EditAutomationRuleDialog = ({ rule, open, onOpenChange }: EditAutomationRu
         .order('name');
       
       if (error) throw error;
-      return data;
+      // Filter out templates with invalid IDs
+      return data?.filter(template => template.id && template.id.trim() !== '') || [];
     },
   });
 
@@ -152,14 +153,20 @@ const EditAutomationRuleDialog = ({ rule, open, onOpenChange }: EditAutomationRu
                 <SelectValue placeholder="Select an email template" />
               </SelectTrigger>
               <SelectContent>
-                {templates.map((template) => (
-                  <SelectItem key={template.id} value={template.id}>
-                    <div>
-                      <div className="font-medium">{template.name}</div>
-                      <div className="text-sm text-muted-foreground">{template.subject}</div>
-                    </div>
+                {templates.length === 0 ? (
+                  <SelectItem value="no-templates" disabled>
+                    No templates available
                   </SelectItem>
-                ))}
+                ) : (
+                  templates.map((template) => (
+                    <SelectItem key={template.id} value={template.id}>
+                      <div>
+                        <div className="font-medium">{template.name}</div>
+                        <div className="text-sm text-muted-foreground">{template.subject}</div>
+                      </div>
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
