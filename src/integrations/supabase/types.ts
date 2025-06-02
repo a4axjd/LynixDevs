@@ -212,6 +212,94 @@ export type Database = {
         }
         Relationships: []
       }
+      email_automation_jobs: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          recipient_email: string
+          retry_count: number | null
+          rule_id: string | null
+          sent_at: string | null
+          status: string
+          template_variables: Json | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          recipient_email: string
+          retry_count?: number | null
+          rule_id?: string | null
+          sent_at?: string | null
+          status?: string
+          template_variables?: Json | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          recipient_email?: string
+          retry_count?: number | null
+          rule_id?: string | null
+          sent_at?: string | null
+          status?: string
+          template_variables?: Json | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_automation_jobs_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "email_automation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_automation_rules: {
+        Row: {
+          conditions: Json | null
+          created_at: string
+          event_type: string
+          id: string
+          is_active: boolean
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          conditions?: Json | null
+          created_at?: string
+          event_type: string
+          id?: string
+          is_active?: boolean
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          conditions?: Json | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          is_active?: boolean
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_automation_rules_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_senders: {
         Row: {
           created_at: string | null

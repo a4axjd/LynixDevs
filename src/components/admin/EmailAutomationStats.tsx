@@ -3,166 +3,142 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, Clock, Mail } from "lucide-react";
+import { emailAutomationAPI } from "@/lib/emailAutomationAPI";
 
 const EmailAutomationStats = () => {
-  const { data: stats, isLoading } = useQuery({
+  const { data: stats, isLoading, error } = useQuery({
     queryKey: ['automationStats'],
-    queryFn: async () => {
-      // Using the email automation service to get stats
-      const response = await fetch('/api/email-automation/jobs?limit=1000');
-      if (!response.ok) {
-        throw new Error('Failed to fetch automation stats');
-      }
-      const data = await response.json();
-      
-      // Calculate stats from jobs data
-      const jobs = data.jobs || [];
-      const total = jobs.length;
-      const completed = jobs.filter((job: any) => job.status === 'completed').length;
-      const failed = jobs.filter((job: any) => job.status === 'failed').length;
-      const pending = jobs.filter((job: any) => job.status === 'pending').length;
-      
-      return {
-        total,
-        completed,
-        failed,
-        pending,
-        successRate: total > 0 ? ((completed / total) * 100).toFixed(1) : '0'
-      };
-    },
+    queryFn: () => emailAutomationAPI.getStats(),
   });
 
   if (isLoading) {
-    return <div>Loading automation statistics...</div>;
+    return (
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}>
+            <CardContent className="flex items-center justify-center py-8">
+              <div>Loading...</div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
   }
 
-  if (!stats) {
-    return <div>Failed to load statistics</div>;
-  }
-
-  const statCards = [
-    {
-      title: "Total Jobs",
-      value: stats.total,
-      icon: Mail,
-      description: "Total automation jobs processed",
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
-    },
-    {
-      title: "Completed",
-      value: stats.completed,
-      icon: CheckCircle,
-      description: "Successfully sent emails",
-      color: "text-green-600",
-      bgColor: "bg-green-100",
-    },
-    {
-      title: "Failed",
-      value: stats.failed,
-      icon: XCircle,
-      description: "Failed email attempts",
-      color: "text-red-600",
-      bgColor: "bg-red-100",
-    },
-    {
-      title: "Pending",
-      value: stats.pending,
-      icon: Clock,
-      description: "Jobs waiting to be processed",
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-100",
-    },
-  ];
-
-  return (
-    <div className="space-y-6">
+  if (error) {
+    return (
       <Card>
-        <CardHeader>
-          <CardTitle>Automation Statistics</CardTitle>
-          <CardDescription>
-            Overview of email automation performance (last 30 days)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {statCards.map((stat) => (
-              <Card key={stat.title}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        {stat.title}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <p className="text-2xl font-bold">{stat.value}</p>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {stat.description}
-                      </p>
-                    </div>
-                    <div className={`p-2 rounded-full ${stat.bgColor}`}>
-                      <stat.icon className={`h-4 w-4 ${stat.color}`} />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+        <CardContent className="flex items-center justify-center py-8">
+          <div className="text-red-600">
+            Failed to load automation statistics. Please try again later.
           </div>
         </CardContent>
       </Card>
+    );
+  }
+
+  const { total = 0, completed = 0, failed = 0, pending = 0 } = stats || {};
+  const successRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Jobs</CardTitle>
+            <Mail className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{total}</div>
+            <p className="text-xs text-muted-foreground">
+              Email automation jobs executed
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CheckCircle className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{completed}</div>
+            <p className="text-xs text-muted-foreground">
+              Successfully sent emails
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Failed</CardTitle>
+            <XCircle className="h-4 w-4 text-red-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{failed}</div>
+            <p className="text-xs text-muted-foreground">
+              Failed email sends
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pending</CardTitle>
+            <Clock className="h-4 w-4 text-yellow-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">{pending}</div>
+            <p className="text-xs text-muted-foreground">
+              Queued for processing
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Success Rate</CardTitle>
           <CardDescription>
-            Overall email automation success rate
+            Overall email automation performance metrics
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-4">
-            <div className="text-3xl font-bold text-green-600">
-              {stats.successRate}%
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Success Rate</span>
+              <Badge variant={successRate >= 90 ? "default" : successRate >= 70 ? "secondary" : "destructive"}>
+                {successRate}%
+              </Badge>
             </div>
-            <div className="flex-1">
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${stats.successRate}%` }}
-                ></div>
+            
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  successRate >= 90 ? 'bg-green-600' : 
+                  successRate >= 70 ? 'bg-yellow-600' : 'bg-red-600'
+                }`}
+                style={{ width: `${successRate}%` }}
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 text-sm">
+              <div className="text-center">
+                <div className="font-medium text-green-600">{completed}</div>
+                <div className="text-muted-foreground">Completed</div>
               </div>
-              <p className="text-sm text-muted-foreground mt-2">
-                {stats.completed} out of {stats.total} emails sent successfully
-              </p>
+              <div className="text-center">
+                <div className="font-medium text-yellow-600">{pending}</div>
+                <div className="text-muted-foreground">Pending</div>
+              </div>
+              <div className="text-center">
+                <div className="font-medium text-red-600">{failed}</div>
+                <div className="text-muted-foreground">Failed</div>
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
-
-      {stats.failed > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <XCircle className="h-5 w-5 text-red-600" />
-              Failed Jobs Analysis
-            </CardTitle>
-            <CardDescription>
-              Jobs that failed to send emails
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span>Failed jobs require attention</span>
-                <Badge variant="destructive">{stats.failed} failed</Badge>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Check the Automation Jobs tab to retry failed jobs or investigate error messages.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };

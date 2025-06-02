@@ -17,19 +17,7 @@ import {
 } from "@/components/ui/table";
 import CreateAutomationRuleDialog from "./CreateAutomationRuleDialog";
 import EditAutomationRuleDialog from "./EditAutomationRuleDialog";
-
-interface AutomationRule {
-  id: string;
-  event_type: string;
-  template_id: string;
-  is_active: boolean;
-  conditions: any;
-  created_at: string;
-  email_templates?: {
-    name: string;
-    subject: string;
-  };
-}
+import { emailAutomationAPI, type AutomationRule } from "@/lib/emailAutomationAPI";
 
 const EmailAutomationRules = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -37,32 +25,14 @@ const EmailAutomationRules = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: rules = [], isLoading } = useQuery({
+  const { data: rules = [], isLoading, error } = useQuery({
     queryKey: ['automationRules'],
-    queryFn: async () => {
-      const response = await fetch('/api/email-automation/rules');
-      if (!response.ok) {
-        throw new Error('Failed to fetch automation rules');
-      }
-      const data = await response.json();
-      return data.rules;
-    },
+    queryFn: () => emailAutomationAPI.getRules(),
   });
 
   const updateRuleMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<AutomationRule> }) => {
-      const response = await fetch(`/api/email-automation/rules/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to update rule');
-      }
-      return response.json();
-    },
+    mutationFn: ({ id, data }: { id: string; data: Partial<AutomationRule> }) => 
+      emailAutomationAPI.updateRule(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['automationRules'] });
       toast({
@@ -70,25 +40,17 @@ const EmailAutomationRules = () => {
         description: "Automation rule updated successfully",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to update automation rule",
         variant: "destructive",
       });
     },
   });
 
   const deleteRuleMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await fetch(`/api/email-automation/rules/${id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to delete rule');
-      }
-      return response.json();
-    },
+    mutationFn: (id: string) => emailAutomationAPI.deleteRule(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['automationRules'] });
       toast({
@@ -96,10 +58,10 @@ const EmailAutomationRules = () => {
         description: "Automation rule deleted successfully",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to delete automation rule",
         variant: "destructive",
       });
     },
@@ -123,7 +85,25 @@ const EmailAutomationRules = () => {
   };
 
   if (isLoading) {
-    return <div>Loading automation rules...</div>;
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <div>Loading automation rules...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <div className="text-red-600">
+            Failed to load automation rules. Please try again later.
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

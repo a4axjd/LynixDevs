@@ -21,23 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-interface AutomationJob {
-  id: string;
-  recipient_email: string;
-  status: 'pending' | 'completed' | 'failed';
-  created_at: string;
-  sent_at?: string;
-  error_message?: string;
-  retry_count?: number;
-  email_automation_rules?: {
-    event_type: string;
-    email_templates?: {
-      name: string;
-      subject: string;
-    };
-  };
-}
+import { emailAutomationAPI, type AutomationJob } from "@/lib/emailAutomationAPI";
 
 const EmailAutomationJobs = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,36 +30,17 @@ const EmailAutomationJobs = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: jobsData, isLoading } = useQuery({
+  const { data: jobsData, isLoading, error } = useQuery({
     queryKey: ['automationJobs', currentPage, statusFilter],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: pageSize.toString(),
-      });
-      
-      if (statusFilter) {
-        params.append('status', statusFilter);
-      }
-
-      const response = await fetch(`/api/email-automation/jobs?${params}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch automation jobs');
-      }
-      return response.json();
-    },
+    queryFn: () => emailAutomationAPI.getJobs({
+      page: currentPage,
+      limit: pageSize,
+      status: statusFilter || undefined,
+    }),
   });
 
   const retryJobMutation = useMutation({
-    mutationFn: async (jobId: string) => {
-      const response = await fetch(`/api/email-automation/jobs/${jobId}/retry`, {
-        method: 'POST',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to retry job');
-      }
-      return response.json();
-    },
+    mutationFn: (jobId: string) => emailAutomationAPI.retryJob(jobId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['automationJobs'] });
       toast({
@@ -83,10 +48,10 @@ const EmailAutomationJobs = () => {
         description: "Job retry initiated successfully",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to retry job",
         variant: "destructive",
       });
     },
@@ -114,11 +79,29 @@ const EmailAutomationJobs = () => {
   };
 
   if (isLoading) {
-    return <div>Loading automation jobs...</div>;
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <div>Loading automation jobs...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <div className="text-red-600">
+            Failed to load automation jobs. Please try again later.
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   const jobs = jobsData?.jobs || [];
-  const pagination = jobsData?.pagination || {};
+  const pagination = jobsData?.pagination || { page: 1, limit: pageSize, total: 0 };
 
   return (
     <Card>
