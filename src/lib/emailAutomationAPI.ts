@@ -57,7 +57,7 @@ class EmailAutomationAPI {
   // Get all automation rules
   async getRules(): Promise<AutomationRule[]> {
     try {
-      const response = await apiClient.get<{ success: boolean; rules: AutomationRule[] }>('/email-automation/rules');
+      const response = await apiClient.get<{ success: boolean; rules: AutomationRule[] }>('/api/email-automation/rules');
       return response.rules || [];
     } catch (error) {
       logger.error('Failed to fetch automation rules', { error });
@@ -68,7 +68,7 @@ class EmailAutomationAPI {
   // Create new automation rule
   async createRule(data: CreateRuleRequest): Promise<AutomationRule> {
     try {
-      const response = await apiClient.post<{ success: boolean; rule: AutomationRule }>('/email-automation/rules', data);
+      const response = await apiClient.post<{ success: boolean; rule: AutomationRule }>('/api/email-automation/rules', data);
       return response.rule;
     } catch (error) {
       logger.error('Failed to create automation rule', { error, data });
@@ -79,7 +79,7 @@ class EmailAutomationAPI {
   // Update automation rule
   async updateRule(id: string, data: Partial<CreateRuleRequest>): Promise<AutomationRule> {
     try {
-      const response = await apiClient.put<{ success: boolean; rule: AutomationRule }>(`/email-automation/rules/${id}`, data);
+      const response = await apiClient.put<{ success: boolean; rule: AutomationRule }>(`/api/email-automation/rules/${id}`, data);
       return response.rule;
     } catch (error) {
       logger.error('Failed to update automation rule', { error, id, data });
@@ -90,7 +90,7 @@ class EmailAutomationAPI {
   // Delete automation rule
   async deleteRule(id: string): Promise<void> {
     try {
-      await apiClient.delete<{ success: boolean; message: string }>(`/email-automation/rules/${id}`);
+      await apiClient.delete<{ success: boolean; message: string }>(`/api/email-automation/rules/${id}`);
     } catch (error) {
       logger.error('Failed to delete automation rule', { error, id });
       throw error;
@@ -100,7 +100,7 @@ class EmailAutomationAPI {
   // Trigger automation
   async triggerAutomation(data: TriggerAutomationRequest): Promise<{ success: boolean; job_id?: string; message: string }> {
     try {
-      const response = await apiClient.post<{ success: boolean; job_id?: string; message: string }>('/email-automation/trigger', data);
+      const response = await apiClient.post<{ success: boolean; job_id?: string; message: string }>('/api/email-automation/trigger', data);
       return response;
     } catch (error) {
       logger.error('Failed to trigger automation', { error, data });
@@ -129,7 +129,7 @@ class EmailAutomationAPI {
       if (params.status) searchParams.append('status', params.status);
       if (params.rule_id) searchParams.append('rule_id', params.rule_id);
 
-      const url = `/email-automation/jobs${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+      const url = `/api/email-automation/jobs${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
       const response = await apiClient.get<{
         success: boolean;
         jobs: AutomationJob[];
@@ -149,7 +149,7 @@ class EmailAutomationAPI {
   // Retry failed job
   async retryJob(jobId: string): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await apiClient.post<{ success: boolean; message: string }>(`/email-automation/jobs/${jobId}/retry`);
+      const response = await apiClient.post<{ success: boolean; message: string }>(`/api/email-automation/jobs/${jobId}/retry`);
       return response;
     } catch (error) {
       logger.error('Failed to retry automation job', { error, jobId });

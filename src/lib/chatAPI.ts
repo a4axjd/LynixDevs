@@ -1,4 +1,3 @@
-
 import { apiClient } from './apiClient';
 import { logger } from './logger';
 
@@ -29,9 +28,13 @@ class ChatAPI {
     conversationHistory: ChatMessage[] = []
   ): Promise<ChatResponse> {
     try {
-      const response = await apiClient.post<ChatResponse>('/chat/message', {
+      // Filter out any messages that are not user or assistant (defensive)
+      const allowedRoles = ['user', 'assistant'] as const;
+      const filteredHistory = conversationHistory.filter(msg => allowedRoles.includes(msg.role));
+
+      const response = await apiClient.post<ChatResponse>('/api/chat/message', {
         message,
-        conversationHistory: conversationHistory.map(msg => ({
+        conversationHistory: filteredHistory.map(msg => ({
           role: msg.role,
           content: msg.content
         }))

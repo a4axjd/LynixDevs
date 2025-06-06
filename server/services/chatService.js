@@ -1,4 +1,3 @@
-
 const { ai } = require("../config/genkit");
 const { gemini20Flash } = require("@genkit-ai/googleai");
 
@@ -27,37 +26,54 @@ If users ask about specific technical implementations, provide general guidance 
 
   async generateResponse(userMessage, conversationHistory = []) {
     try {
-      // Build conversation context
-      const messages = [
-        { role: 'system', content: this.systemPrompt },
-        ...conversationHistory,
-        { role: 'user', content: userMessage }
-      ];
+      // Build conversation context as a single prompt string
+      let conversationContext = this.systemPrompt + "\n\n";
+
+      // Add conversation history
+      if (conversationHistory && conversationHistory.length > 0) {
+        conversationHistory.forEach((msg) => {
+          if (msg.role === "user") {
+            conversationContext += `User: ${msg.content}\n`;
+          } else if (msg.role === "assistant") {
+            conversationContext += `Assistant: ${msg.content}\n`;
+          }
+        });
+      }
+
+      // Add current user message
+      conversationContext += `User: ${userMessage}\nAssistant:`;
 
       const response = await ai.generate({
         model: gemini20Flash,
-        prompt: {
-          messages: messages
-        },
+        prompt: conversationContext,
         config: {
           temperature: 0.7,
           maxOutputTokens: 1000,
           topP: 0.8,
-          topK: 40
-        }
+          topK: 40,
+        },
       });
+
+      // Fix: Use the correct property to get the generated text
+      const generatedText =
+        response.text ||
+        response.output ||
+        response.content ||
+        response.response;
 
       return {
         success: true,
-        message: response.text(),
-        timestamp: new Date().toISOString()
+        message: generatedText,
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
-      console.error('Chat service error:', error);
+      console.error("Chat service error:", error);
       return {
         success: false,
-        message: "I'm sorry, I'm having trouble responding right now. Please try again or contact us directly.",
-        error: error.message
+        message:
+          "I'm sorry, I'm having trouble responding right now. Please try again or contact us directly.",
+        error: error.message,
+        timestamp: new Date().toISOString(),
       };
     }
   }
@@ -79,21 +95,29 @@ Keep the response professional and helpful, focusing on how LynixDevs can delive
         prompt: prompt,
         config: {
           temperature: 0.6,
-          maxOutputTokens: 800
-        }
+          maxOutputTokens: 800,
+        },
       });
+
+      // Fix: Use the correct property to get the generated text
+      const generatedText =
+        response.text ||
+        response.output ||
+        response.content ||
+        response.response;
 
       return {
         success: true,
-        suggestion: response.text(),
-        timestamp: new Date().toISOString()
+        suggestion: generatedText,
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
-      console.error('Project suggestion error:', error);
+      console.error("Project suggestion error:", error);
       return {
         success: false,
-        message: "Unable to generate project suggestion at the moment.",
-        error: error.message
+        suggestion: "Unable to generate project suggestion at the moment.",
+        error: error.message,
+        timestamp: new Date().toISOString(),
       };
     }
   }

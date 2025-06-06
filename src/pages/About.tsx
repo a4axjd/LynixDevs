@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, User, Clock, Users } from "lucide-react";
@@ -12,8 +11,8 @@ const About = () => {
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="heading-1 mb-6">About LynixDevs</h1>
             <p className="body-text text-gray-300">
-              We're a team of passionate designers, developers, and digital strategists dedicated to 
-              creating exceptional digital experiences.
+              We're a team of passionate designers, developers, and digital
+              strategists dedicated to creating exceptional digital experiences.
             </p>
           </div>
         </div>
@@ -26,31 +25,45 @@ const About = () => {
             <div>
               <h2 className="heading-2 mb-6">Our Story</h2>
               <p className="body-text text-gray-600 mb-4">
-                Founded in 2018, LynixDevs was born from a simple idea: to create digital solutions 
-                that truly work for businesses and their customers. What started as a small team of 
-                three passionate developers has grown into a full-service digital agency with a 
-                team of experts across various disciplines.
+                Founded in 2018, LynixDevs was born from a simple idea: to
+                create digital solutions that truly work for businesses and
+                their customers. What started as a small team of three
+                passionate developers has grown into a full-service digital
+                agency with a team of experts across various disciplines.
               </p>
               <p className="body-text text-gray-600 mb-6">
-                We believe that great technology should simplify lives, not complicate them. 
-                This philosophy guides everything we do – from the websites we build to the 
-                applications we develop and the strategies we create.
+                We believe that great technology should simplify lives, not
+                complicate them. This philosophy guides everything we do – from
+                the websites we build to the applications we develop and the
+                strategies we create.
               </p>
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="flex items-start">
-                  <CheckCircle className="text-lynix-purple mr-2 mt-1" size={20} />
+                  <CheckCircle
+                    className="text-lynix-purple mr-2 mt-1"
+                    size={20}
+                  />
                   <span className="text-gray-700">User-Centered Approach</span>
                 </div>
                 <div className="flex items-start">
-                  <CheckCircle className="text-lynix-purple mr-2 mt-1" size={20} />
+                  <CheckCircle
+                    className="text-lynix-purple mr-2 mt-1"
+                    size={20}
+                  />
                   <span className="text-gray-700">Innovative Solutions</span>
                 </div>
                 <div className="flex items-start">
-                  <CheckCircle className="text-lynix-purple mr-2 mt-1" size={20} />
+                  <CheckCircle
+                    className="text-lynix-purple mr-2 mt-1"
+                    size={20}
+                  />
                   <span className="text-gray-700">Quality Craftsmanship</span>
                 </div>
                 <div className="flex items-start">
-                  <CheckCircle className="text-lynix-purple mr-2 mt-1" size={20} />
+                  <CheckCircle
+                    className="text-lynix-purple mr-2 mt-1"
+                    size={20}
+                  />
                   <span className="text-gray-700">Open Communication</span>
                 </div>
               </div>
@@ -61,7 +74,9 @@ const About = () => {
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center text-white">
                     <p className="text-xl font-semibold mb-2">Our Office</p>
-                    <p className="opacity-80">Where creativity meets technology</p>
+                    <p className="opacity-80">
+                      Where creativity meets technology
+                    </p>
                   </div>
                 </div>
               </div>
@@ -83,7 +98,7 @@ const About = () => {
               <h3 className="text-4xl font-bold text-lynix-dark mb-2">200+</h3>
               <p className="text-gray-600">Happy Clients</p>
             </div>
-            
+
             <div className="bg-white p-8 rounded-xl shadow-sm text-center">
               <div className="w-16 h-16 bg-lynix-purple/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Clock className="text-lynix-purple" size={24} />
@@ -91,7 +106,7 @@ const About = () => {
               <h3 className="text-4xl font-bold text-lynix-dark mb-2">5+</h3>
               <p className="text-gray-600">Years Experience</p>
             </div>
-            
+
             <div className="bg-white p-8 rounded-xl shadow-sm text-center">
               <div className="w-16 h-16 bg-lynix-purple/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="text-lynix-purple" size={24} />
@@ -99,7 +114,7 @@ const About = () => {
               <h3 className="text-4xl font-bold text-lynix-dark mb-2">350+</h3>
               <p className="text-gray-600">Projects Completed</p>
             </div>
-            
+
             <div className="bg-white p-8 rounded-xl shadow-sm text-center">
               <div className="w-16 h-16 bg-lynix-purple/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Users className="text-lynix-purple" size={24} />
@@ -117,8 +132,8 @@ const About = () => {
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="heading-2 mb-4">Our Core Values</h2>
             <p className="body-text text-gray-600">
-              These principles guide our work and define our culture. They shape how we collaborate 
-              with clients and approach every project.
+              These principles guide our work and define our culture. They shape
+              how we collaborate with clients and approach every project.
             </p>
           </div>
 
@@ -129,8 +144,8 @@ const About = () => {
               </div>
               <h3 className="text-xl font-bold mb-3">Excellence</h3>
               <p className="text-gray-600">
-                We're committed to delivering work of the highest quality in everything we do, 
-                from code to design to client communication.
+                We're committed to delivering work of the highest quality in
+                everything we do, from code to design to client communication.
               </p>
             </div>
 
@@ -140,8 +155,8 @@ const About = () => {
               </div>
               <h3 className="text-xl font-bold mb-3">Innovation</h3>
               <p className="text-gray-600">
-                We stay at the forefront of technology and design trends, always seeking 
-                better solutions to complex problems.
+                We stay at the forefront of technology and design trends, always
+                seeking better solutions to complex problems.
               </p>
             </div>
 
@@ -151,8 +166,8 @@ const About = () => {
               </div>
               <h3 className="text-xl font-bold mb-3">Integrity</h3>
               <p className="text-gray-600">
-                We build relationships based on trust, honesty, and transparency, 
-                following through on our commitments.
+                We build relationships based on trust, honesty, and
+                transparency, following through on our commitments.
               </p>
             </div>
           </div>
@@ -165,14 +180,18 @@ const About = () => {
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="heading-2 mb-4">Meet Our Team</h2>
             <p className="body-text text-gray-600">
-              Our talented team brings together a diverse range of skills and expertise to deliver exceptional results.
+              Our talented team brings together a diverse range of skills and
+              expertise to deliver exceptional results.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* In a real implementation, this would include actual team member photos and info */}
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-xl overflow-hidden shadow-lg">
+              <div
+                key={i}
+                className="bg-white rounded-xl overflow-hidden shadow-lg"
+              >
                 <div className="h-64 bg-gradient-to-br from-lynix-purple/70 to-lynix-tertiary-purple/70"></div>
                 <div className="p-6">
                   <h3 className="text-lg font-bold mb-1">Team Member {i}</h3>
@@ -193,9 +212,13 @@ const About = () => {
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="heading-2 mb-6">Ready to Work With Us?</h2>
             <p className="body-text text-gray-300 mb-8">
-              Let's discuss how we can help you achieve your business goals with our digital expertise.
+              Let's discuss how we can help you achieve your business goals with
+              our digital expertise.
             </p>
-            <Button asChild className="bg-lynix-purple hover:bg-lynix-secondary-purple text-white px-8 py-6">
+            <Button
+              asChild
+              className="bg-lynix-purple hover:bg-lynix-secondary-purple text-white px-8 py-6"
+            >
               <Link to="/contact">Get in Touch</Link>
             </Button>
           </div>

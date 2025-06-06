@@ -1,6 +1,8 @@
 const express = require("express");
 const { supabase, supabaseAdmin } = require("../config/supabase");
 const { sendEmail } = require("../config/dynamicEmail");
+// Adjust the path below to where your EmailAutomationService is located
+const emailAutomationService = require("../services/EmailAutomationService");
 
 const router = express.Router();
 
@@ -63,26 +65,28 @@ router.post("/subscribe", async (req, res) => {
       throw new Error(`Database error: ${insertError.message}`);
     }
 
-    // Send welcome email
+    // Trigger the welcome email automation
     try {
-      const welcomeHtml = `
-        <h1>Welcome to LynixDevs Newsletter!</h1>
-        <p>Thank you for subscribing to our newsletter. You'll now receive updates on our latest news, projects, and offers.</p>
-        <p>If you didn't subscribe or wish to unsubscribe, please <a href="https://lynixdevs.us/unsubscribe?email=${encodeURIComponent(
-          email
-        )}">click here</a>.</p>
-        <p>Best regards,<br>The LynixDevs Team</p>
-      `;
-
-      await sendEmail({
-        to: email,
-        subject: "Welcome to LynixDevs Newsletter!",
-        html: welcomeHtml,
-      });
-
-      console.log("Welcome email sent successfully");
+      const automationResult = await emailAutomationService.triggerAutomation(
+        "newsletter_confirmation", // eventType in your automation_rules table
+        email,
+        {
+          email,
+          unsubscribe_link: `https://lynixdevs.us/unsubscribe?email=${encodeURIComponent(
+            email
+          )}`,
+        }
+      );
+      if (!automationResult.success) {
+        console.error("Automation service error:", automationResult.error);
+      } else {
+        console.log("Welcome email sent via automation service");
+      }
     } catch (emailError) {
-      console.error("Error sending welcome email:", emailError);
+      console.error(
+        "Error sending welcome email via automation service:",
+        emailError
+      );
       // Continue execution - we've saved the subscription to database
     }
 
@@ -100,7 +104,7 @@ router.post("/subscribe", async (req, res) => {
   }
 });
 
-// Send newsletter to all subscribers
+// Send newsletter to all subscribers (unchanged)
 router.post("/send", async (req, res) => {
   try {
     const { subject, html, text, newsletter_id } = req.body;
@@ -112,10 +116,7 @@ router.post("/send", async (req, res) => {
       });
     }
 
-    // Use supabaseAdmin for reading subscribers
-    const { data: subscribers, error: subError } = await (
-      supabaseAdmin || supabase
-    )
+    const { data: subscribers, error: subError } = await supabaseAdmin
       .from("subscribers")
       .select("email")
       .eq("status", "active");
@@ -143,9 +144,8 @@ router.post("/send", async (req, res) => {
       }
     }
 
-    // Optionally update the newsletter row as sent
     if (newsletter_id) {
-      await (supabaseAdmin || supabase)
+      await supabaseAdmin
         .from("newsletters")
         .update({
           sent_at: new Date().toISOString(),
@@ -171,4 +171,5 @@ router.post("/send", async (req, res) => {
     });
   }
 });
+
 module.exports = router;

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Loader2, Edit, Trash2, Plus, Users } from "lucide-react";
+import { Loader2, Edit, Trash2, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import {
@@ -42,6 +41,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { apiClient } from "@/lib/apiClient";
 
 interface ClientProject {
   id: string;
@@ -87,11 +87,18 @@ const clientProjectFormSchema = z.object({
 
 type ClientProjectFormValues = z.infer<typeof clientProjectFormSchema>;
 
-const PROJECT_STATUSES = ["not_started", "in_progress", "completed", "on_hold", "cancelled"];
+const PROJECT_STATUSES = [
+  "not_started",
+  "in_progress",
+  "completed",
+  "on_hold",
+  "cancelled",
+];
 
 const ClientProjectsAdmin = () => {
   const { toast } = useToast();
-  const [selectedClientProject, setSelectedClientProject] = useState<ClientProject | null>(null);
+  const [selectedClientProject, setSelectedClientProject] =
+    useState<ClientProject | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   const form = useForm<ClientProjectFormValues>({
@@ -107,74 +114,39 @@ const ClientProjectsAdmin = () => {
     },
   });
 
-  // Fetch client projects with project and user details
-  const { data: clientProjects, isLoading, error, refetch } = useQuery({
+  // Fetch client projects from your backend API (not Supabase!)
+  const {
+    data: clientProjects,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ["clientProjects"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("client_projects")
-        .select(`
-          *
-        `)
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        throw new Error(`Error fetching client projects: ${error.message}`);
-      }
-
-      // Fetch related data separately to avoid join issues
-      const projectsWithDetails = await Promise.all(
-        (data || []).map(async (clientProject) => {
-          const [projectResult, profileResult] = await Promise.all([
-            supabase
-              .from("projects")
-              .select("title, description")
-              .eq("id", clientProject.project_id)
-              .single(),
-            supabase
-              .from("profiles")
-              .select("full_name")
-              .eq("id", clientProject.client_user_id)
-              .single()
-          ]);
-
-          return {
-            ...clientProject,
-            project_info: projectResult.data,
-            client_profile: profileResult.data
-          };
-        })
-      );
-
-      return projectsWithDetails as ClientProject[];
+      const json = await apiClient.get("/api/clientProjects");
+      // The backend should return { projects: [...] }, with mapped fields as needed.
+      // If your backend doesn't map project_info/client_profile, you may need to adapt this.
+      return (json.projects as ClientProject[]) || [];
     },
   });
 
-  // Fetch available projects
+  // Fetch available projects from backend API
   const { data: projects } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("projects")
-        .select("id, title, description")
-        .order("title");
-
-      if (error) throw error;
-      return data as Project[];
+      const json = await apiClient.get("/api/projects");
+      // The backend should return { projects: [...] }
+      return (json.projects as Project[]) || [];
     },
   });
 
-  // Fetch available users (clients)
+  // Fetch available users (clients) from backend API
   const { data: users } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .order("full_name");
-
-      if (error) throw error;
-      return data as User[];
+      const json = await apiClient.get("/api/users");
+      // The backend should return { users: [...] }
+      return (json.users as User[]) || [];
     },
   });
 
@@ -208,8 +180,12 @@ const ClientProjectsAdmin = () => {
       client_user_id: clientProject.client_user_id,
       status: clientProject.status,
       progress: clientProject.progress || 0,
-      start_date: clientProject.start_date ? clientProject.start_date.split('T')[0] : "",
-      estimated_completion: clientProject.estimated_completion ? clientProject.estimated_completion.split('T')[0] : "",
+      start_date: clientProject.start_date
+        ? clientProject.start_date.split("T")[0]
+        : "",
+      estimated_completion: clientProject.estimated_completion
+        ? clientProject.estimated_completion.split("T")[0]
+        : "",
       notes: clientProject.notes || "",
     });
     setSelectedClientProject(clientProject);
@@ -223,31 +199,26 @@ const ClientProjectsAdmin = () => {
         client_user_id: values.client_user_id,
         status: values.status,
         progress: values.progress,
-        start_date: values.start_date ? new Date(values.start_date).toISOString() : null,
-        estimated_completion: values.estimated_completion ? new Date(values.estimated_completion).toISOString() : null,
+        start_date: values.start_date
+          ? new Date(values.start_date).toISOString()
+          : null,
+        estimated_completion: values.estimated_completion
+          ? new Date(values.estimated_completion).toISOString()
+          : null,
         notes: values.notes || null,
-        updated_at: new Date().toISOString(),
       };
 
       if (selectedClientProject) {
-        const { error } = await supabase
-          .from("client_projects")
-          .update(submitData)
-          .eq("id", selectedClientProject.id);
-
-        if (error) throw error;
-
+        await apiClient.put(
+          `/api/clientProjects/${selectedClientProject.id}`,
+          submitData
+        );
         toast({
           title: "Client project updated",
           description: "The client project was successfully updated.",
         });
       } else {
-        const { error } = await supabase
-          .from("client_projects")
-          .insert(submitData);
-
-        if (error) throw error;
-
+        await apiClient.post("/api/clientProjects", submitData);
         toast({
           title: "Client project created",
           description: "The client project was successfully assigned.",
@@ -259,7 +230,9 @@ const ClientProjectsAdmin = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: `Failed to ${selectedClientProject ? "update" : "create"} client project: ${(error as Error).message}`,
+        description: `Failed to ${
+          selectedClientProject ? "update" : "create"
+        } client project: ${(error as Error).message}`,
         variant: "destructive",
       });
     }
@@ -267,23 +240,18 @@ const ClientProjectsAdmin = () => {
 
   const handleDeleteClientProject = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from("client_projects")
-        .delete()
-        .eq("id", id);
-
-      if (error) throw error;
-
+      await apiClient.delete(`/api/clientProjects/${id}`);
       toast({
         title: "Client project deleted",
         description: "The client project was successfully deleted.",
       });
-
       refetch();
     } catch (error) {
       toast({
         title: "Error",
-        description: `Failed to delete client project: ${(error as Error).message}`,
+        description: `Failed to delete client project: ${
+          (error as Error).message
+        }`,
         variant: "destructive",
       });
     }
@@ -345,19 +313,32 @@ const ClientProjectsAdmin = () => {
                       {clientProject.project_info?.title || "Unknown Project"}
                     </TableCell>
                     <TableCell>
-                      {clientProject.client_profile?.full_name || "Unknown User"}
+                      {clientProject.client_profile?.full_name ||
+                        "Unknown User"}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={getStatusBadgeVariant(clientProject.status)}>
-                        {clientProject.status.replace('_', ' ').toUpperCase()}
+                      <Badge
+                        variant={getStatusBadgeVariant(clientProject.status)}
+                      >
+                        {clientProject.status.replace("_", " ").toUpperCase()}
                       </Badge>
                     </TableCell>
                     <TableCell>{clientProject.progress || 0}%</TableCell>
                     <TableCell>
-                      {clientProject.start_date ? format(new Date(clientProject.start_date), "MMM d, yyyy") : "-"}
+                      {clientProject.start_date
+                        ? format(
+                            new Date(clientProject.start_date),
+                            "MMM d, yyyy"
+                          )
+                        : "-"}
                     </TableCell>
                     <TableCell>
-                      {clientProject.estimated_completion ? format(new Date(clientProject.estimated_completion), "MMM d, yyyy") : "-"}
+                      {clientProject.estimated_completion
+                        ? format(
+                            new Date(clientProject.estimated_completion),
+                            "MMM d, yyyy"
+                          )
+                        : "-"}
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
@@ -371,7 +352,9 @@ const ClientProjectsAdmin = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDeleteClientProject(clientProject.id)}
+                          onClick={() =>
+                            handleDeleteClientProject(clientProject.id)
+                          }
                           className="text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -396,7 +379,9 @@ const ClientProjectsAdmin = () => {
         <SheetContent className="sm:max-w-2xl overflow-y-auto">
           <SheetHeader>
             <SheetTitle>
-              {selectedClientProject ? "Edit Client Project" : "Assign Project to Client"}
+              {selectedClientProject
+                ? "Edit Client Project"
+                : "Assign Project to Client"}
             </SheetTitle>
             <SheetDescription>
               {selectedClientProject
@@ -406,14 +391,20 @@ const ClientProjectsAdmin = () => {
           </SheetHeader>
           <div className="py-4">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
                 <FormField
                   control={form.control}
                   name="project_id"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Project</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a project" />
@@ -437,7 +428,10 @@ const ClientProjectsAdmin = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Client</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a client" />
@@ -461,7 +455,10 @@ const ClientProjectsAdmin = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Status</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select status" />
@@ -470,7 +467,7 @@ const ClientProjectsAdmin = () => {
                         <SelectContent>
                           {PROJECT_STATUSES.map((status) => (
                             <SelectItem key={status} value={status}>
-                              {status.replace('_', ' ').toUpperCase()}
+                              {status.replace("_", " ").toUpperCase()}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -492,7 +489,9 @@ const ClientProjectsAdmin = () => {
                           max="100"
                           placeholder="0"
                           {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value) || 0)
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -532,14 +531,21 @@ const ClientProjectsAdmin = () => {
                     <FormItem>
                       <FormLabel>Notes</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Additional notes or comments" {...field} />
+                        <Textarea
+                          placeholder="Additional notes or comments"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <div className="flex justify-end space-x-4 pt-4">
-                  <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsFormOpen(false)}
+                  >
                     Cancel
                   </Button>
                   <Button type="submit">Save</Button>

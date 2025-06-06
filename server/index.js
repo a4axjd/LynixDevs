@@ -1,4 +1,3 @@
-
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -18,11 +17,11 @@ app.use(bodyParser.json());
 async function initializeServer() {
   try {
     console.log("Starting server initialization...");
-    
+
     // Initialize database
     await databaseService.initialize();
     console.log("Database initialized successfully");
-    
+
     // Routes
     const adminRoutes = require("./routes/admin");
     const contactRoutes = require("./routes/contact");
@@ -30,16 +29,14 @@ async function initializeServer() {
     const emailRoutes = require("./routes/email");
     const adminSettingsRoutes = require("./routes/adminSettings");
     const adminCountsRoutes = require("./routes/adminCounts");
-    
+    const clientProjectsRoutes = require("./routes/clientProjects");
     // New API routes that replace edge functions
     const usersRoutes = require("./routes/users");
-    const contactNewRoutes = require("./routes/contactNew");
-    const newsletterNewRoutes = require("./routes/newsletterNew");
-    
+
     // New public API routes
     const blogRoutes = require("./routes/blog");
     const projectsRoutes = require("./routes/projects");
-    
+
     // Email automation routes
     const emailAutomationRoutes = require("./routes/emailAutomation");
 
@@ -53,16 +50,14 @@ async function initializeServer() {
     app.use("/api/email", emailRoutes);
     app.use("/api/admin/settings", adminSettingsRoutes);
     app.use("/api/admin", adminCountsRoutes);
-    
+
     // Register new routes that replace edge functions
     app.use("/api/users", usersRoutes);
-    app.use("/api/contact-new", contactNewRoutes);
-    app.use("/api/newsletter-new", newsletterNewRoutes);
-    
+    app.use("/api/clientProjects", clientProjectsRoutes);
     // Register new public routes
     app.use("/api/blog", blogRoutes);
     app.use("/api/projects", projectsRoutes);
-    
+
     // Register email automation routes
     app.use("/api/email-automation", emailAutomationRoutes);
 
@@ -71,10 +66,10 @@ async function initializeServer() {
 
     // Health check endpoint
     app.get("/health", (req, res) => {
-      res.json({ 
-        status: "ok", 
+      res.json({
+        status: "ok",
         message: "Server is running",
-        database: databaseService.isInitialized ? "connected" : "disconnected"
+        database: databaseService.isInitialized ? "connected" : "disconnected",
       });
     });
 
@@ -82,7 +77,6 @@ async function initializeServer() {
       console.log(`Server running on port ${PORT}`);
       console.log("Server initialization completed successfully");
     });
-    
   } catch (error) {
     console.error("Failed to initialize server:", error);
     process.exit(1);

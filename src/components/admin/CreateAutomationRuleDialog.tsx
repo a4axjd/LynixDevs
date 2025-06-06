@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -28,49 +27,55 @@ interface CreateAutomationRuleDialogProps {
 }
 
 const EVENT_TYPES = [
-  { value: 'user_welcome', label: 'User Welcome' },
-  { value: 'contact_form_reply', label: 'Contact Form Reply' },
-  { value: 'project_update', label: 'Project Update' },
-  { value: 'newsletter_confirmation', label: 'Newsletter Confirmation' },
+  { value: "user_welcome", label: "User Welcome" },
+  { value: "contact_form_reply", label: "Contact Form Reply" },
+  { value: "project_update", label: "Project Update" },
+  { value: "newsletter_confirmation", label: "Newsletter Confirmation" },
 ];
-
-const CreateAutomationRuleDialog = ({ open, onOpenChange }: CreateAutomationRuleDialogProps) => {
-  const [eventType, setEventType] = useState('');
-  const [templateId, setTemplateId] = useState('');
+const apiBase = import.meta.env.VITE_SERVER_URL;
+const CreateAutomationRuleDialog = ({
+  open,
+  onOpenChange,
+}: CreateAutomationRuleDialogProps) => {
+  const [eventType, setEventType] = useState("");
+  const [templateId, setTemplateId] = useState("");
   const [isActive, setIsActive] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: templates = [] } = useQuery({
-    queryKey: ['emailTemplates'],
+    queryKey: ["emailTemplates"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('email_templates')
-        .select('id, name, subject')
-        .order('name');
-      
+        .from("email_templates")
+        .select("id, name, subject")
+        .order("name");
+
       if (error) throw error;
       // Filter out templates with invalid IDs
-      return data?.filter(template => template.id && template.id.trim() !== '') || [];
+      return (
+        data?.filter((template) => template.id && template.id.trim() !== "") ||
+        []
+      );
     },
   });
 
   const createRuleMutation = useMutation({
     mutationFn: async (ruleData: any) => {
-      const response = await fetch('/api/email-automation/rules', {
-        method: 'POST',
+      const response = await fetch(`${apiBase}/api/email-automation/rules`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(ruleData),
       });
       if (!response.ok) {
-        throw new Error('Failed to create automation rule');
+        throw new Error("Failed to create automation rule");
       }
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['automationRules'] });
+      queryClient.invalidateQueries({ queryKey: ["automationRules"] });
       toast({
         title: "Success",
         description: "Automation rule created successfully",
@@ -88,7 +93,7 @@ const CreateAutomationRuleDialog = ({ open, onOpenChange }: CreateAutomationRule
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!eventType || !templateId) {
       toast({
         title: "Error",
@@ -106,8 +111,8 @@ const CreateAutomationRuleDialog = ({ open, onOpenChange }: CreateAutomationRule
   };
 
   const handleClose = () => {
-    setEventType('');
-    setTemplateId('');
+    setEventType("");
+    setTemplateId("");
     setIsActive(true);
     onOpenChange(false);
   };
@@ -118,7 +123,8 @@ const CreateAutomationRuleDialog = ({ open, onOpenChange }: CreateAutomationRule
         <DialogHeader>
           <DialogTitle>Create Automation Rule</DialogTitle>
           <DialogDescription>
-            Create a new automated email rule that will trigger when specific events occur.
+            Create a new automated email rule that will trigger when specific
+            events occur.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -154,7 +160,9 @@ const CreateAutomationRuleDialog = ({ open, onOpenChange }: CreateAutomationRule
                     <SelectItem key={template.id} value={template.id}>
                       <div>
                         <div className="font-medium">{template.name}</div>
-                        <div className="text-sm text-muted-foreground">{template.subject}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {template.subject}
+                        </div>
                       </div>
                     </SelectItem>
                   ))
@@ -177,7 +185,7 @@ const CreateAutomationRuleDialog = ({ open, onOpenChange }: CreateAutomationRule
               Cancel
             </Button>
             <Button type="submit" disabled={createRuleMutation.isPending}>
-              {createRuleMutation.isPending ? 'Creating...' : 'Create Rule'}
+              {createRuleMutation.isPending ? "Creating..." : "Create Rule"}
             </Button>
           </DialogFooter>
         </form>

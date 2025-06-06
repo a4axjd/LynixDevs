@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,24 +21,30 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'}/api/contact-new/submit`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_SERVER_URL || "http://localhost:3001"
+        }/api/contact/submit`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const result = await response.json();
 
       if (result.success) {
         toast({
           title: "Message sent successfully!",
-          description: "Thank you for your message. We'll get back to you soon.",
+          description:
+            "Thank you for your message. We'll get back to you soon.",
         });
         setFormData({ name: "", email: "", subject: "", message: "" });
       } else {
-        throw new Error(result.error || 'Failed to send message');
+        throw new Error(result.error || "Failed to send message");
       }
     } catch (error: any) {
       toast({
@@ -52,7 +57,9 @@ const Contact = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -87,7 +94,8 @@ const Contact = () => {
             <div>
               <h2 className="heading-2 mb-8">Let's Start a Conversation</h2>
               <p className="body-text text-gray-600 mb-8">
-                We're here to help bring your digital vision to life. Reach out to us and let's discuss your project.
+                We're here to help bring your digital vision to life. Reach out
+                to us and let's discuss your project.
               </p>
 
               <div className="space-y-6">
@@ -95,7 +103,9 @@ const Contact = () => {
                   <MapPin className="h-6 w-6 text-lynix-purple mt-1 mr-4 flex-shrink-0" />
                   <div>
                     <h3 className="font-semibold mb-1">Office Location</h3>
-                    <p className="text-gray-600">Remote Team - Serving Globally</p>
+                    <p className="text-gray-600">
+                      Remote Team - Serving Globally
+                    </p>
                   </div>
                 </div>
 
@@ -111,7 +121,9 @@ const Contact = () => {
                   <Clock className="h-6 w-6 text-lynix-purple mt-1 mr-4 flex-shrink-0" />
                   <div>
                     <h3 className="font-semibold mb-1">Response Time</h3>
-                    <p className="text-gray-600">We typically respond within 24 hours</p>
+                    <p className="text-gray-600">
+                      We typically respond within 24 hours
+                    </p>
                   </div>
                 </div>
               </div>
@@ -122,7 +134,10 @@ const Contact = () => {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label
+                      htmlFor="name"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
                       Full Name *
                     </label>
                     <Input
@@ -136,7 +151,10 @@ const Contact = () => {
                     />
                   </div>
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
                       Email Address *
                     </label>
                     <Input
@@ -152,7 +170,10 @@ const Contact = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="subject"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Subject *
                   </label>
                   <Input
@@ -167,7 +188,10 @@ const Contact = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="message"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Message *
                   </label>
                   <Textarea

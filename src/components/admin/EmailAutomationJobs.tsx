@@ -1,9 +1,14 @@
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import {
@@ -21,28 +26,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { emailAutomationAPI, type AutomationJob } from "@/lib/emailAutomationAPI";
+import {
+  emailAutomationAPI,
+  type AutomationJob,
+} from "@/lib/emailAutomationAPI";
 
 const EmailAutomationJobs = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState("all");
   const [pageSize] = useState(20);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: jobsData, isLoading, error } = useQuery({
-    queryKey: ['automationJobs', currentPage, statusFilter],
-    queryFn: () => emailAutomationAPI.getJobs({
-      page: currentPage,
-      limit: pageSize,
-      status: statusFilter || undefined,
-    }),
+  const {
+    data: jobsData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["automationJobs", currentPage, statusFilter],
+    queryFn: () =>
+      emailAutomationAPI.getJobs({
+        page: currentPage,
+        limit: pageSize,
+        status: statusFilter === "all" ? undefined : statusFilter,
+      }),
   });
 
   const retryJobMutation = useMutation({
     mutationFn: (jobId: string) => emailAutomationAPI.retryJob(jobId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['automationJobs'] });
+      queryClient.invalidateQueries({ queryKey: ["automationJobs"] });
       toast({
         title: "Success",
         description: "Job retry initiated successfully",
@@ -63,11 +76,11 @@ const EmailAutomationJobs = () => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'completed':
+      case "completed":
         return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
-      case 'failed':
+      case "failed":
         return <Badge variant="destructive">Failed</Badge>;
-      case 'pending':
+      case "pending":
         return <Badge variant="secondary">Pending</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
@@ -75,7 +88,9 @@ const EmailAutomationJobs = () => {
   };
 
   const formatEventType = (eventType: string) => {
-    return eventType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return eventType
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
   if (isLoading) {
@@ -101,7 +116,11 @@ const EmailAutomationJobs = () => {
   }
 
   const jobs = jobsData?.jobs || [];
-  const pagination = jobsData?.pagination || { page: 1, limit: pageSize, total: 0 };
+  const pagination = jobsData?.pagination || {
+    page: 1,
+    limit: pageSize,
+    total: 0,
+  };
 
   return (
     <Card>
@@ -119,7 +138,7 @@ const EmailAutomationJobs = () => {
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="failed">Failed</SelectItem>
@@ -128,7 +147,9 @@ const EmailAutomationJobs = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => queryClient.invalidateQueries({ queryKey: ['automationJobs'] })}
+              onClick={() =>
+                queryClient.invalidateQueries({ queryKey: ["automationJobs"] })
+              }
             >
               <RefreshCw className="w-4 h-4" />
             </Button>
@@ -162,13 +183,16 @@ const EmailAutomationJobs = () => {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">
-                        {formatEventType(job.email_automation_rules?.event_type || 'Unknown')}
+                        {formatEventType(
+                          job.email_automation_rules?.event_type || "Unknown"
+                        )}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <div>
                         <div className="font-medium">
-                          {job.email_automation_rules?.email_templates?.name || 'N/A'}
+                          {job.email_automation_rules?.email_templates?.name ||
+                            "N/A"}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {job.email_automation_rules?.email_templates?.subject}
@@ -187,10 +211,12 @@ const EmailAutomationJobs = () => {
                       {new Date(job.created_at).toLocaleString()}
                     </TableCell>
                     <TableCell>
-                      {job.sent_at ? new Date(job.sent_at).toLocaleString() : '-'}
+                      {job.sent_at
+                        ? new Date(job.sent_at).toLocaleString()
+                        : "-"}
                     </TableCell>
                     <TableCell>
-                      {job.status === 'failed' && (
+                      {job.status === "failed" && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -202,7 +228,10 @@ const EmailAutomationJobs = () => {
                         </Button>
                       )}
                       {job.error_message && (
-                        <div className="text-xs text-red-600 mt-1 max-w-xs truncate" title={job.error_message}>
+                        <div
+                          className="text-xs text-red-600 mt-1 max-w-xs truncate"
+                          title={job.error_message}
+                        >
                           {job.error_message}
                         </div>
                       )}
@@ -215,13 +244,17 @@ const EmailAutomationJobs = () => {
             {pagination.total > pageSize && (
               <div className="flex items-center justify-between mt-4">
                 <div className="text-sm text-muted-foreground">
-                  Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, pagination.total)} of {pagination.total} jobs
+                  Showing {(currentPage - 1) * pageSize + 1} to{" "}
+                  {Math.min(currentPage * pageSize, pagination.total)} of{" "}
+                  {pagination.total} jobs
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(1, prev - 1))
+                    }
                     disabled={currentPage === 1}
                   >
                     <ChevronLeft className="w-4 h-4" />
@@ -230,7 +263,7 @@ const EmailAutomationJobs = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setCurrentPage(prev => prev + 1)}
+                    onClick={() => setCurrentPage((prev) => prev + 1)}
                     disabled={currentPage * pageSize >= pagination.total}
                   >
                     Next

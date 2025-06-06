@@ -1,6 +1,5 @@
-
-const databaseService = require('../config/database');
-const { sendEmail } = require('../config/dynamicEmail');
+const databaseService = require("../config/database");
+const { sendEmail } = require("../config/dynamicEmail");
 
 class ContactService {
   constructor() {
@@ -13,19 +12,19 @@ class ContactService {
     try {
       // Validate required fields
       if (!name || !email || !subject || !message) {
-        throw new Error('Please fill in all required fields.');
+        throw new Error("Please fill in all required fields.");
       }
 
       // Insert contact submission into database
       const { data, error } = await this.supabase
-        .from('contact_submissions')
+        .from("contact_submissions")
         .insert([
-          { 
+          {
             name,
             email,
             subject,
             message,
-          }
+          },
         ])
         .select()
         .single();
@@ -53,9 +52,9 @@ class ContactService {
           replyTo: "info@lynixdevs.com",
         });
 
-        console.log('Confirmation email sent successfully');
+        console.log("Confirmation email sent successfully");
       } catch (emailError) {
-        console.error('Error sending confirmation email:', emailError);
+        console.error("Error sending confirmation email:", emailError);
         // Continue execution - don't fail the request just because email failed
       }
 
@@ -79,18 +78,21 @@ class ContactService {
           replyTo: email,
         });
 
-        console.log('Admin notification email sent successfully');
+        console.log("Admin notification email sent successfully");
       } catch (adminEmailError) {
-        console.error('Error sending admin notification email:', adminEmailError);
+        console.error(
+          "Error sending admin notification email:",
+          adminEmailError
+        );
       }
 
       return {
         success: true,
         message: "Thank you for your message. We'll get back to you soon!",
-        data: data
+        data: data,
       };
     } catch (error) {
-      console.error('Error processing contact submission:', error);
+      console.error("Error processing contact submission:", error);
       throw error;
     }
   }
@@ -98,9 +100,9 @@ class ContactService {
   async getContactSubmissions() {
     try {
       const { data, error } = await this.supabase
-        .from('contact_submissions')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from("contact_submissions")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) {
         throw error;
@@ -108,7 +110,7 @@ class ContactService {
 
       return data;
     } catch (error) {
-      console.error('Error fetching contact submissions:', error);
+      console.error("Error fetching contact submissions:", error);
       throw error;
     }
   }
@@ -116,9 +118,9 @@ class ContactService {
   async markAsRead(submissionId) {
     try {
       const { data, error } = await this.supabase
-        .from('contact_submissions')
+        .from("contact_submissions")
         .update({ read: true })
-        .eq('id', submissionId)
+        .eq("id", submissionId)
         .select()
         .single();
 
@@ -128,7 +130,7 @@ class ContactService {
 
       return data;
     } catch (error) {
-      console.error('Error marking submission as read:', error);
+      console.error("Error marking submission as read:", error);
       throw error;
     }
   }
