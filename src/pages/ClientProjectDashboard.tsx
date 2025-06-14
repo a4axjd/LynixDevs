@@ -1,18 +1,23 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Loader2, Upload, Download, FileText, Calendar, Clock } from "lucide-react";
+import { Loader2, FileText, Calendar, Clock } from "lucide-react";
 import { format } from "date-fns";
 import ClientProjectUpdates from "@/components/ClientProjectUpdates";
 import ClientProjectFiles from "@/components/ClientProjectFiles";
+import ClientProjectNavigation from "@/components/ClientProjectNavigation";
 
 interface ClientProject {
   id: string;
@@ -35,24 +40,33 @@ interface ClientProject {
 const ClientProjectDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [selectedProject, setSelectedProject] = useState<ClientProject | null>(null);
+  const [selectedProject, setSelectedProject] = useState<ClientProject | null>(
+    null
+  );
 
   // Fetch user's assigned projects
-  const { data: clientProjects, isLoading, error, refetch } = useQuery({
+  const {
+    data: clientProjects,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ["myClientProjects", user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-      
+
       const { data, error } = await supabase
         .from("client_projects")
-        .select(`
+        .select(
+          `
           *,
           projects:project_id (
             title,
             description,
             image_url
           )
-        `)
+        `
+        )
         .eq("client_user_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -70,14 +84,14 @@ const ClientProjectDashboard = () => {
     if (!user?.id) return;
 
     const channel = supabase
-      .channel('client-project-changes')
+      .channel("client-project-changes")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'client_projects',
-          filter: `client_user_id=eq.${user.id}`
+          event: "*",
+          schema: "public",
+          table: "client_projects",
+          filter: `client_user_id=eq.${user.id}`,
         },
         () => {
           refetch();
@@ -140,6 +154,13 @@ const ClientProjectDashboard = () => {
     }
   };
 
+  // Create array for navigation dropdown
+  const allProjects =
+    clientProjects?.map((project) => ({
+      id: project.id,
+      title: project.projects?.title || "Untitled Project",
+    })) || [];
+
   if (isLoading) {
     return (
       <div className="container py-8">
@@ -153,11 +174,13 @@ const ClientProjectDashboard = () => {
   if (!clientProjects || clientProjects.length === 0) {
     return (
       <div className="container py-8">
+        <ClientProjectNavigation />
         <div className="text-center py-12">
           <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h2 className="text-2xl font-semibold mb-2">No Projects Assigned</h2>
           <p className="text-muted-foreground">
-            You don't have any projects assigned yet. Contact your administrator for more information.
+            You don't have any projects assigned yet. Contact your administrator
+            for more information.
           </p>
         </div>
       </div>
@@ -166,6 +189,12 @@ const ClientProjectDashboard = () => {
 
   return (
     <div className="container py-8">
+      <ClientProjectNavigation
+        projectTitle={selectedProject?.projects?.title}
+        projectId={selectedProject?.id}
+        allProjects={allProjects}
+      />
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">My Projects</h1>
         <p className="text-muted-foreground">
@@ -175,18 +204,20 @@ const ClientProjectDashboard = () => {
 
       <div className="grid gap-6 md:grid-cols-3 mb-8">
         {clientProjects.map((project) => (
-          <Card 
-            key={project.id} 
+          <Card
+            key={project.id}
             className={`cursor-pointer transition-colors ${
-              selectedProject?.id === project.id ? 'ring-2 ring-primary' : ''
+              selectedProject?.id === project.id ? "ring-2 ring-primary" : ""
             }`}
             onClick={() => setSelectedProject(project)}
           >
             <CardHeader>
-              <CardTitle className="text-lg">{project.projects?.title}</CardTitle>
+              <CardTitle className="text-lg">
+                {project.projects?.title}
+              </CardTitle>
               <CardDescription>
                 <Badge variant={getStatusBadgeVariant(project.status)}>
-                  {project.status.replace('_', ' ').toUpperCase()}
+                  {project.status.replace("_", " ").toUpperCase()}
                 </Badge>
               </CardDescription>
             </CardHeader>
@@ -200,7 +231,11 @@ const ClientProjectDashboard = () => {
                 {project.estimated_completion && (
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Clock className="h-4 w-4 mr-1" />
-                    Due {format(new Date(project.estimated_completion), "MMM d, yyyy")}
+                    Due{" "}
+                    {format(
+                      new Date(project.estimated_completion),
+                      "MMM d, yyyy"
+                    )}
                   </div>
                 )}
               </div>
@@ -214,13 +249,15 @@ const ClientProjectDashboard = () => {
           <CardHeader>
             <div className="flex justify-between items-start">
               <div>
-                <CardTitle className="text-2xl">{selectedProject.projects?.title}</CardTitle>
+                <CardTitle className="text-2xl">
+                  {selectedProject.projects?.title}
+                </CardTitle>
                 <CardDescription className="mt-2">
                   {selectedProject.projects?.description}
                 </CardDescription>
               </div>
               <Badge variant={getStatusBadgeVariant(selectedProject.status)}>
-                {selectedProject.status.replace('_', ' ').toUpperCase()}
+                {selectedProject.status.replace("_", " ").toUpperCase()}
               </Badge>
             </div>
           </CardHeader>
@@ -231,7 +268,9 @@ const ClientProjectDashboard = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Completion</span>
-                    <span className="font-medium">{selectedProject.progress || 0}%</span>
+                    <span className="font-medium">
+                      {selectedProject.progress || 0}%
+                    </span>
                   </div>
                   <Progress value={selectedProject.progress || 0} />
                 </div>
@@ -241,7 +280,11 @@ const ClientProjectDashboard = () => {
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
                     <span className="text-sm">
-                      Started: {format(new Date(selectedProject.start_date), "MMM d, yyyy")}
+                      Started:{" "}
+                      {format(
+                        new Date(selectedProject.start_date),
+                        "MMM d, yyyy"
+                      )}
                     </span>
                   </div>
                 )}
@@ -249,7 +292,11 @@ const ClientProjectDashboard = () => {
                   <div className="flex items-center">
                     <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
                     <span className="text-sm">
-                      Due: {format(new Date(selectedProject.estimated_completion), "MMM d, yyyy")}
+                      Due:{" "}
+                      {format(
+                        new Date(selectedProject.estimated_completion),
+                        "MMM d, yyyy"
+                      )}
                     </span>
                   </div>
                 )}

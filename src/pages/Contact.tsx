@@ -67,7 +67,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="pt-20">
+    <div>
       <SEOHead
         title="Contact Us | LynixDevs - Get In Touch"
         description="Contact LynixDevs for your web development needs. We're here to help bring your digital vision to life."

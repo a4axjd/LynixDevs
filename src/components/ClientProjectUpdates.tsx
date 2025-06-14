@@ -1,15 +1,28 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Plus, Clock, TrendingUp, AlertCircle, CheckCircle, Sparkles } from "lucide-react";
+import {
+  Loader2,
+  Plus,
+  Clock,
+  TrendingUp,
+  AlertCircle,
+  CheckCircle,
+  Sparkles,
+} from "lucide-react";
 import { format } from "date-fns";
 import {
   Dialog,
@@ -30,6 +43,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 interface ProjectUpdate {
   id: string;
@@ -62,7 +76,9 @@ interface ClientProjectUpdatesProps {
   clientProjectId: string;
 }
 
-const ClientProjectUpdates = ({ clientProjectId }: ClientProjectUpdatesProps) => {
+const ClientProjectUpdates = ({
+  clientProjectId,
+}: ClientProjectUpdatesProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -82,29 +98,36 @@ const ClientProjectUpdates = ({ clientProjectId }: ClientProjectUpdatesProps) =>
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (!user?.id) return;
-      
-      const { data, error } = await supabase.rpc('has_role', {
+
+      const { data, error } = await supabase.rpc("has_role", {
         _user_id: user.id,
-        _role: 'admin',
+        _role: "admin",
       });
-      
+
       if (!error) {
         setIsAdmin(!!data);
       }
     };
-    
+
     checkAdminStatus();
   }, [user?.id]);
 
   // Fetch project updates
-  const { data: updates, isLoading, error, refetch } = useQuery({
+  const {
+    data: updates,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ["projectUpdates", clientProjectId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("project_updates")
-        .select(`
+        .select(
+          `
           *
-        `)
+        `
+        )
         .eq("client_project_id", clientProjectId)
         .eq("is_visible_to_client", true)
         .order("created_at", { ascending: false });
@@ -122,15 +145,15 @@ const ClientProjectUpdates = ({ clientProjectId }: ClientProjectUpdatesProps) =>
               .select("full_name")
               .eq("id", update.created_by)
               .single();
-            
+
             return {
               ...update,
-              creator_profile: profile
+              creator_profile: profile,
             };
           }
           return {
             ...update,
-            creator_profile: null
+            creator_profile: null,
           };
         })
       );
@@ -142,14 +165,14 @@ const ClientProjectUpdates = ({ clientProjectId }: ClientProjectUpdatesProps) =>
   // Set up real-time subscription for updates
   useEffect(() => {
     const channel = supabase
-      .channel('project-updates-changes')
+      .channel("project-updates-changes")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'project_updates',
-          filter: `client_project_id=eq.${clientProjectId}`
+          event: "*",
+          schema: "public",
+          table: "project_updates",
+          filter: `client_project_id=eq.${clientProjectId}`,
         },
         () => {
           refetch();
@@ -164,17 +187,15 @@ const ClientProjectUpdates = ({ clientProjectId }: ClientProjectUpdatesProps) =>
 
   const onSubmit = async (values: UpdateFormValues) => {
     try {
-      const { error } = await supabase
-        .from("project_updates")
-        .insert({
-          client_project_id: clientProjectId,
-          title: values.title,
-          description: values.description || null,
-          update_type: values.update_type,
-          progress_percentage: values.progress_percentage || null,
-          is_visible_to_client: true,
-          created_by: user?.id,
-        });
+      const { error } = await supabase.from("project_updates").insert({
+        client_project_id: clientProjectId,
+        title: values.title,
+        description: values.description || null,
+        update_type: values.update_type,
+        progress_percentage: values.progress_percentage || null,
+        is_visible_to_client: true,
+        created_by: user?.id,
+      });
 
       if (error) throw error;
 
@@ -262,10 +283,15 @@ const ClientProjectUpdates = ({ clientProjectId }: ClientProjectUpdatesProps) =>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl border">
         <div>
           <h3 className="text-xl font-bold text-foreground">Project Updates</h3>
-          <p className="text-muted-foreground mt-1">Stay informed about your project progress</p>
+          <p className="text-muted-foreground mt-1">
+            Stay informed about your project progress
+          </p>
         </div>
         {isAdmin && (
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <Dialog
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg">
                 <Plus className="h-4 w-4 mr-2" />
@@ -274,13 +300,20 @@ const ClientProjectUpdates = ({ clientProjectId }: ClientProjectUpdatesProps) =>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
-                <DialogTitle className="text-xl">Add Project Update</DialogTitle>
+                <DialogTitle className="text-xl">
+                  Add Project Update
+                </DialogTitle>
                 <DialogDescription>
-                  Create a new update to keep your client informed about the project progress.
+                  Create a new update to keep your client informed about the
+                  project progress. You can use Markdown formatting in the
+                  description.
                 </DialogDescription>
               </DialogHeader>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                >
                   <FormField
                     control={form.control}
                     name="title"
@@ -288,7 +321,11 @@ const ClientProjectUpdates = ({ clientProjectId }: ClientProjectUpdatesProps) =>
                       <FormItem>
                         <FormLabel>Title</FormLabel>
                         <FormControl>
-                          <Input placeholder="Update title" {...field} className="h-11" />
+                          <Input
+                            placeholder="Update title"
+                            {...field}
+                            className="h-11"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -301,7 +338,10 @@ const ClientProjectUpdates = ({ clientProjectId }: ClientProjectUpdatesProps) =>
                       <FormItem>
                         <FormLabel>Type</FormLabel>
                         <FormControl>
-                          <select className="w-full p-3 border rounded-lg bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary" {...field}>
+                          <select
+                            className="w-full p-3 border rounded-lg bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                            {...field}
+                          >
                             {UPDATE_TYPES.map((type) => (
                               <option key={type} value={type}>
                                 {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -327,7 +367,11 @@ const ClientProjectUpdates = ({ clientProjectId }: ClientProjectUpdatesProps) =>
                             placeholder="Progress percentage"
                             className="h-11"
                             {...field}
-                            onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
+                            onChange={(e) =>
+                              field.onChange(
+                                parseInt(e.target.value) || undefined
+                              )
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -339,19 +383,30 @@ const ClientProjectUpdates = ({ clientProjectId }: ClientProjectUpdatesProps) =>
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Description</FormLabel>
+                        <FormLabel>Description (Markdown supported)</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="Update description" className="min-h-[100px]" {...field} />
+                          <Textarea
+                            placeholder="Update description (you can use Markdown formatting like **bold**, *italic*, lists, etc.)"
+                            className="min-h-[120px]"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                   <div className="flex justify-end space-x-3 pt-4 border-t">
-                    <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsCreateDialogOpen(false)}
+                    >
                       Cancel
                     </Button>
-                    <Button type="submit" className="bg-gradient-to-r from-primary to-primary/80">
+                    <Button
+                      type="submit"
+                      className="bg-gradient-to-r from-primary to-primary/80"
+                    >
                       Post Update
                     </Button>
                   </div>
@@ -370,18 +425,34 @@ const ClientProjectUpdates = ({ clientProjectId }: ClientProjectUpdatesProps) =>
       ) : updates && updates.length > 0 ? (
         <div className="space-y-4">
           {updates.map((update) => (
-            <Card key={update.id} className="overflow-hidden border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
-              <div className={`h-1 bg-gradient-to-r ${getUpdateTypeColor(update.update_type)}`} />
+            <Card
+              key={update.id}
+              className="overflow-hidden border-0 shadow-md hover:shadow-lg transition-shadow duration-300"
+            >
+              <div
+                className={`h-1 bg-gradient-to-r ${getUpdateTypeColor(
+                  update.update_type
+                )}`}
+              />
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-3 flex-1">
-                    <div className={`p-2 rounded-lg bg-gradient-to-r ${getUpdateTypeColor(update.update_type)} bg-opacity-10`}>
+                    <div
+                      className={`p-2 rounded-lg bg-gradient-to-r ${getUpdateTypeColor(
+                        update.update_type
+                      )} bg-opacity-10`}
+                    >
                       {getUpdateIcon(update.update_type)}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-1">
-                        <CardTitle className="text-lg">{update.title}</CardTitle>
-                        <Badge variant={getUpdateTypeVariant(update.update_type)} className="text-xs">
+                        <CardTitle className="text-lg">
+                          {update.title}
+                        </CardTitle>
+                        <Badge
+                          variant={getUpdateTypeVariant(update.update_type)}
+                          className="text-xs"
+                        >
                           {update.update_type}
                         </Badge>
                       </div>
@@ -393,23 +464,32 @@ const ClientProjectUpdates = ({ clientProjectId }: ClientProjectUpdatesProps) =>
                     </div>
                   </div>
                   <div className="text-sm text-muted-foreground text-right">
-                    <div>{format(new Date(update.created_at), "MMM d, yyyy")}</div>
-                    <div className="text-xs">{format(new Date(update.created_at), "h:mm a")}</div>
+                    <div>
+                      {format(new Date(update.created_at), "MMM d, yyyy")}
+                    </div>
+                    <div className="text-xs">
+                      {format(new Date(update.created_at), "h:mm a")}
+                    </div>
                   </div>
                 </div>
               </CardHeader>
               {(update.description || update.progress_percentage !== null) && (
                 <CardContent className="pt-0">
                   {update.description && (
-                    <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
-                      {update.description}
-                    </p>
+                    <div className="mb-4">
+                      <MarkdownRenderer
+                        content={update.description}
+                        className="prose-sm text-muted-foreground"
+                      />
+                    </div>
                   )}
                   {update.progress_percentage !== null && (
                     <div className="flex items-center space-x-3">
                       <div className="flex-1 bg-gray-200 rounded-full h-2">
-                        <div 
-                          className={`h-2 rounded-full bg-gradient-to-r ${getUpdateTypeColor(update.update_type)} transition-all duration-300`}
+                        <div
+                          className={`h-2 rounded-full bg-gradient-to-r ${getUpdateTypeColor(
+                            update.update_type
+                          )} transition-all duration-300`}
                           style={{ width: `${update.progress_percentage}%` }}
                         />
                       </div>

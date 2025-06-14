@@ -28,6 +28,7 @@ import Profile from "@/pages/Profile";
 import Settings from "@/pages/Settings";
 import ProjectDetail from "@/pages/ProjectDetail";
 import ClientProjectDashboard from "@/pages/ClientProjectDashboard";
+import ClientProjectDetail from "@/pages/ClientProjectDetail";
 
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import UsersAdmin from "@/pages/admin/UsersAdmin";
@@ -45,12 +46,12 @@ import EmailAutomationAdmin from "@/pages/admin/EmailAutomationAdmin";
 // Validate environment on app start
 try {
   validateEnvironment();
-  logger.info('Application starting', { 
+  logger.info("Application starting", {
     environment: import.meta.env.MODE,
-    version: import.meta.env.VITE_APP_VERSION || 'unknown'
+    version: import.meta.env.VITE_APP_VERSION || "unknown",
   });
 } catch (error) {
-  logger.error('Environment validation failed', {}, error as Error);
+  logger.error("Environment validation failed", {}, error as Error);
 }
 
 const queryClient = new QueryClient({
@@ -70,7 +71,7 @@ const queryClient = new QueryClient({
     mutations: {
       retry: false, // Don't retry mutations by default
       onError: (error: any) => {
-        logger.error('Mutation error', { error: error.message });
+        logger.error("Mutation error", { error: error.message });
       },
     },
   },
@@ -129,10 +130,18 @@ function App() {
                       }
                     />
                     <Route
-                      path="/client-project/:id"
+                      path="/client-projects"
                       element={
                         <RouteGuard>
                           <ClientProjectDashboard />
+                        </RouteGuard>
+                      }
+                    />
+                    <Route
+                      path="/client-project/:id"
+                      element={
+                        <RouteGuard>
+                          <ClientProjectDetail />
                         </RouteGuard>
                       }
                     />
@@ -150,14 +159,26 @@ function App() {
                     <Route index element={<AdminDashboard />} />
                     <Route path="users" element={<UsersAdmin />} />
                     <Route path="projects" element={<ProjectsAdmin />} />
-                    <Route path="client-projects" element={<ClientProjectsAdmin />} />
+                    <Route
+                      path="client-projects"
+                      element={<ClientProjectsAdmin />}
+                    />
                     <Route path="blog" element={<BlogAdmin />} />
-                    <Route path="email-templates" element={<EmailTemplatesAdmin />} />
-                    <Route path="email-settings" element={<EmailSettingsAdmin />} />
+                    <Route
+                      path="email-templates"
+                      element={<EmailTemplatesAdmin />}
+                    />
+                    <Route
+                      path="email-settings"
+                      element={<EmailSettingsAdmin />}
+                    />
                     <Route path="newsletter" element={<NewsletterAdmin />} />
                     <Route path="contact" element={<ContactAdmin />} />
                     <Route path="settings" element={<SettingsAdmin />} />
-                    <Route path="email-automation" element={<EmailAutomationAdmin />} />
+                    <Route
+                      path="email-automation"
+                      element={<EmailAutomationAdmin />}
+                    />
                   </Route>
 
                   <Route path="*" element={<NotFound />} />

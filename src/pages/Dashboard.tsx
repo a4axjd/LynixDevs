@@ -1,6 +1,11 @@
-
 import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { FolderKanban, User, Settings, FileText } from "lucide-react";
@@ -13,21 +18,21 @@ const Dashboard = () => {
       title: "My Projects",
       description: "View and track your assigned projects",
       icon: FolderKanban,
-      href: "/dashboard/projects",
+      href: "/client-projects",
       color: "text-blue-600",
     },
     {
       title: "Profile",
       description: "Update your personal information",
       icon: User,
-      href: "/dashboard/profile",
+      href: "/profile",
       color: "text-green-600",
     },
     {
       title: "Settings",
       description: "Manage your account settings",
       icon: Settings,
-      href: "/dashboard/settings",
+      href: "/settings",
       color: "text-purple-600",
     },
   ];
@@ -45,7 +50,10 @@ const Dashboard = () => {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
         {quickActions.map((action) => (
-          <Card key={action.title} className="hover:shadow-md transition-shadow">
+          <Card
+            key={action.title}
+            className="hover:shadow-md transition-shadow"
+          >
             <CardHeader className="flex flex-row items-center space-y-0 pb-2">
               <action.icon className={`h-6 w-6 ${action.color}`} />
               <CardTitle className="ml-2 text-lg">{action.title}</CardTitle>
@@ -55,9 +63,7 @@ const Dashboard = () => {
                 {action.description}
               </CardDescription>
               <Button asChild variant="outline" className="w-full">
-                <Link to={action.href}>
-                  Open {action.title}
-                </Link>
+                <Link to={action.href}>Open {action.title}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -78,7 +84,8 @@ const Dashboard = () => {
               <div>
                 <h4 className="font-medium">Check Your Projects</h4>
                 <p className="text-sm text-muted-foreground">
-                  View any projects that have been assigned to you and track their progress.
+                  View any projects that have been assigned to you and track
+                  their progress.
                 </p>
               </div>
             </div>

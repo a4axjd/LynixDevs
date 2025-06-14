@@ -171,6 +171,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "client_projects_client_user_id_fkey"
+            columns: ["client_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "client_projects_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false

@@ -1,17 +1,16 @@
-
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const databaseService = require('../config/database');
+const databaseService = require("../config/database");
 
 // Get all projects (public endpoint)
-router.get('/public', async (req, res) => {
+router.get("/public", async (req, res) => {
   try {
     const supabase = databaseService.getClient();
-    
+
     const { data, error } = await supabase
-      .from('projects')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .from("projects")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Error fetching projects:", error);
@@ -20,23 +19,47 @@ router.get('/public', async (req, res) => {
 
     res.json(data || []);
   } catch (error) {
-    console.error('Error fetching public projects:', error);
-    res.status(500).json({ 
-      error: error.message || 'An error occurred while fetching projects' 
+    console.error("Error fetching public projects:", error);
+    res.status(500).json({
+      error: error.message || "An error occurred while fetching projects",
+    });
+  }
+});
+
+// Get all projects (admin endpoint)
+router.get("/", async (req, res) => {
+  try {
+    const supabase = databaseService.getClient();
+
+    const { data, error } = await supabase
+      .from("projects")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching projects:", error);
+      return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ projects: data || [] });
+  } catch (error) {
+    console.error("Error fetching projects:", error);
+    res.status(500).json({
+      error: error.message || "An error occurred while fetching projects",
     });
   }
 });
 
 // Get project by ID (public endpoint)
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const supabase = databaseService.getClient();
-    
+
     const { data, error } = await supabase
-      .from('projects')
-      .select('*')
-      .eq('id', id)
+      .from("projects")
+      .select("*")
+      .eq("id", id)
       .single();
 
     if (error) {
@@ -45,9 +68,9 @@ router.get('/:id', async (req, res) => {
 
     res.json(data);
   } catch (error) {
-    console.error('Error fetching project by ID:', error);
-    res.status(500).json({ 
-      error: error.message || 'An error occurred while fetching the project' 
+    console.error("Error fetching project by ID:", error);
+    res.status(500).json({
+      error: error.message || "An error occurred while fetching the project",
     });
   }
 });

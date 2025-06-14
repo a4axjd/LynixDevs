@@ -4,7 +4,7 @@ import { CheckCircle, User, Clock, Users } from "lucide-react";
 
 const About = () => {
   return (
-    <div className="pt-20">
+    <div>
       {/* Hero Section */}
       <section className="bg-lynix-dark text-white py-20 md:py-28">
         <div className="container-custom">

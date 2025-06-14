@@ -18,7 +18,15 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Loader2, Edit, Trash2, Plus } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Loader2, Edit, Trash2, Plus, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import {
@@ -42,6 +50,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { apiClient } from "@/lib/apiClient";
+import AdminProjectUpdates from "@/components/admin/AdminProjectUpdates";
 
 interface ClientProject {
   id: string;
@@ -75,6 +84,11 @@ interface User {
   full_name: string | null;
 }
 
+interface ApiResponse<T> {
+  projects?: T[];
+  users?: T[];
+}
+
 const clientProjectFormSchema = z.object({
   project_id: z.string().min(1, "Project is required"),
   client_user_id: z.string().min(1, "Client is required"),
@@ -100,6 +114,9 @@ const ClientProjectsAdmin = () => {
   const [selectedClientProject, setSelectedClientProject] =
     useState<ClientProject | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [updatesDialogProjectId, setUpdatesDialogProjectId] = useState<
+    string | null
+  >(null);
 
   const form = useForm<ClientProjectFormValues>({
     resolver: zodResolver(clientProjectFormSchema),
@@ -114,7 +131,7 @@ const ClientProjectsAdmin = () => {
     },
   });
 
-  // Fetch client projects from your backend API (not Supabase!)
+  // Fetch client projects
   const {
     data: clientProjects,
     isLoading,
@@ -123,29 +140,29 @@ const ClientProjectsAdmin = () => {
   } = useQuery({
     queryKey: ["clientProjects"],
     queryFn: async () => {
-      const json = await apiClient.get("/api/clientProjects");
-      // The backend should return { projects: [...] }, with mapped fields as needed.
-      // If your backend doesn't map project_info/client_profile, you may need to adapt this.
+      const json = (await apiClient.get(
+        "/api/clientProjects"
+      )) as ApiResponse<ClientProject>;
       return (json.projects as ClientProject[]) || [];
     },
   });
 
-  // Fetch available projects from backend API
+  // Fetch available projects using the admin endpoint
   const { data: projects } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
-      const json = await apiClient.get("/api/projects");
-      // The backend should return { projects: [...] }
+      const json = (await apiClient.get(
+        "/api/projects"
+      )) as ApiResponse<Project>;
       return (json.projects as Project[]) || [];
     },
   });
 
-  // Fetch available users (clients) from backend API
+  // Fetch available users (clients) from the new users endpoint
   const { data: users } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
-      const json = await apiClient.get("/api/users");
-      // The backend should return { users: [...] }
+      const json = (await apiClient.get("/api/users")) as ApiResponse<User>;
       return (json.users as User[]) || [];
     },
   });
@@ -190,6 +207,10 @@ const ClientProjectsAdmin = () => {
     });
     setSelectedClientProject(clientProject);
     setIsFormOpen(true);
+  };
+
+  const handleViewUpdates = (clientProject: ClientProject) => {
+    setUpdatesDialogProjectId(clientProject.id);
   };
 
   const onSubmit = async (values: ClientProjectFormValues) => {
@@ -345,6 +366,14 @@ const ClientProjectsAdmin = () => {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => handleViewUpdates(clientProject)}
+                          title="Manage Updates"
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => handleEditClientProject(clientProject)}
                         >
                           <Edit className="h-4 w-4" />
@@ -375,6 +404,7 @@ const ClientProjectsAdmin = () => {
         </div>
       )}
 
+      {/* Existing Sheet for editing client projects */}
       <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
         <SheetContent className="sm:max-w-2xl overflow-y-auto">
           <SheetHeader>
@@ -411,11 +441,17 @@ const ClientProjectsAdmin = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {projects?.map((project) => (
-                            <SelectItem key={project.id} value={project.id}>
-                              {project.title}
+                          {projects && projects.length > 0 ? (
+                            projects.map((project) => (
+                              <SelectItem key={project.id} value={project.id}>
+                                {project.title}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="" disabled>
+                              No projects available
                             </SelectItem>
-                          ))}
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -438,11 +474,17 @@ const ClientProjectsAdmin = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {users?.map((user) => (
-                            <SelectItem key={user.id} value={user.id}>
-                              {user.full_name || "Unnamed User"}
+                          {users && users.length > 0 ? (
+                            users.map((user) => (
+                              <SelectItem key={user.id} value={user.id}>
+                                {user.full_name || "Unnamed User"}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="" disabled>
+                              No users available
                             </SelectItem>
-                          ))}
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -555,6 +597,27 @@ const ClientProjectsAdmin = () => {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* New Dialog for managing project updates */}
+      <Dialog
+        open={!!updatesDialogProjectId}
+        onOpenChange={(open) => !open && setUpdatesDialogProjectId(null)}
+      >
+        <DialogContent className="sm:max-w-4xl max-h-[80vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Project Updates</DialogTitle>
+            <DialogDescription>
+              Manage updates for this client project. Updates marked as visible
+              will be shown to the client.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="overflow-y-auto max-h-[calc(80vh-120px)]">
+            {updatesDialogProjectId && (
+              <AdminProjectUpdates clientProjectId={updatesDialogProjectId} />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

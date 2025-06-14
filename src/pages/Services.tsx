@@ -1,18 +1,26 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Code, PenTool, Smartphone, Server, LayoutDashboard, Globe, CheckCircle } from "lucide-react";
+import {
+  Code,
+  PenTool,
+  Smartphone,
+  Server,
+  LayoutDashboard,
+  Globe,
+  CheckCircle,
+} from "lucide-react";
 
 const Services = () => {
   return (
-    <div className="pt-20">
+    <div>
       {/* Hero Section */}
       <section className="bg-lynix-dark text-white py-20 md:py-28">
         <div className="container-custom">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="heading-1 mb-6">Our Services</h1>
             <p className="body-text text-gray-300">
-              We offer a comprehensive range of digital services to help your business 
-              grow and succeed in the digital world.
+              We offer a comprehensive range of digital services to help your
+              business grow and succeed in the digital world.
             </p>
           </div>
         </div>
@@ -28,29 +36,53 @@ const Services = () => {
               </div>
               <h2 className="heading-2 mb-4">Custom Web Development</h2>
               <p className="body-text text-gray-600 mb-6">
-                We create custom-built, high-performance websites tailored to your specific business 
-                needs. Our development team focuses on creating scalable, secure, and responsive 
-                solutions that work across all devices.
+                We create custom-built, high-performance websites tailored to
+                your specific business needs. Our development team focuses on
+                creating scalable, secure, and responsive solutions that work
+                across all devices.
               </p>
               <ul className="space-y-3 mb-8">
                 <li className="flex items-start">
-                  <CheckCircle className="text-lynix-purple mr-3 mt-1" size={20} />
-                  <span className="text-gray-700">Custom front-end and back-end development</span>
+                  <CheckCircle
+                    className="text-lynix-purple mr-3 mt-1"
+                    size={20}
+                  />
+                  <span className="text-gray-700">
+                    Custom front-end and back-end development
+                  </span>
                 </li>
                 <li className="flex items-start">
-                  <CheckCircle className="text-lynix-purple mr-3 mt-1" size={20} />
-                  <span className="text-gray-700">E-commerce platforms with payment integration</span>
+                  <CheckCircle
+                    className="text-lynix-purple mr-3 mt-1"
+                    size={20}
+                  />
+                  <span className="text-gray-700">
+                    E-commerce platforms with payment integration
+                  </span>
                 </li>
                 <li className="flex items-start">
-                  <CheckCircle className="text-lynix-purple mr-3 mt-1" size={20} />
-                  <span className="text-gray-700">Progressive Web Applications (PWAs)</span>
+                  <CheckCircle
+                    className="text-lynix-purple mr-3 mt-1"
+                    size={20}
+                  />
+                  <span className="text-gray-700">
+                    Progressive Web Applications (PWAs)
+                  </span>
                 </li>
                 <li className="flex items-start">
-                  <CheckCircle className="text-lynix-purple mr-3 mt-1" size={20} />
-                  <span className="text-gray-700">Web portals and dashboards</span>
+                  <CheckCircle
+                    className="text-lynix-purple mr-3 mt-1"
+                    size={20}
+                  />
+                  <span className="text-gray-700">
+                    Web portals and dashboards
+                  </span>
                 </li>
               </ul>
-              <Button asChild className="bg-lynix-purple hover:bg-lynix-secondary-purple">
+              <Button
+                asChild
+                className="bg-lynix-purple hover:bg-lynix-secondary-purple"
+              >
                 <Link to="/contact">Get Started</Link>
               </Button>
             </div>
@@ -81,29 +113,53 @@ const Services = () => {
               </div>
               <h2 className="heading-2 mb-4">User Experience Design</h2>
               <p className="body-text text-gray-600 mb-6">
-                We design intuitive, user-friendly interfaces that provide exceptional user experiences. 
-                Our design process is centered around understanding your users' needs and creating 
-                interfaces that delight and engage.
+                We design intuitive, user-friendly interfaces that provide
+                exceptional user experiences. Our design process is centered
+                around understanding your users' needs and creating interfaces
+                that delight and engage.
               </p>
               <ul className="space-y-3 mb-8">
                 <li className="flex items-start">
-                  <CheckCircle className="text-lynix-purple mr-3 mt-1" size={20} />
-                  <span className="text-gray-700">User research and persona development</span>
+                  <CheckCircle
+                    className="text-lynix-purple mr-3 mt-1"
+                    size={20}
+                  />
+                  <span className="text-gray-700">
+                    User research and persona development
+                  </span>
                 </li>
                 <li className="flex items-start">
-                  <CheckCircle className="text-lynix-purple mr-3 mt-1" size={20} />
-                  <span className="text-gray-700">Wireframing and prototyping</span>
+                  <CheckCircle
+                    className="text-lynix-purple mr-3 mt-1"
+                    size={20}
+                  />
+                  <span className="text-gray-700">
+                    Wireframing and prototyping
+                  </span>
                 </li>
                 <li className="flex items-start">
-                  <CheckCircle className="text-lynix-purple mr-3 mt-1" size={20} />
-                  <span className="text-gray-700">Visual design and UI systems</span>
+                  <CheckCircle
+                    className="text-lynix-purple mr-3 mt-1"
+                    size={20}
+                  />
+                  <span className="text-gray-700">
+                    Visual design and UI systems
+                  </span>
                 </li>
                 <li className="flex items-start">
-                  <CheckCircle className="text-lynix-purple mr-3 mt-1" size={20} />
-                  <span className="text-gray-700">Usability testing and optimization</span>
+                  <CheckCircle
+                    className="text-lynix-purple mr-3 mt-1"
+                    size={20}
+                  />
+                  <span className="text-gray-700">
+                    Usability testing and optimization
+                  </span>
                 </li>
               </ul>
-              <Button asChild className="bg-lynix-purple hover:bg-lynix-secondary-purple">
+              <Button
+                asChild
+                className="bg-lynix-purple hover:bg-lynix-secondary-purple"
+              >
                 <Link to="/contact">Get Started</Link>
               </Button>
             </div>
@@ -114,7 +170,8 @@ const Services = () => {
             <div className="text-center max-w-3xl mx-auto mb-16">
               <h2 className="heading-2 mb-4">Additional Services</h2>
               <p className="body-text text-gray-600">
-                Explore our full range of digital services designed to help your business succeed.
+                Explore our full range of digital services designed to help your
+                business succeed.
               </p>
             </div>
 
@@ -126,20 +183,36 @@ const Services = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-3">Mobile Development</h3>
                 <p className="text-gray-600 mb-6">
-                  Native and cross-platform mobile applications that engage users and drive conversions.
+                  Native and cross-platform mobile applications that engage
+                  users and drive conversions.
                 </p>
                 <ul className="space-y-2 mb-6">
                   <li className="flex items-start">
-                    <CheckCircle className="text-lynix-purple mr-2 mt-0.5" size={16} />
-                    <span className="text-gray-600 text-sm">iOS and Android apps</span>
+                    <CheckCircle
+                      className="text-lynix-purple mr-2 mt-0.5"
+                      size={16}
+                    />
+                    <span className="text-gray-600 text-sm">
+                      iOS and Android apps
+                    </span>
                   </li>
                   <li className="flex items-start">
-                    <CheckCircle className="text-lynix-purple mr-2 mt-0.5" size={16} />
-                    <span className="text-gray-600 text-sm">React Native development</span>
+                    <CheckCircle
+                      className="text-lynix-purple mr-2 mt-0.5"
+                      size={16}
+                    />
+                    <span className="text-gray-600 text-sm">
+                      React Native development
+                    </span>
                   </li>
                   <li className="flex items-start">
-                    <CheckCircle className="text-lynix-purple mr-2 mt-0.5" size={16} />
-                    <span className="text-gray-600 text-sm">App store optimization</span>
+                    <CheckCircle
+                      className="text-lynix-purple mr-2 mt-0.5"
+                      size={16}
+                    />
+                    <span className="text-gray-600 text-sm">
+                      App store optimization
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -151,20 +224,36 @@ const Services = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-3">Backend Development</h3>
                 <p className="text-gray-600 mb-6">
-                  Robust server-side solutions that power your applications with reliable performance.
+                  Robust server-side solutions that power your applications with
+                  reliable performance.
                 </p>
                 <ul className="space-y-2 mb-6">
                   <li className="flex items-start">
-                    <CheckCircle className="text-lynix-purple mr-2 mt-0.5" size={16} />
-                    <span className="text-gray-600 text-sm">API development</span>
+                    <CheckCircle
+                      className="text-lynix-purple mr-2 mt-0.5"
+                      size={16}
+                    />
+                    <span className="text-gray-600 text-sm">
+                      API development
+                    </span>
                   </li>
                   <li className="flex items-start">
-                    <CheckCircle className="text-lynix-purple mr-2 mt-0.5" size={16} />
-                    <span className="text-gray-600 text-sm">Database architecture</span>
+                    <CheckCircle
+                      className="text-lynix-purple mr-2 mt-0.5"
+                      size={16}
+                    />
+                    <span className="text-gray-600 text-sm">
+                      Database architecture
+                    </span>
                   </li>
                   <li className="flex items-start">
-                    <CheckCircle className="text-lynix-purple mr-2 mt-0.5" size={16} />
-                    <span className="text-gray-600 text-sm">Cloud infrastructure</span>
+                    <CheckCircle
+                      className="text-lynix-purple mr-2 mt-0.5"
+                      size={16}
+                    />
+                    <span className="text-gray-600 text-sm">
+                      Cloud infrastructure
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -176,20 +265,36 @@ const Services = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-3">Digital Marketing</h3>
                 <p className="text-gray-600 mb-6">
-                  Strategic marketing solutions to increase your online visibility and drive growth.
+                  Strategic marketing solutions to increase your online
+                  visibility and drive growth.
                 </p>
                 <ul className="space-y-2 mb-6">
                   <li className="flex items-start">
-                    <CheckCircle className="text-lynix-purple mr-2 mt-0.5" size={16} />
-                    <span className="text-gray-600 text-sm">SEO optimization</span>
+                    <CheckCircle
+                      className="text-lynix-purple mr-2 mt-0.5"
+                      size={16}
+                    />
+                    <span className="text-gray-600 text-sm">
+                      SEO optimization
+                    </span>
                   </li>
                   <li className="flex items-start">
-                    <CheckCircle className="text-lynix-purple mr-2 mt-0.5" size={16} />
-                    <span className="text-gray-600 text-sm">Content marketing</span>
+                    <CheckCircle
+                      className="text-lynix-purple mr-2 mt-0.5"
+                      size={16}
+                    />
+                    <span className="text-gray-600 text-sm">
+                      Content marketing
+                    </span>
                   </li>
                   <li className="flex items-start">
-                    <CheckCircle className="text-lynix-purple mr-2 mt-0.5" size={16} />
-                    <span className="text-gray-600 text-sm">Social media management</span>
+                    <CheckCircle
+                      className="text-lynix-purple mr-2 mt-0.5"
+                      size={16}
+                    />
+                    <span className="text-gray-600 text-sm">
+                      Social media management
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -207,9 +312,13 @@ const Services = () => {
                 Ready to Transform Your Digital Presence?
               </h2>
               <p className="text-white/90 text-lg mb-8">
-                Let's discuss your project and explore how we can help you achieve your business goals.
+                Let's discuss your project and explore how we can help you
+                achieve your business goals.
               </p>
-              <Button asChild className="bg-white text-lynix-purple hover:bg-gray-100 px-8 py-6 text-lg">
+              <Button
+                asChild
+                className="bg-white text-lynix-purple hover:bg-gray-100 px-8 py-6 text-lg"
+              >
                 <Link to="/contact">Get in Touch</Link>
               </Button>
             </div>

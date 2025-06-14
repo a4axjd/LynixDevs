@@ -1,45 +1,39 @@
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const userService = require('../services/userService');
+const databaseService = require("../config/database");
 
-// Get all users (admin only)
-router.get('/', async (req, res) => {
+// GET all users (for admin purposes)
+router.get("/", async (req, res) => {
   try {
-    const users = await userService.getAllUsers();
-    res.json(users);
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ 
-      error: error.message || 'An error occurred while fetching users' 
-    });
-  }
-});
+    const supabaseAdmin = databaseService.getAdminClient();
+    
+    if (!supabaseAdmin) {
+      return res.status(500).json({ error: "Admin client not available" });
+    }
 
-// Get user by ID
-router.get('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const user = await userService.getUserById(id);
-    res.json(user);
-  } catch (error) {
-    console.error('Error fetching user:', error);
-    res.status(500).json({ 
-      error: error.message || 'An error occurred while fetching user' 
-    });
-  }
-});
+    // Get all profiles with user data
+    const { data: profiles, error } = await supabaseAdmin
+      .from("profiles")
+      .select("id, full_name")
+      .order("full_name", { ascending: true });
 
-// Make user admin
-router.post('/:id/make-admin', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const result = await userService.makeUserAdmin(id);
-    res.json(result);
+    if (error) {
+      console.error("Error fetching users:", error);
+      return res.status(500).json({ error: error.message });
+    }
+
+    // Transform to match expected format
+    const users = (profiles || []).map(profile => ({
+      id: profile.id,
+      full_name: profile.full_name || "Unnamed User"
+    }));
+
+    res.json({ users });
   } catch (error) {
-    console.error('Error making user admin:', error);
+    console.error("Error in users route:", error);
     res.status(500).json({ 
-      error: error.message || 'An error occurred while making user admin' 
+      error: error.message || "An error occurred while fetching users" 
     });
   }
 });

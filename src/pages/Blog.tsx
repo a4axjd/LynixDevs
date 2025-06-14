@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -26,11 +25,19 @@ const Blog = () => {
   const { toast } = useToast();
 
   // Fetch published blog posts from backend server
-  const { data: posts, isLoading, error } = useQuery({
+  const {
+    data: posts,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["publishedBlogPosts"],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'}/api/blog/published`);
-      
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_SERVER_URL || "http://localhost:3001"
+        }/api/blog/published`
+      );
+
       if (!response.ok) {
         console.error("Error fetching blog posts:", response.statusText);
         return [];
@@ -52,7 +59,7 @@ const Blog = () => {
   };
 
   return (
-    <div className="pt-20">
+    <div>
       <SEOHead
         title="Blog | LynixDevs - Latest Articles & Insights"
         description="Read our latest articles about web development, design trends, and technology insights. Stay updated with industry best practices."
@@ -65,7 +72,8 @@ const Blog = () => {
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="heading-1 mb-6">Our Blog</h1>
             <p className="body-text text-gray-300">
-              Stay updated with the latest insights, trends, and best practices in web development and design.
+              Stay updated with the latest insights, trends, and best practices
+              in web development and design.
             </p>
           </div>
         </div>
@@ -81,14 +89,14 @@ const Blog = () => {
           ) : posts && posts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {posts.map((post) => (
-                <article 
-                  key={post.id} 
+                <article
+                  key={post.id}
                   className="group rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 bg-white"
                 >
                   <div className="relative h-64 overflow-hidden">
                     {post.image_url ? (
-                      <img 
-                        src={post.image_url} 
+                      <img
+                        src={post.image_url}
                         alt={post.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
@@ -101,26 +109,28 @@ const Blog = () => {
                     )}
                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   </div>
-                  
+
                   <div className="p-6">
                     <div className="flex items-center text-sm text-gray-500 mb-3">
                       <Calendar size={14} className="mr-2" />
-                      <span>{formatDate(post.published_at || post.created_at)}</span>
+                      <span>
+                        {formatDate(post.published_at || post.created_at)}
+                      </span>
                       <User size={14} className="ml-4 mr-2" />
                       <span>Admin</span>
                     </div>
-                    
+
                     <h2 className="text-xl font-bold mb-3 group-hover:text-lynix-purple transition-colors">
                       {post.title}
                     </h2>
-                    
+
                     {post.excerpt && (
                       <p className="text-gray-600 mb-4 line-clamp-3">
                         {post.excerpt}
                       </p>
                     )}
-                    
-                    <Link 
+
+                    <Link
                       to={`/blog/${post.slug}`}
                       className="inline-flex items-center text-lynix-purple font-medium hover:underline"
                     >
@@ -132,7 +142,9 @@ const Blog = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No blog posts available at the moment.</p>
+              <p className="text-gray-500 text-lg">
+                No blog posts available at the moment.
+              </p>
             </div>
           )}
         </div>
@@ -144,9 +156,13 @@ const Blog = () => {
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="heading-2 mb-6">Stay Updated</h2>
             <p className="body-text text-gray-600 mb-8">
-              Subscribe to our newsletter to get the latest articles delivered to your inbox.
+              Subscribe to our newsletter to get the latest articles delivered
+              to your inbox.
             </p>
-            <Button asChild className="bg-lynix-purple hover:bg-lynix-secondary-purple text-white px-8">
+            <Button
+              asChild
+              className="bg-lynix-purple hover:bg-lynix-secondary-purple text-white px-8"
+            >
               <Link to="/contact">Subscribe</Link>
             </Button>
           </div>
