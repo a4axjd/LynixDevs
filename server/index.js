@@ -43,6 +43,9 @@ async function initializeServer() {
     // Chat AI routes
     const chatRoutes = require("./routes/chat");
 
+    // Start Project route (NEW)
+    const startProjectRoutes = require("./routes/startProject");
+    const startProjectsAdmin = require("./routes/adminStartProjects");
     // Register existing routes
     app.use("/api/admin", adminRoutes);
     app.use("/api/contact", contactRoutes);
@@ -64,6 +67,9 @@ async function initializeServer() {
     // Register chat AI routes
     app.use("/api/chat", chatRoutes);
 
+    // Register Start Project public API route
+    app.use("/api/start-project", startProjectRoutes);
+    app.use("/api/admin-start-projects", startProjectsAdmin);
     // Health check endpoint
     app.get("/health", (req, res) => {
       res.json({

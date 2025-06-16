@@ -178,7 +178,7 @@ const Portfolio = () => {
                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
                         asChild
-                        className="bg-white text-lynix-purple hover:bg-gray-100"
+                        className="bg-white text-white hover:bg-gray-100"
                       >
                         <Link to={`/portfolio/${project.id}`}>
                           View Project
@@ -239,7 +239,7 @@ const Portfolio = () => {
               asChild
               className="bg-lynix-purple hover:bg-lynix-secondary-purple text-white px-8"
             >
-              <Link to="/contact">Start a Project</Link>
+              <Link to="/start-project">Start a Project</Link>
             </Button>
           </div>
         </div>

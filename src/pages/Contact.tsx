@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { MapPin, Mail, Clock } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react"; // For Lottie animations
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -74,16 +75,26 @@ const Contact = () => {
         url={`${window.location.origin}/contact`}
       />
 
-      {/* Hero Section */}
-      <section className="bg-lynix-dark text-white py-20 md:py-28">
+      {/* Hero Section with Lottie Animation */}
+      <section className="bg-lynix-dark text-white py-20 md:py-28 relative">
         <div className="container-custom">
-          <div className="max-w-3xl mx-auto text-center">
+          <div className="max-w-3xl mx-auto text-center relative z-10">
             <h1 className="heading-1 mb-6">Get In Touch</h1>
             <p className="body-text text-gray-300">
               Ready to start your next project? We'd love to hear from you.
             </p>
+            {/* Lottie Animation: Friendly chat, communication, or envelope animation */}
+            <div className="flex justify-center mt-8">
+              <DotLottieReact
+                src="/assets/contact-hero.lottie"
+                autoplay
+                loop
+                style={{ width: "220px", height: "220px", margin: "auto" }}
+              />
+            </div>
           </div>
         </div>
+        {/* Optionally, add a decorative animated background Lottie here for style */}
       </section>
 
       {/* Contact Section */}
@@ -99,8 +110,16 @@ const Contact = () => {
               </p>
 
               <div className="space-y-6">
+                {/* Lottie Animation: Location pin, globe, or remote work */}
                 <div className="flex items-start">
-                  <MapPin className="h-6 w-6 text-lynix-purple mt-1 mr-4 flex-shrink-0" />
+                  <div className="w-10 h-10 flex items-center justify-center mr-4">
+                    <DotLottieReact
+                      src="/assets/location.lottie"
+                      autoplay
+                      loop
+                      style={{ width: "40px", height: "40px" }}
+                    />
+                  </div>
                   <div>
                     <h3 className="font-semibold mb-1">Office Location</h3>
                     <p className="text-gray-600">
@@ -108,17 +127,31 @@ const Contact = () => {
                     </p>
                   </div>
                 </div>
-
+                {/* Lottie Animation: Email/envelope */}
                 <div className="flex items-start">
-                  <Mail className="h-6 w-6 text-lynix-purple mt-1 mr-4 flex-shrink-0" />
+                  <div className="w-10 h-10 flex items-center justify-center mr-4">
+                    <DotLottieReact
+                      src="/assets/email.lottie"
+                      autoplay
+                      loop
+                      style={{ width: "40px", height: "40px" }}
+                    />
+                  </div>
                   <div>
                     <h3 className="font-semibold mb-1">Email</h3>
                     <p className="text-gray-600">hello@lynixdevs.us</p>
                   </div>
                 </div>
-
+                {/* Lottie Animation: Clock/timer */}
                 <div className="flex items-start">
-                  <Clock className="h-6 w-6 text-lynix-purple mt-1 mr-4 flex-shrink-0" />
+                  <div className="w-10 h-10 flex items-center justify-center mr-4">
+                    <DotLottieReact
+                      src="/assets/clock.lottie"
+                      autoplay
+                      loop
+                      style={{ width: "40px", height: "40px" }}
+                    />
+                  </div>
                   <div>
                     <h3 className="font-semibold mb-1">Response Time</h3>
                     <p className="text-gray-600">
@@ -129,8 +162,17 @@ const Contact = () => {
               </div>
             </div>
 
-            {/* Contact Form */}
-            <div className="bg-white p-8 rounded-xl shadow-lg">
+            {/* Contact Form with Lottie Animation */}
+            <div className="bg-white p-8 rounded-xl shadow-lg relative">
+              {/* Lottie Animation: Paper plane, sending message, or form animation */}
+              <div className="absolute -top-12 right-4 z-10 hidden md:block">
+                <DotLottieReact
+                  src="/assets/send-message.lottie"
+                  autoplay
+                  loop
+                  style={{ width: "80px", height: "80px" }}
+                />
+              </div>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
@@ -214,6 +256,31 @@ const Contact = () => {
                 </Button>
               </form>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* NEW: Collaboration/Community Section with Lottie */}
+      <section className="section-padding bg-gray-50">
+        <div className="container-custom">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="flex justify-center mb-6">
+              {/* Lottie Animation: Collaboration, teamwork, or global community */}
+              <DotLottieReact
+                src="/assets/community.lottie"
+                autoplay
+                loop
+                style={{ width: "120px", height: "120px", margin: "auto" }}
+              />
+            </div>
+            <h2 className="heading-2 mb-4">More Than Just a Project</h2>
+            <p className="body-text text-gray-600">
+              When you reach out to Lynix Devs, you’re connecting with a global
+              network of passionate creators, innovators, and problem-solvers.
+              We believe in building lasting relationships and growing together.
+              Whether you have a question, need advice, or want to collaborate
+              on something meaningful, we’re here to listen and help.
+            </p>
           </div>
         </div>
       </section>

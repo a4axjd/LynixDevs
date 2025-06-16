@@ -1,9 +1,14 @@
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Edit, Trash2 } from "lucide-react";
@@ -17,7 +22,10 @@ import {
 } from "@/components/ui/table";
 import CreateAutomationRuleDialog from "./CreateAutomationRuleDialog";
 import EditAutomationRuleDialog from "./EditAutomationRuleDialog";
-import { emailAutomationAPI, type AutomationRule } from "@/lib/emailAutomationAPI";
+import {
+  emailAutomationAPI,
+  type AutomationRule,
+} from "@/lib/emailAutomationAPI";
 
 const EmailAutomationRules = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -25,16 +33,20 @@ const EmailAutomationRules = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: rules = [], isLoading, error } = useQuery({
-    queryKey: ['automationRules'],
+  const {
+    data: rules = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["automationRules"],
     queryFn: () => emailAutomationAPI.getRules(),
   });
 
   const updateRuleMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<AutomationRule> }) => 
+    mutationFn: ({ id, data }: { id: string; data: Partial<AutomationRule> }) =>
       emailAutomationAPI.updateRule(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['automationRules'] });
+      queryClient.invalidateQueries({ queryKey: ["automationRules"] });
       toast({
         title: "Success",
         description: "Automation rule updated successfully",
@@ -52,7 +64,7 @@ const EmailAutomationRules = () => {
   const deleteRuleMutation = useMutation({
     mutationFn: (id: string) => emailAutomationAPI.deleteRule(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['automationRules'] });
+      queryClient.invalidateQueries({ queryKey: ["automationRules"] });
       toast({
         title: "Success",
         description: "Automation rule deleted successfully",
@@ -70,18 +82,21 @@ const EmailAutomationRules = () => {
   const handleToggleActive = (rule: AutomationRule) => {
     updateRuleMutation.mutate({
       id: rule.id,
-      data: { is_active: !rule.is_active }
+      data: { is_active: !rule.is_active },
     });
   };
 
   const handleDeleteRule = (id: string) => {
-    if (confirm('Are you sure you want to delete this automation rule?')) {
+    if (confirm("Are you sure you want to delete this automation rule?")) {
       deleteRuleMutation.mutate(id);
     }
   };
 
+  // Display the event type as-is, but with underscores replaced by spaces and capitalized
   const formatEventType = (eventType: string) => {
-    return eventType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return eventType
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
   if (isLoading) {
@@ -112,7 +127,13 @@ const EmailAutomationRules = () => {
         <div>
           <CardTitle>Automation Rules</CardTitle>
           <CardDescription>
-            Configure automated email triggers for different events
+            Configure automated email triggers for different events.
+            <br />
+            <span className="text-xs text-muted-foreground">
+              You can use <b>any custom event type</b> (e.g.{" "}
+              <code>project_inquiry_reply</code>,{" "}
+              <code>project_inquiry_admin</code>) when creating a rule.
+            </span>
           </CardDescription>
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)}>
@@ -123,7 +144,8 @@ const EmailAutomationRules = () => {
       <CardContent>
         {rules.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            No automation rules configured yet. Create your first rule to get started.
+            No automation rules configured yet. Create your first rule to get
+            started.
           </div>
         ) : (
           <Table>
@@ -147,7 +169,7 @@ const EmailAutomationRules = () => {
                   <TableCell>
                     <div>
                       <div className="font-medium">
-                        {rule.email_templates?.name || 'Template not found'}
+                        {rule.email_templates?.name || "Template not found"}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         {rule.email_templates?.subject}
@@ -161,7 +183,7 @@ const EmailAutomationRules = () => {
                         onCheckedChange={() => handleToggleActive(rule)}
                       />
                       <span className="text-sm">
-                        {rule.is_active ? 'Active' : 'Inactive'}
+                        {rule.is_active ? "Active" : "Inactive"}
                       </span>
                     </div>
                   </TableCell>

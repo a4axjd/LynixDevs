@@ -24,12 +24,10 @@ import AuthCallback from "@/pages/AuthCallback";
 import ResetPassword from "@/pages/ResetPassword";
 import VerifyEmail from "@/pages/VerifyEmail";
 import Dashboard from "@/pages/Dashboard";
-import Profile from "@/pages/Profile";
-import Settings from "@/pages/Settings";
 import ProjectDetail from "@/pages/ProjectDetail";
 import ClientProjectDashboard from "@/pages/ClientProjectDashboard";
 import ClientProjectDetail from "@/pages/ClientProjectDetail";
-
+import ScrollToTop from "./components/ui/ScrollToTop";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import UsersAdmin from "@/pages/admin/UsersAdmin";
 import ProjectsAdmin from "@/pages/admin/ProjectsAdmin";
@@ -40,8 +38,10 @@ import NewsletterAdmin from "@/pages/admin/NewsletterAdmin";
 import ContactAdmin from "@/pages/admin/ContactAdmin";
 import NotFound from "@/pages/NotFound";
 import EmailSettingsAdmin from "@/pages/admin/EmailSettingsAdmin";
+import StartProjectAdmin from "@/pages/admin/StartProjectAdmin";
 import SettingsAdmin from "@/pages/admin/SettingsAdmin";
 import EmailAutomationAdmin from "@/pages/admin/EmailAutomationAdmin";
+import StartProject from "@/pages/StartProject"; // <-- Added import
 
 // Validate environment on app start
 try {
@@ -85,6 +85,7 @@ function App() {
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <ScrollToTop />
             <AuthProvider>
               <ErrorBoundary>
                 <Routes>
@@ -103,6 +104,8 @@ function App() {
                     {/* Supabase auth redirects */}
                     <Route path="reset-password" element={<ResetPassword />} />
                     <Route path="verify-email" element={<VerifyEmail />} />
+                    {/* Start Project Page */}
+                    <Route path="start-project" element={<StartProject />} />
 
                     {/* Protected routes */}
                     <Route
@@ -113,22 +116,7 @@ function App() {
                         </RouteGuard>
                       }
                     />
-                    <Route
-                      path="/profile"
-                      element={
-                        <RouteGuard>
-                          <Profile />
-                        </RouteGuard>
-                      }
-                    />
-                    <Route
-                      path="/settings"
-                      element={
-                        <RouteGuard>
-                          <Settings />
-                        </RouteGuard>
-                      }
-                    />
+
                     <Route
                       path="/client-projects"
                       element={
@@ -167,6 +155,10 @@ function App() {
                     <Route
                       path="email-templates"
                       element={<EmailTemplatesAdmin />}
+                    />
+                    <Route
+                      path="start-project-admin"
+                      element={<StartProjectAdmin />}
                     />
                     <Route
                       path="email-settings"

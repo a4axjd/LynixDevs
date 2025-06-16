@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -25,8 +25,9 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/";
+
+  const from =
+    (location.state as { from?: { pathname: string } })?.from?.pathname || "/";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +37,7 @@ const Auth = () => {
     try {
       if (isResetPassword) {
         const { error, success } = await resetPassword(email);
-        
+
         if (success) {
           toast({
             title: "Password Reset Email Sent",
@@ -54,7 +55,7 @@ const Auth = () => {
           phone: phone,
           company: company,
         });
-        
+
         if (success) {
           toast({
             title: "Account Created Successfully!",
@@ -65,7 +66,7 @@ const Auth = () => {
         }
       } else {
         const { error, success } = await signIn(email, password);
-        
+
         if (success) {
           toast({
             title: "Welcome Back!",
@@ -96,23 +97,33 @@ const Auth = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-primary/5 to-lynix-purple/10 p-4">
       <div className="w-full max-w-md rounded-xl border border-border bg-background/95 backdrop-blur-sm p-8 shadow-2xl">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-r from-primary to-lynix-purple rounded-2xl flex items-center justify-center">
-            <span className="text-2xl font-bold text-white">L</span>
+        <div className="mb-8 text-center flex flex-col items-center">
+          {/* Lottie animation replaces 'L' card */}
+          <div className="w-20 h-20 mb-3 flex items-center justify-center">
+            <DotLottieReact
+              src="/assets/auth.lottie"
+              autoplay
+              loop
+              style={{
+                width: "80px",
+                height: "80px",
+                margin: "auto",
+              }}
+            />
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-lynix-purple bg-clip-text text-transparent">
-            {isResetPassword 
-              ? "Reset Password" 
-              : isSignUp 
-                ? "Join LynixDevs" 
-                : "Welcome Back"}
+          <h1 className="text-3xl font-bold text-lynix-purple drop-shadow-[0_2px_12px_rgba(139,92,246,0.20)]">
+            {isResetPassword
+              ? "Reset Password"
+              : isSignUp
+              ? "Join LynixDevs"
+              : "Welcome Back"}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {isResetPassword 
-              ? "Enter your email to receive reset instructions" 
-              : isSignUp 
-                ? "Create your account and start building amazing projects" 
-                : "Sign in to access your dashboard and projects"}
+            {isResetPassword
+              ? "Enter your email to receive reset instructions"
+              : isSignUp
+              ? "Create your account and start building amazing projects"
+              : "Sign in to access your dashboard and projects"}
           </p>
         </div>
 
@@ -201,7 +212,7 @@ const Auth = () => {
                       setIsResetPassword(true);
                       setIsSignUp(false);
                     }}
-                    className="text-xs text-primary hover:underline"
+                    className="text-xs text-lynix-purple hover:underline"
                   >
                     Forgot password?
                   </button>
@@ -226,26 +237,26 @@ const Auth = () => {
 
           <Button
             type="submit"
-            className="w-full btn-gradient text-white shadow-lg hover:shadow-xl"
+            className="w-full bg-lynix-purple text-white shadow-lg hover:shadow-xl drop-shadow-[0_2px_12px_rgba(139,92,246,0.20)]"
             disabled={loading}
           >
             {loading ? (
               <>
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent"></div>
                 <span className="ml-2">
-                  {isResetPassword 
-                    ? "Sending..." 
-                    : isSignUp 
-                      ? "Creating Account..." 
-                      : "Signing In..."}
+                  {isResetPassword
+                    ? "Sending..."
+                    : isSignUp
+                    ? "Creating Account..."
+                    : "Signing In..."}
                 </span>
               </>
+            ) : isResetPassword ? (
+              "Send Reset Instructions"
+            ) : isSignUp ? (
+              "Create Account"
             ) : (
-              isResetPassword 
-                ? "Send Reset Instructions" 
-                : isSignUp 
-                  ? "Create Account" 
-                  : "Sign In"
+              "Sign In"
             )}
           </Button>
         </form>
@@ -301,7 +312,7 @@ const Auth = () => {
                       setIsSignUp(false);
                       setIsResetPassword(false);
                     }}
-                    className="font-medium text-primary hover:underline"
+                    className="font-medium text-lynix-purple hover:underline"
                   >
                     Sign In
                   </button>
@@ -315,7 +326,7 @@ const Auth = () => {
                       setIsSignUp(true);
                       setIsResetPassword(false);
                     }}
-                    className="font-medium text-primary hover:underline"
+                    className="font-medium text-lynix-purple hover:underline"
                   >
                     Sign Up
                   </button>
@@ -332,7 +343,7 @@ const Auth = () => {
               onClick={() => {
                 setIsResetPassword(false);
               }}
-              className="font-medium text-primary hover:underline"
+              className="font-medium text-lynix-purple hover:underline"
             >
               Back to Sign In
             </button>

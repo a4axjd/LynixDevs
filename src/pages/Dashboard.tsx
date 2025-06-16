@@ -8,63 +8,81 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { FolderKanban, User, Settings, FileText } from "lucide-react";
+import { FolderKanban, FileText, PlusCircle } from "lucide-react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 const Dashboard = () => {
   const { user } = useAuth();
 
+  // Only show the "My Projects" and "Start a Project" actions, with Lottie
   const quickActions = [
     {
       title: "My Projects",
       description: "View and track your assigned projects",
       icon: FolderKanban,
+      lottie: "/assets/project-info.lottie",
       href: "/client-projects",
       color: "text-blue-600",
     },
     {
-      title: "Profile",
-      description: "Update your personal information",
-      icon: User,
-      href: "/profile",
-      color: "text-green-600",
-    },
-    {
-      title: "Settings",
-      description: "Manage your account settings",
-      icon: Settings,
-      href: "/settings",
-      color: "text-purple-600",
+      title: "Start a Project",
+      description: "Kickstart a new project with LynixDevs",
+      icon: PlusCircle,
+      lottie: "/assets/email.lottie",
+      href: "/start-project",
+      color: "text-lynix-purple",
     },
   ];
 
   return (
     <div className="container py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">
-          Welcome back, {user?.user_metadata?.full_name || user?.email}!
-        </h1>
-        <p className="text-muted-foreground">
-          Here's an overview of your account and recent activity.
-        </p>
+      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">
+            Welcome back, {user?.user_metadata?.full_name || user?.email}!
+          </h1>
+          <p className="text-muted-foreground">
+            Here&apos;s an overview of your account and recent activity.
+          </p>
+        </div>
+        {/* Optional: Add a nice dashboard Lottie on the right */}
+        <div className="hidden md:block">
+          <DotLottieReact
+            src="/assets/technology.lottie"
+            autoplay
+            loop
+            style={{ width: 96, height: 96 }}
+          />
+        </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 mb-8">
         {quickActions.map((action) => (
           <Card
             key={action.title}
-            className="hover:shadow-md transition-shadow"
+            className="hover:shadow-md transition-shadow flex flex-col justify-between"
           >
             <CardHeader className="flex flex-row items-center space-y-0 pb-2">
               <action.icon className={`h-6 w-6 ${action.color}`} />
               <CardTitle className="ml-2 text-lg">{action.title}</CardTitle>
             </CardHeader>
-            <CardContent>
-              <CardDescription className="mb-4">
+            <CardContent className="flex flex-col justify-between gap-3">
+              <CardDescription className="mb-2">
                 {action.description}
               </CardDescription>
-              <Button asChild variant="outline" className="w-full">
-                <Link to={action.href}>Open {action.title}</Link>
-              </Button>
+              <div className="flex items-center justify-between">
+                <Button asChild variant="outline" className="w-full md:w-auto">
+                  <Link to={action.href}>Open {action.title}</Link>
+                </Button>
+                <div className="hidden md:flex ml-4">
+                  <DotLottieReact
+                    src={action.lottie}
+                    autoplay
+                    loop
+                    style={{ width: 56, height: 56 }}
+                  />
+                </div>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -90,16 +108,16 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="flex items-start space-x-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+              <div className="w-2 h-2 bg-lynix-purple rounded-full mt-2"></div>
               <div>
-                <h4 className="font-medium">Update Your Profile</h4>
+                <h4 className="font-medium">Start a New Project</h4>
                 <p className="text-sm text-muted-foreground">
-                  Complete your profile information to help us serve you better.
+                  Launch a new idea with LynixDevs by starting a project.
                 </p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
-              <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
+              <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
               <div>
                 <h4 className="font-medium">Explore Features</h4>
                 <p className="text-sm text-muted-foreground">
@@ -107,6 +125,15 @@ const Dashboard = () => {
                 </p>
               </div>
             </div>
+          </div>
+          {/* Add a friendly getting started Lottie at the bottom */}
+          <div className="w-full flex justify-center mt-8">
+            <DotLottieReact
+              src="/assets/contact-hero.lottie"
+              autoplay
+              loop
+              style={{ width: 100, height: 100 }}
+            />
           </div>
         </CardContent>
       </Card>

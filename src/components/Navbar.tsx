@@ -27,13 +27,12 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center group">
-            <div className="h-10 w-10 flex items-center justify-center rounded-full overflow-hidden transition-transform group-hover:scale-110 bg-white shadow">
-              <img
-                src="/logo.png"
-                alt="LynixDevs Logo"
-                className="h-8 w-auto object-contain"
-              />
-            </div>
+            {/* Removed logo background/placeholder */}
+            <img
+              src="/favicon.svg"
+              alt="LynixDevs Logo"
+              className="h-8 w-auto object-contain"
+            />
             <span className="ml-3 text-xl font-bold text-lynix-purple tracking-tight hidden sm:inline">
               LynixDevs
             </span>

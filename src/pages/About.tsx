@@ -1,6 +1,43 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, User, Clock, Users } from "lucide-react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+
+// Example logos, you can replace these URLs with your own SVGs or images
+const companyLogos = [
+  {
+    name: "Google",
+    url: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg",
+  },
+  {
+    name: "Microsoft Azure",
+    url: "https://upload.wikimedia.org/wikipedia/commons/a/a8/Microsoft_Azure_Logo.svg",
+  },
+  {
+    name: "Amazon AWS",
+    url: "https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg",
+  },
+  {
+    name: "Meta",
+    url: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Meta_Platforms_Inc._logo.svg/2560px-Meta_Platforms_Inc._logo.svg.png",
+  },
+  {
+    name: "Shopify",
+    url: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Shopify_logo_2018.svg/2560px-Shopify_logo_2018.svg.png",
+  },
+  {
+    name: "Slack",
+    url: "https://upload.wikimedia.org/wikipedia/commons/7/76/Slack_Icon.png",
+  },
+  {
+    name: "Stripe",
+    url: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Stripe_Logo%2C_revised_2016.svg/2560px-Stripe_Logo%2C_revised_2016.svg.png",
+  },
+  {
+    name: "Notion",
+    url: "https://upload.wikimedia.org/wikipedia/commons/4/45/Notion_app_logo.png",
+  },
+];
 
 const About = () => {
   return (
@@ -11,8 +48,10 @@ const About = () => {
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="heading-1 mb-6">About LynixDevs</h1>
             <p className="body-text text-gray-300">
-              We're a team of passionate designers, developers, and digital
-              strategists dedicated to creating exceptional digital experiences.
+              We are not just a company—we are a collective of passionate
+              freelancers, dreamers, and builders. United by our love for
+              technology, creativity, and meaningful collaboration, we transform
+              ideas into reality, one innovation at a time.
             </p>
           </div>
         </div>
@@ -25,17 +64,17 @@ const About = () => {
             <div>
               <h2 className="heading-2 mb-6">Our Story</h2>
               <p className="body-text text-gray-600 mb-4">
-                Founded in 2018, LynixDevs was born from a simple idea: to
-                create digital solutions that truly work for businesses and
-                their customers. What started as a small team of three
-                passionate developers has grown into a full-service digital
-                agency with a team of experts across various disciplines.
+                LynixDevs began in 2018, not as a traditional agency, but as a
+                gathering of talented freelancers from diverse
+                backgrounds—developers, designers, storytellers and
+                strategists—each bringing a unique perspective to the table.
               </p>
               <p className="body-text text-gray-600 mb-6">
-                We believe that great technology should simplify lives, not
-                complicate them. This philosophy guides everything we do – from
-                the websites we build to the applications we develop and the
-                strategies we create.
+                For us, every project is personal. We know the late-night
+                brainstorming, the rush of inspiration, and the joy of seeing a
+                client's vision come to life. Our remote, borderless way of
+                working means we are always innovating, always learning, and
+                always connected to the heartbeat of what matters most—people.
               </p>
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="flex items-start">
@@ -43,42 +82,52 @@ const About = () => {
                     className="text-lynix-purple mr-2 mt-1"
                     size={20}
                   />
-                  <span className="text-gray-700">User-Centered Approach</span>
+                  <span className="text-gray-700">Human-Centered Design</span>
                 </div>
                 <div className="flex items-start">
                   <CheckCircle
                     className="text-lynix-purple mr-2 mt-1"
                     size={20}
                   />
-                  <span className="text-gray-700">Innovative Solutions</span>
+                  <span className="text-gray-700">Flexible Collaboration</span>
                 </div>
                 <div className="flex items-start">
                   <CheckCircle
                     className="text-lynix-purple mr-2 mt-1"
                     size={20}
                   />
-                  <span className="text-gray-700">Quality Craftsmanship</span>
+                  <span className="text-gray-700">Relentless Curiosity</span>
                 </div>
                 <div className="flex items-start">
                   <CheckCircle
                     className="text-lynix-purple mr-2 mt-1"
                     size={20}
                   />
-                  <span className="text-gray-700">Open Communication</span>
+                  <span className="text-gray-700">
+                    Innovation-Driven Spirit
+                  </span>
                 </div>
               </div>
+              <p className="body-text text-lynix-purple font-semibold italic mt-6">
+                We believe the web should feel like home—welcoming, inspiring,
+                and uniquely yours.
+              </p>
             </div>
-            <div className="relative">
-              <div className="rounded-2xl overflow-hidden h-[400px] bg-gradient-to-br from-lynix-purple/80 to-lynix-tertiary-purple/80">
-                {/* This would be an image in a real implementation */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <p className="text-xl font-semibold mb-2">Our Office</p>
-                    <p className="opacity-80">
-                      Where creativity meets technology
-                    </p>
-                  </div>
-                </div>
+            {/* Lottie Animation instead of image */}
+            <div className="relative h-[400px] flex items-center justify-center">
+              <div className="rounded-2xl overflow-hidden w-full h-full bg-gradient-to-br from-lynix-purple/80 to-lynix-tertiary-purple/80 flex items-center justify-center">
+                <DotLottieReact
+                  src="/assets/AboutPage.lottie"
+                  autoplay
+                  loop
+                  style={{
+                    width: "min(320px, 70vw)",
+                    height: "min(320px, 70vw)",
+                    maxWidth: "320px",
+                    maxHeight: "320px",
+                    margin: "auto",
+                  }}
+                />
               </div>
               <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-lynix-purple/10 backdrop-blur-sm rounded-full z-0"></div>
               <div className="absolute -top-6 -left-6 w-24 h-24 bg-lynix-light-purple/20 backdrop-blur-sm rounded-full z-0"></div>
@@ -120,7 +169,7 @@ const About = () => {
                 <Users className="text-lynix-purple" size={24} />
               </div>
               <h3 className="text-4xl font-bold text-lynix-dark mb-2">25+</h3>
-              <p className="text-gray-600">Team Members</p>
+              <p className="text-gray-600">Collaborating Freelancers</p>
             </div>
           </div>
         </div>
@@ -142,10 +191,10 @@ const About = () => {
               <div className="w-14 h-14 rounded-lg bg-lynix-purple/10 flex items-center justify-center mb-6">
                 <span className="text-lynix-purple text-2xl font-bold">01</span>
               </div>
-              <h3 className="text-xl font-bold mb-3">Excellence</h3>
+              <h3 className="text-xl font-bold mb-3">Empathy</h3>
               <p className="text-gray-600">
-                We're committed to delivering work of the highest quality in
-                everything we do, from code to design to client communication.
+                We listen deeply, approach with heart, and create solutions that
+                truly help people.
               </p>
             </div>
 
@@ -155,8 +204,8 @@ const About = () => {
               </div>
               <h3 className="text-xl font-bold mb-3">Innovation</h3>
               <p className="text-gray-600">
-                We stay at the forefront of technology and design trends, always
-                seeking better solutions to complex problems.
+                We embrace change and bring fresh ideas to every project, always
+                pushing boundaries.
               </p>
             </div>
 
@@ -166,42 +215,87 @@ const About = () => {
               </div>
               <h3 className="text-xl font-bold mb-3">Integrity</h3>
               <p className="text-gray-600">
-                We build relationships based on trust, honesty, and
-                transparency, following through on our commitments.
+                Honesty and transparency are at the core of everything we do.
+                Our clients are our partners.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Team Section Placeholder */}
+      {/* Team Affiliations Section - Scrolling Logos */}
       <section className="section-padding bg-gray-50">
         <div className="container-custom">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="heading-2 mb-4">Meet Our Team</h2>
+          <div className="text-center max-w-3xl mx-auto mb-10">
+            <h2 className="heading-2 mb-4">
+              Affiliated With Leading Companies
+            </h2>
             <p className="body-text text-gray-600">
-              Our talented team brings together a diverse range of skills and
-              expertise to deliver exceptional results.
+              Our freelancers have worked with, contributed to, or collaborated
+              with top global brands:
             </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* In a real implementation, this would include actual team member photos and info */}
-            {[1, 2, 3, 4].map((i) => (
+          <div className="overflow-x-hidden">
+            <div className="relative w-full h-24">
               <div
-                key={i}
-                className="bg-white rounded-xl overflow-hidden shadow-lg"
+                className="absolute flex gap-16 animate-scroll-logos items-center"
+                style={{
+                  animation: "scroll-logos 25s linear infinite",
+                  minWidth: "1200px",
+                }}
               >
-                <div className="h-64 bg-gradient-to-br from-lynix-purple/70 to-lynix-tertiary-purple/70"></div>
-                <div className="p-6">
-                  <h3 className="text-lg font-bold mb-1">Team Member {i}</h3>
-                  <p className="text-lynix-purple mb-4">Position</p>
-                  <p className="text-gray-600 text-sm">
-                    Brief description about the team member and their expertise.
-                  </p>
-                </div>
+                {companyLogos.concat(companyLogos).map((logo, idx) => (
+                  <div
+                    key={idx}
+                    className="flex flex-col items-center min-w-36"
+                  >
+                    <img
+                      src={logo.url}
+                      alt={logo.name}
+                      className="h-12 mb-2 object-contain"
+                      style={{ filter: "grayscale(0.2)" }}
+                    />
+                    <span className="text-xs text-gray-600">{logo.name}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+            {/* Keyframes for infinite scroll */}
+            <style>
+              {`
+                @keyframes scroll-logos {
+                  0% { left: 0%; }
+                  100% { left: -50%; }
+                }
+                .animate-scroll-logos {
+                  left: 0;
+                  will-change: left;
+                }
+              `}
+            </style>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Freelance? Section */}
+      <section className="section-padding bg-white">
+        <div className="container-custom">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="heading-2 mb-6">
+              Why We Choose Freelance Collaboration
+            </h2>
+            <p className="body-text text-gray-600 mb-6">
+              For us, freelancing is more than a way of working—it's a
+              philosophy of life. It means freedom to create, to connect across
+              borders, and to bring the best talent together for every
+              challenge. Our journey is filled with trust, creativity, and the
+              courage to try something new. We believe that when passionate
+              people unite, anything is possible.
+            </p>
+            <p className="body-text text-lynix-purple font-semibold italic">
+              Every project is a story, every client a collaborator, every
+              result a shared achievement.
+            </p>
           </div>
         </div>
       </section>
@@ -219,7 +313,7 @@ const About = () => {
               asChild
               className="bg-lynix-purple hover:bg-lynix-secondary-purple text-white px-8 py-6"
             >
-              <Link to="/contact">Get in Touch</Link>
+              <Link to="/start-project">Get in Touch</Link>
             </Button>
           </div>
         </div>

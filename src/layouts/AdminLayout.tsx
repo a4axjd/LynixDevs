@@ -1,16 +1,16 @@
 import { Outlet } from "react-router-dom";
 import { Link, useLocation } from "react-router-dom";
-import { 
-  LayoutDashboard, 
-  Users, 
-  FolderKanban, 
-  FileText, 
-  Mail, 
-  Send, 
+import {
+  LayoutDashboard,
+  Users,
+  FolderKanban,
+  FileText,
+  Mail,
+  Send,
   MessageSquare,
   Settings,
   UserCog,
-  AtSign
+  AtSign,
 } from "lucide-react";
 import {
   Sidebar,
@@ -43,6 +43,11 @@ const AdminLayout = () => {
     {
       title: "Projects",
       href: "/admin/projects",
+      icon: FolderKanban,
+    },
+    {
+      title: "New Projects",
+      href: "/admin/start-project-admin",
       icon: FolderKanban,
     },
     {
@@ -98,7 +103,10 @@ const AdminLayout = () => {
                 <SidebarMenu>
                   {navItems.map((item) => (
                     <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild isActive={pathname === item.href}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathname === item.href}
+                      >
                         <Link to={item.href}>
                           <item.icon />
                           <span>{item.title}</span>

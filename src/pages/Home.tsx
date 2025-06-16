@@ -1,20 +1,50 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import TechAnimation from "/assets/TechAnimation.lottie";
 import {
   ArrowRight,
   Code,
-  LayoutDashboard,
-  PenTool,
-  Server,
-  Smartphone,
+  Briefcase,
+  DollarSign,
+  Megaphone,
+  Users,
+  Shield,
   Star,
 } from "lucide-react";
 
+// Animation hook using Intersection Observer
+const useRevealOnScroll = (threshold = 0.18) => {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const node = ref.current;
+    const observer = new window.IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setVisible(true);
+        });
+      },
+      { threshold }
+    );
+    observer.observe(node);
+    return () => observer.unobserve(node);
+  }, [threshold]);
+
+  return [ref, visible] as const;
+};
+
 const Home = () => {
   const [isVisible, setIsVisible] = useState(false);
+
+  // Section refs for reveal animations
+  const [servicesRef, servicesVisible] = useRevealOnScroll();
+  const [testimonialsRef, testimonialsVisible] = useRevealOnScroll();
+  const [ctaRef, ctaVisible] = useRevealOnScroll();
+  const [aboutRef, aboutVisible] = useRevealOnScroll();
+  const [uspRef, uspVisible] = useRevealOnScroll();
 
   useEffect(() => {
     setIsVisible(true);
@@ -24,9 +54,9 @@ const Home = () => {
   const testimonials = [
     {
       id: 1,
-      name: "Sarah Johnson",
-      position: "CEO",
-      company: "TechStart Inc.",
+      name: "Benjamin Gaunt",
+      position: "Founder",
+      company: "Tidy Scapes LLC",
       content:
         "Working with LynixDevs was a game-changer for our business. Their team delivered a website that not only looks beautiful but also performs exceptionally well.",
       rating: 5,
@@ -34,19 +64,19 @@ const Home = () => {
     },
     {
       id: 2,
-      name: "Michael Rodriguez",
-      position: "Marketing Director",
-      company: "Global Retail Solutions",
+      name: "Jazib Ghaffar",
+      position: "co-Founder",
+      company: "Nature Valley PK",
       content:
-        "The e-commerce platform developed by LynixDevs exceeded our expectations. Their team took the time to understand our unique requirements.",
+        "LynixDevs built us a beautiful, functional site with tools like a plant disease detector and AI garden planner. They nailed our vision and delivered exactly what we needed.",
       rating: 5,
       color: "from-green-500 to-teal-500",
     },
     {
       id: 3,
-      name: "Emily Chen",
-      position: "Product Manager",
-      company: "InnovateTech",
+      name: "Abu Zar",
+      position: "Owner",
+      company: "Firdousia",
       content:
         "LynixDevs helped us transform our product idea into a fully-functional mobile application. Their expertise in UI/UX design was invaluable.",
       rating: 5,
@@ -54,18 +84,46 @@ const Home = () => {
     },
   ];
 
+  // Helper for lottie URLs
+  const lottie = (name: string) => `/assets/${name}.lottie`;
+
   return (
-    <div className="overflow-hidden">
+    <div className="overflow-hidden relative">
+      {/* Absolute abstract background animation */}
+      <div className="hidden md:block fixed left-0 top-0 w-full h-full z-0 pointer-events-none opacity-45">
+        <div className="absolute left-[-80px] top-[-40px] w-2/5">
+          <DotLottieReact
+            src={lottie("contact-below")}
+            autoplay
+            loop
+            style={{ width: "100%" }}
+            // Always mounted, no conditional rendering!
+          />
+        </div>
+        <div className="absolute right-[-70px] bottom-[-30px] w-1/3">
+          <DotLottieReact
+            src={lottie("DotsGrid")}
+            autoplay
+            loop
+            style={{ width: "100%" }}
+          />
+        </div>
+      </div>
+
       {/* Hero Section */}
-      <section className="bg-lynix-dark text-white relative overflow-hidden pt-32 sm:pt-40 md:pt-48 lg:pt-56 pb-12 sm:pb-16 md:pb-20 lg:pb-24">
-        {/* Decorative accent behind heading */}
+      <section className="relative bg-lynix-dark text-white overflow-hidden pt-32 sm:pt-40 md:pt-48 lg:pt-56 pb-12 sm:pb-16 md:pb-20 lg:pb-24 z-10">
         <div className="absolute left-1/2 top-0 transform -translate-x-1/2 -translate-y-1/4 z-0 pointer-events-none">
           <div className="w-[420px] h-[220px] blur-3xl bg-lynix-purple/20 opacity-60 rounded-full"></div>
         </div>
-
-        {/* Optional: background gradient at top for depth */}
         <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-lynix-purple/40 to-transparent z-0 pointer-events-none"></div>
-
+        <div className="absolute right-0 top-16 w-40 md:w-72 opacity-60 pointer-events-none z-0">
+          <DotLottieReact
+            src={lottie("HeroCubes")}
+            autoplay
+            loop
+            style={{ width: "100%" }}
+          />
+        </div>
         <div className="container-custom relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
             <div
@@ -81,23 +139,32 @@ const Home = () => {
                   </span>{" "}
                   That Transform Businesses
                 </span>
+                {/* Floating rocket animation */}
+                <span className="absolute -right-10 -top-8 w-20 block pointer-events-none">
+                  <DotLottieReact
+                    src={lottie("LaunchRocket")}
+                    autoplay
+                    loop
+                    style={{ width: "80px" }}
+                  />
+                </span>
               </h1>
               <p className="text-sm sm:text-base md:text-lg text-gray-300 mb-6 sm:mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
                 LynixDevs is a full-service digital agency specializing in web
-                development, UI/UX design, and digital marketing strategies that
-                help businesses thrive in the digital landscape.
+                development, UI/UX design, and comprehensive business solutions
+                that help companies thrive in the digital landscape.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center justify-center lg:justify-start">
                 <Button
                   asChild
                   className="bg-lynix-purple hover:bg-lynix-secondary-purple text-white px-8 sm:px-10 py-4 sm:py-5 text-lg font-semibold rounded-full shadow-xl transition-all duration-200"
                 >
-                  <Link to="/contact">Get Started</Link>
+                  <Link to="/start-project">Get Started</Link>
                 </Button>
                 <Button
                   asChild
                   variant="outline"
-                  className="border-white text-white hover:bg-white/10 px-8 sm:px-10 py-4 sm:py-5 text-lg font-semibold rounded-full shadow transition-all duration-200"
+                  className="border-white text-black hover:bg-white/10 px-8 sm:px-10 py-4 sm:py-5 text-lg font-semibold rounded-full shadow transition-all duration-200"
                 >
                   <Link to="/portfolio">Our Work</Link>
                 </Button>
@@ -115,7 +182,7 @@ const Home = () => {
                       <div className="text-center space-y-2 sm:space-y-3 lg:space-y-4 w-full">
                         <div className="flex justify-center items-center w-full mb-2 sm:mb-3 lg:mb-4">
                           <DotLottieReact
-                            src="/assets/TechAnimation.lottie"
+                            src={lottie("tech")}
                             autoplay
                             loop
                             style={{
@@ -132,7 +199,6 @@ const Home = () => {
                         <p className="text-white/80 text-xs sm:text-sm lg:text-base px-2">
                           Transforming ideas into reality
                         </p>
-
                         {/* Stats Row */}
                         <div className="flex gap-4 sm:gap-6 lg:gap-10 justify-center mt-3 sm:mt-4 px-2">
                           <div className="flex flex-col items-center min-w-0">
@@ -164,10 +230,17 @@ const Home = () => {
                             </span>
                           </div>
                         </div>
-
                         {/* CTA Button */}
                         <div className="mt-4 sm:mt-6"></div>
                       </div>
+                    </div>
+                    <div className="absolute left-6 bottom-6 w-16 opacity-80 z-20 pointer-events-none">
+                      <DotLottieReact
+                        src={lottie("TouchScreen")}
+                        autoplay
+                        loop
+                        style={{ width: "64px" }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -180,31 +253,141 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Services Section */}
-      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-white">
+      {/* About/Abstract Section - Who We Are */}
+      <section
+        ref={aboutRef}
+        className="relative py-16 md:py-24 bg-gradient-to-b from-white via-gray-50 to-white transition-all duration-1000"
+      >
+        <div className="container-custom flex flex-col md:flex-row items-center gap-12 md:gap-20">
+          <div className="w-full md:w-2/5 flex flex-col items-center md:items-start">
+            <div className="relative w-64 h-64 mb-6">
+              {/* Always render, no conditional rendering */}
+              <DotLottieReact
+                src="/assets/contact-below.lottie"
+                autoplay
+                loop
+                style={{ width: "100%", height: "100%" }}
+              />
+            </div>
+          </div>
+          <div className="w-full md:w-3/5 text-center md:text-left">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
+              Who We Are
+            </h2>
+            <p className="text-gray-700 text-base sm:text-lg mb-4">
+              <span className="block mb-2">
+                <b>LynixDevs</b> is a team of passionate engineers, designers,
+                and strategists dedicated to building digital experiences that
+                inspire and deliver tangible results.
+              </span>
+              We blend creativity with technology to craft custom solutions for
+              startups, enterprises, and everything in between.
+            </p>
+            <Button asChild className="bg-lynix-purple mt-2">
+              <Link to="/about">Learn About Us</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Unique Selling Points / Why Choose Us */}
+      <section
+        ref={uspRef}
+        className="relative py-16 md:py-24 bg-gradient-to-r from-lynix-light-purple/10 to-white transition-all duration-1000"
+      >
+        <div className="container-custom">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
+              Why LynixDevs?
+            </h2>
+            <p className="text-gray-600 text-base sm:text-lg">
+              We stand out with our blend of artistic creativity, technical
+              mastery, and business insight.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="flex flex-col items-center p-6 rounded-xl bg-white shadow hover:shadow-lg border border-gray-100 transition">
+              <div className="w-16 h-16 mb-4 flex items-center justify-center rounded-full bg-lynix-purple/10">
+                <DotLottieReact
+                  src="/assets/ui-ux.lottie"
+                  autoplay
+                  loop
+                  style={{ width: "48px" }}
+                />
+              </div>
+              <h3 className="font-bold text-lg mb-2">End-to-End Expertise</h3>
+              <p className="text-gray-600 text-center">
+                From UI/UX and development to launch and support, we manage your
+                digital journey.
+              </p>
+            </div>
+            <div className="flex flex-col items-center p-6 rounded-xl bg-white shadow hover:shadow-lg border border-gray-100 transition">
+              <div className="w-16 h-16 mb-4 flex items-center justify-center rounded-full bg-lynix-purple/10">
+                <DotLottieReact
+                  src="/assets/rocket.lottie"
+                  autoplay
+                  loop
+                  style={{ width: "48px" }}
+                />
+              </div>
+              <h3 className="font-bold text-lg mb-2">Rapid Launch</h3>
+              <p className="text-gray-600 text-center">
+                Agile development means you get to market faster—without
+                sacrificing quality.
+              </p>
+            </div>
+            <div className="flex flex-col items-center p-6 rounded-xl bg-white shadow hover:shadow-lg border border-gray-100 transition">
+              <div className="w-16 h-16 mb-4 flex items-center justify-center rounded-full bg-lynix-purple/10">
+                <DotLottieReact
+                  src="/assets/abstract.lottie"
+                  autoplay
+                  loop
+                  style={{ width: "48px" }}
+                />
+              </div>
+              <h3 className="font-bold text-lg mb-2">Creative Abstracts</h3>
+              <p className="text-gray-600 text-center">
+                Unique, visually striking digital solutions that set your brand
+                apart.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section (keep only one with "Complete Business Solutions") */}
+      <section
+        ref={servicesRef}
+        className={`py-12 sm:py-16 md:py-20 lg:py-24 bg-white transition-all duration-1000 ${
+          servicesVisible
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-16"
+        }`}
+      >
         <div className="container-custom">
           <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-3 sm:mb-4">
-              Our Services
+              Complete Business Solutions
             </h2>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 leading-relaxed px-4 sm:px-0">
-              We offer a comprehensive range of digital services to help your
-              business grow and succeed in the digital world.
+              From startup to scale-up, we provide comprehensive digital and
+              business services to help your company grow and succeed in today's
+              competitive marketplace.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {/* Service 1 */}
-            <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100 mx-4 sm:mx-0">
+            {/* Service 1 - Web Development */}
+            <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100 mx-4 sm:mx-0 transform transition-transform duration-700 hover:-translate-y-2">
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-lynix-purple/10 flex items-center justify-center mb-4 sm:mb-6">
                 <Code className="text-lynix-purple" size={24} />
               </div>
               <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">
-                Web Development
+                Custom Web Development
               </h3>
               <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">
-                Custom web development solutions tailored to your specific
-                business needs and goals.
+                High-performance websites and e-commerce platforms tailored to
+                your business needs.
               </p>
               <Link
                 to="/services"
@@ -214,106 +397,101 @@ const Home = () => {
               </Link>
             </div>
 
-            {/* Service 2 */}
-            <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100 mx-4 sm:mx-0">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-lynix-purple/10 flex items-center justify-center mb-4 sm:mb-6">
-                <PenTool className="text-lynix-purple" size={24} />
+            {/* Service 2 - Business Strategy */}
+            <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100 mx-4 sm:mx-0 transform transition-transform duration-700 hover:-translate-y-2">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-blue-500/10 flex items-center justify-center mb-4 sm:mb-6">
+                <Briefcase className="text-blue-600" size={24} />
               </div>
               <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">
-                UI/UX Design
+                Business Planning & Strategy
               </h3>
               <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">
-                Creating intuitive, user-friendly interfaces that provide
-                exceptional user experiences.
+                Market research, business planning, and strategic guidance to
+                launch your startup successfully.
               </p>
               <Link
                 to="/services"
-                className="inline-flex items-center text-lynix-purple font-medium hover:underline text-sm sm:text-base"
+                className="inline-flex items-center text-blue-600 font-medium hover:underline text-sm sm:text-base"
               >
                 Learn More <ArrowRight size={14} className="ml-2" />
               </Link>
             </div>
 
-            {/* Service 3 */}
-            <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100 mx-4 sm:mx-0 sm:col-span-2 lg:col-span-1">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-lynix-purple/10 flex items-center justify-center mb-4 sm:mb-6">
-                <Smartphone className="text-lynix-purple" size={24} />
+            {/* Service 3 - Digital Marketing */}
+            <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100 mx-4 sm:mx-0 sm:col-span-2 lg:col-span-1 transform transition-transform duration-700 hover:-translate-y-2">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-purple-500/10 flex items-center justify-center mb-4 sm:mb-6">
+                <Megaphone className="text-purple-600" size={24} />
               </div>
               <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">
-                Mobile App Development
+                Digital Marketing & SEO
               </h3>
               <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">
-                Native and cross-platform mobile applications that engage users
-                and drive conversions.
+                Comprehensive marketing strategies to boost your online presence
+                and drive growth.
               </p>
               <Link
                 to="/services"
-                className="inline-flex items-center text-lynix-purple font-medium hover:underline text-sm sm:text-base"
+                className="inline-flex items-center text-purple-600 font-medium hover:underline text-sm sm:text-base"
               >
                 Learn More <ArrowRight size={14} className="ml-2" />
               </Link>
             </div>
 
-            {/* Service 4 */}
-            <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100 mx-4 sm:mx-0">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-lynix-purple/10 flex items-center justify-center mb-4 sm:mb-6">
-                <Server className="text-lynix-purple" size={24} />
+            {/* Service 4 - Financial Management */}
+            <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100 mx-4 sm:mx-0 transform transition-transform duration-700 hover:-translate-y-2">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-green-500/10 flex items-center justify-center mb-4 sm:mb-6">
+                <DollarSign className="text-green-600" size={24} />
               </div>
               <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">
-                Backend Development
+                Financial Management
               </h3>
               <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">
-                Robust server-side solutions that power your applications with
-                reliable performance.
+                Accounting, bookkeeping, tax planning, and payroll management
+                services.
               </p>
               <Link
                 to="/services"
-                className="inline-flex items-center text-lynix-purple font-medium hover:underline text-sm sm:text-base"
+                className="inline-flex items-center text-green-600 font-medium hover:underline text-sm sm:text-base"
               >
                 Learn More <ArrowRight size={14} className="ml-2" />
               </Link>
             </div>
 
-            {/* Service 5 */}
-            <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100 mx-4 sm:mx-0">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-lynix-purple/10 flex items-center justify-center mb-4 sm:mb-6">
-                <LayoutDashboard className="text-lynix-purple" size={24} />
+            {/* Service 5 - HR & Operations */}
+            <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100 mx-4 sm:mx-0 transform transition-transform duration-700 hover:-translate-y-2">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-orange-500/10 flex items-center justify-center mb-4 sm:mb-6">
+                <Users className="text-orange-600" size={24} />
               </div>
               <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">
-                CMS Development
+                HR & Operations
               </h3>
               <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">
-                Content management systems that make it easy to update and
-                manage your website.
+                Recruitment, training, employee development, and operational
+                support services.
               </p>
               <Link
                 to="/services"
-                className="inline-flex items-center text-lynix-purple font-medium hover:underline text-sm sm:text-base"
+                className="inline-flex items-center text-orange-600 font-medium hover:underline text-sm sm:text-base"
               >
                 Learn More <ArrowRight size={14} className="ml-2" />
               </Link>
             </div>
 
-            {/* Service 6 */}
-            <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100 mx-4 sm:mx-0 sm:col-span-2 lg:col-span-1">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-lynix-purple/10 flex items-center justify-center mb-4 sm:mb-6">
-                <img
-                  src="/lovable-uploads/d48b52d9-ede6-4bb2-8a5b-73ff16b8e5bb.png"
-                  alt="Digital Marketing"
-                  className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
-                  style={{ filter: "hue-rotate(260deg) saturate(2)" }}
-                />
+            {/* Service 6 - Technology Solutions */}
+            <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100 mx-4 sm:mx-0 sm:col-span-2 lg:col-span-1 transform transition-transform duration-700 hover:-translate-y-2">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-indigo-500/10 flex items-center justify-center mb-4 sm:mb-6">
+                <Shield className="text-indigo-600" size={24} />
               </div>
               <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">
-                SEO & Digital Marketing
+                IT Support & Security
               </h3>
               <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">
-                Strategies to improve your online visibility and attract more
-                qualified leads.
+                Network setup, cybersecurity, data protection, and comprehensive
+                IT support.
               </p>
               <Link
                 to="/services"
-                className="inline-flex items-center text-lynix-purple font-medium hover:underline text-sm sm:text-base"
+                className="inline-flex items-center text-indigo-600 font-medium hover:underline text-sm sm:text-base"
               >
                 Learn More <ArrowRight size={14} className="ml-2" />
               </Link>
@@ -332,7 +510,14 @@ const Home = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-12 sm:py-16 md:py-20 bg-gray-50">
+      <section
+        ref={testimonialsRef}
+        className={`py-12 sm:py-16 md:py-20 bg-gray-50 transition-all duration-1000 ${
+          testimonialsVisible
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-16"
+        }`}
+      >
         <div className="container-custom">
           <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16 px-4 sm:px-0">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-3 sm:mb-4">
@@ -343,12 +528,23 @@ const Home = () => {
               about working with us.
             </p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {testimonials.map((testimonial) => (
+            {testimonials.map((testimonial, idx) => (
               <div
                 key={testimonial.id}
-                className="bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-gray-100 hover:shadow-xl transition-shadow mx-4 sm:mx-0"
+                className={`bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-gray-100 hover:shadow-xl transition-shadow mx-4 sm:mx-0
+                transition-all duration-1000
+                ${
+                  testimonialsVisible
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-12"
+                }
+                `}
+                style={{
+                  transitionDelay: testimonialsVisible
+                    ? `${idx * 120 + 80}ms`
+                    : "0ms",
+                }}
               >
                 <div className="flex mb-4 sm:mb-6">
                   {[...Array(testimonial.rating)].map((_, i) => (
@@ -386,22 +582,28 @@ const Home = () => {
       </section>
 
       {/* Call to Action */}
-      <section className="bg-lynix-dark py-12 sm:py-16 md:py-20">
+      <section
+        ref={ctaRef}
+        className={`bg-lynix-dark py-12 sm:py-16 md:py-20 transition-all duration-1000 ${
+          ctaVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+        }`}
+      >
         <div className="container-custom px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-r from-lynix-purple to-lynix-secondary-purple rounded-2xl p-6 sm:p-10 md:p-16">
+          <div className="bg-gradient-to-r from-lynix-purple to-lynix-secondary-purple rounded-2xl p-6 sm:p-10 md:p-16 shadow-2xl">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
                 Ready to Start Your Digital Journey?
               </h2>
+              {/* Animation removed as requested */}
               <p className="text-white/90 text-sm sm:text-base md:text-lg lg:text-xl mb-6 sm:mb-8 leading-relaxed">
                 Let's discuss your project and explore how we can help you
-                achieve your business goals.
+                achieve your business goals with our comprehensive services.
               </p>
               <Button
                 asChild
-                className="bg-white text-lynix-purple hover:bg-gray-100 px-6 sm:px-8 py-3 sm:py-6 text-base sm:text-lg w-full sm:w-auto"
+                className="bg-white text-white hover:bg-gray-100 px-6 sm:px-8 py-3 sm:py-6 text-base sm:text-lg w-full sm:w-auto"
               >
-                <Link to="/contact">Get in Touch</Link>
+                <Link to="/start-project">Get in Touch</Link>
               </Button>
             </div>
           </div>

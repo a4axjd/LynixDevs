@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -26,13 +27,8 @@ interface CreateAutomationRuleDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const EVENT_TYPES = [
-  { value: "user_welcome", label: "User Welcome" },
-  { value: "contact_form_reply", label: "Contact Form Reply" },
-  { value: "project_update", label: "Project Update" },
-  { value: "newsletter_confirmation", label: "Newsletter Confirmation" },
-];
 const apiBase = import.meta.env.VITE_SERVER_URL;
+
 const CreateAutomationRuleDialog = ({
   open,
   onOpenChange,
@@ -130,18 +126,20 @@ const CreateAutomationRuleDialog = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="event-type">Event Type *</Label>
-            <Select value={eventType} onValueChange={setEventType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select an event type" />
-              </SelectTrigger>
-              <SelectContent>
-                {EVENT_TYPES.map((event) => (
-                  <SelectItem key={event.value} value={event.value}>
-                    {event.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Changed from Select to Input for free-form custom event types */}
+            <Input
+              id="event-type"
+              value={eventType}
+              onChange={(e) => setEventType(e.target.value)}
+              placeholder="e.g. project_inquiry_reply"
+              required
+              autoFocus
+            />
+            <span className="text-xs text-muted-foreground">
+              Enter any custom event type (e.g.{" "}
+              <code>project_inquiry_reply</code>,{" "}
+              <code>project_inquiry_admin</code>)
+            </span>
           </div>
 
           <div className="space-y-2">

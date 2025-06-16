@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { chatAPI, ChatMessage } from "@/lib/chatAPI";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 
 const ChatInterface = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -149,7 +150,16 @@ const ChatInterface = () => {
                     : "bg-muted"
                 }`}
               >
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                {message.role === "assistant" ? (
+                  <MarkdownRenderer
+                    content={message.content}
+                    className="!mb-0 !max-w-none prose-sm"
+                  />
+                ) : (
+                  <p className="text-sm whitespace-pre-wrap">
+                    {message.content}
+                  </p>
+                )}
               </Card>
 
               {message.role === "user" && (

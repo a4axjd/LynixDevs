@@ -167,7 +167,7 @@ class EmailAutomationService {
   async sendWelcomeEmail(userEmail, userName) {
     return await this.triggerAutomation("user_welcome", userEmail, {
       user_name: userName,
-      site_url: process.env.SITE_URL || "https://lynixdevs.us",
+      site_url: process.env.SITE_URL,
     });
   }
 
@@ -181,7 +181,7 @@ class EmailAutomationService {
       client_name: clientName,
       project_title: projectTitle,
       update_details: updateDetails,
-      site_url: process.env.SITE_URL || "https://lynixdevs.us",
+      site_url: process.env.SITE_URL,
     });
   }
 
@@ -191,6 +191,32 @@ class EmailAutomationService {
       original_message: originalMessage,
       company_name: "LynixDevs",
       site_url: process.env.SITE_URL || "https://lynixdevs.us",
+    });
+  }
+
+  // Helper method: Send auto-reply to the user after project inquiry submission
+  async sendProjectInquiryAutoReply(userEmail, userName, projectTitle) {
+    return await this.triggerAutomation("project_inquiry_reply", userEmail, {
+      user_name: userName,
+      project_title: projectTitle,
+      company_name: "LynixDevs",
+      site_url: process.env.SITE_URL,
+    });
+  }
+
+  // Helper method: Notify admin/team about a new project inquiry
+  async sendProjectInquiryAdminNotification(
+    adminEmail,
+    userName,
+    userEmailValue,
+    projectTitle
+  ) {
+    return await this.triggerAutomation("project_inquiry_admin", adminEmail, {
+      user_name: userName,
+      user_email: userEmailValue,
+      project_title: projectTitle,
+      company_name: "LynixDevs",
+      site_url: process.env.SITE_URL,
     });
   }
 

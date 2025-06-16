@@ -18,6 +18,7 @@ import { format } from "date-fns";
 import ClientProjectUpdates from "@/components/ClientProjectUpdates";
 import ClientProjectFiles from "@/components/ClientProjectFiles";
 import ClientProjectNavigation from "@/components/ClientProjectNavigation";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 interface ClientProject {
   id: string;
@@ -164,7 +165,13 @@ const ClientProjectDashboard = () => {
   if (isLoading) {
     return (
       <div className="container py-8">
-        <div className="flex justify-center my-12">
+        <div className="flex flex-col items-center my-12 gap-6">
+          <DotLottieReact
+            src="/assets/project-info.lottie"
+            autoplay
+            loop
+            style={{ width: 90, height: 90 }}
+          />
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </div>
@@ -175,7 +182,13 @@ const ClientProjectDashboard = () => {
     return (
       <div className="container py-8">
         <ClientProjectNavigation />
-        <div className="text-center py-12">
+        <div className="text-center py-12 flex flex-col items-center">
+          <DotLottieReact
+            src="/assets/project-info.lottie"
+            autoplay
+            loop
+            style={{ width: 120, height: 120, marginBottom: 24 }}
+          />
           <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h2 className="text-2xl font-semibold mb-2">No Projects Assigned</h2>
           <p className="text-muted-foreground">
@@ -195,31 +208,56 @@ const ClientProjectDashboard = () => {
         allProjects={allProjects}
       />
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">My Projects</h1>
-        <p className="text-muted-foreground">
-          Track the progress of your assigned projects
-        </p>
+      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold mb-2 text-lynix-purple drop-shadow-[0_2px_12px_rgba(139,92,246,0.20)]">
+            My Projects
+          </h1>
+          <p className="text-muted-foreground">
+            Track the progress of your assigned projects
+          </p>
+        </div>
+        <div className="hidden md:block">
+          <DotLottieReact
+            src="/assets/hr.lottie"
+            autoplay
+            loop
+            style={{ width: 80, height: 80 }}
+          />
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3 mb-8">
         {clientProjects.map((project) => (
           <Card
             key={project.id}
-            className={`cursor-pointer transition-colors ${
-              selectedProject?.id === project.id ? "ring-2 ring-primary" : ""
+            className={`cursor-pointer transition-shadow hover:shadow-lg ${
+              selectedProject?.id === project.id
+                ? "ring-2 ring-lynix-purple"
+                : ""
             }`}
             onClick={() => setSelectedProject(project)}
           >
-            <CardHeader>
-              <CardTitle className="text-lg">
-                {project.projects?.title}
-              </CardTitle>
-              <CardDescription>
-                <Badge variant={getStatusBadgeVariant(project.status)}>
-                  {project.status.replace("_", " ").toUpperCase()}
-                </Badge>
-              </CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <div>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <DotLottieReact
+                    src="/assets/project-info.lottie"
+                    autoplay
+                    loop
+                    style={{
+                      width: 32,
+                      height: 32,
+                      marginRight: 8,
+                      minWidth: 32,
+                    }}
+                  />
+                  {project.projects?.title}
+                </CardTitle>
+              </div>
+              <Badge variant={getStatusBadgeVariant(project.status)}>
+                {project.status.replace("_", " ").toUpperCase()}
+              </Badge>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
@@ -245,11 +283,21 @@ const ClientProjectDashboard = () => {
       </div>
 
       {selectedProject && (
-        <Card>
+        <Card className="animate-fade-in">
           <CardHeader>
             <div className="flex justify-between items-start">
               <div>
-                <CardTitle className="text-2xl">
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <DotLottieReact
+                    src="/assets/project-info.lottie"
+                    autoplay
+                    loop
+                    style={{
+                      width: 36,
+                      height: 36,
+                      minWidth: 36,
+                    }}
+                  />
                   {selectedProject.projects?.title}
                 </CardTitle>
                 <CardDescription className="mt-2">
