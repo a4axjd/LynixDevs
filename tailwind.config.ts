@@ -79,7 +79,7 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			fontFamily: {
-				sans: ['Inter', 'sans-serif'],
+				sans: ['Lynix Devs'],
 			},
 			keyframes: {
 				'accordion-down': {
