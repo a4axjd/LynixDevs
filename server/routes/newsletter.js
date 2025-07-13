@@ -2,7 +2,7 @@ const express = require("express");
 const { supabase, supabaseAdmin } = require("../config/supabase");
 const { sendEmail } = require("../config/dynamicEmail");
 // Adjust the path below to where your EmailAutomationService is located
-const emailAutomationService = require("../services/EmailAutomationService");
+const emailAutomationService = require("../services/emailAutomationService");
 
 const router = express.Router();
 
